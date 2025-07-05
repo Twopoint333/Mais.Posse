@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 // Interfaces for data structures
 export interface MarketingCampaign {
@@ -105,16 +105,9 @@ export const useAdmin = () => {
 };
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [marketingCampaigns, setMarketingCampaignsState] = useState<MarketingCampaign[]>([]);
-  const [teamMembers, setTeamMembersState] = useState<TeamMember[]>([]);
-  const [testimonials, setTestimonialsState] = useState<Testimonial[]>([]);
-
-  // Load initial data from localStorage or defaults
-  useEffect(() => {
-    setMarketingCampaignsState(getFromStorage('marketingCampaigns', defaultData.marketingCampaigns));
-    setTeamMembersState(getFromStorage('teamMembers', defaultData.teamMembers));
-    setTestimonialsState(getFromStorage('testimonials', defaultData.testimonials));
-  }, []);
+  const [marketingCampaigns, setMarketingCampaignsState] = useState<MarketingCampaign[]>(() => getFromStorage('marketingCampaigns', defaultData.marketingCampaigns));
+  const [teamMembers, setTeamMembersState] = useState<TeamMember[]>(() => getFromStorage('teamMembers', defaultData.teamMembers));
+  const [testimonials, setTestimonialsState] = useState<Testimonial[]>(() => getFromStorage('testimonials', defaultData.testimonials));
 
   const setMarketingCampaigns = (campaigns: MarketingCampaign[]) => {
     setInStorage('marketingCampaigns', campaigns);
