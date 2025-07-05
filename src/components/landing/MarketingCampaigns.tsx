@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { ArrowRight } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -51,10 +51,6 @@ export const MarketingCampaigns = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious />
-              <CarouselNext />
-            </div>
           </Carousel>
         </div>
         
