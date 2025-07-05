@@ -34,7 +34,7 @@ export const CallToAction = () => {
         
         <Button 
           size="lg" 
-          className={`text-lg bg-[#A21C1C] hover:bg-[#911616] shadow-lg hover:shadow-xl transition-all duration-300 ${isPulsing ? 'animate-pulse scale-105' : 'scale-100'}`}
+          className={`text-lg bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 ${isPulsing ? 'animate-pulse scale-105' : 'scale-100'}`}
           onClick={handlePartnerClick}
         >
           Quero ser parceiro

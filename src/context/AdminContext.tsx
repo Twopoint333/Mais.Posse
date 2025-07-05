@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// Interfaces for data structures
 export interface MarketingCampaign {
   id: string;
   imageUrl: string;
@@ -19,38 +20,20 @@ export interface Testimonial {
   logoUrl: string;
 }
 
-interface AdminContextType {
-  marketingCampaigns: MarketingCampaign[];
-  teamMembers: TeamMember[];
-  testimonials: Testimonial[];
-}
-
-const AdminContext = createContext<AdminContextType | undefined>(undefined);
-
-export const useAdmin = () => {
-  const context = useContext(AdminContext);
-  if (!context) {
-    throw new Error('useAdmin must be used within an AdminProvider');
-  }
-  return context;
-};
-
-export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize state with the new uploaded images
-  const [marketingCampaigns] = useState<MarketingCampaign[]>([
+// Default data if localStorage is empty
+const defaultData = {
+  marketingCampaigns: [
     { id: '1', imageUrl: '/lovable-uploads/352c9ee3-e2b5-4ad6-bd4c-f074346670be.png' },
     { id: '2', imageUrl: '/lovable-uploads/3026788e-bc43-493f-9082-c4f5cd2d0a6b.png' },
     { id: '3', imageUrl: '/lovable-uploads/32fc0e1d-e6dc-4e3a-95e3-040557da4601.png' },
     { id: '4', imageUrl: '/lovable-uploads/cb108444-5f14-4286-a0de-ece70d147d42.png' },
     { id: '5', imageUrl: '/lovable-uploads/8cae2fea-a2f7-4120-927e-a63700a263f1.png' }
-  ]);
-  
-  const [teamMembers] = useState<TeamMember[]>([
+  ],
+  teamMembers: [
     { id: '1', imageUrl: 'https://i.imgur.com/eKGLi9U.jpeg' },
     { id: '2', imageUrl: 'https://i.imgur.com/oILzGmK.jpeg' }
-  ]);
-  
-  const [testimonials] = useState<Testimonial[]>([
+  ],
+  testimonials: [
     {
       id: '1',
       quote: "No dia que aceitei integrar meu estabelecimento ao Mais Delivery, vi resultados imediatos. Agora estamos oferecendo nossos produtos para um público muito maior, sem precisar de investimento.",
@@ -75,13 +58,94 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       location: "Barra/BA",
       logoUrl: "/lovable-uploads/c301d3fe-5693-4938-b64e-be25b2d44acf.png"
     }
-  ]);
+  ]
+};
+
+// Helper to get data from localStorage
+const getFromStorage = <T,>(key: string, defaultValue: T): T => {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.warn(`Error reading localStorage key “${key}”:`, error);
+    return defaultValue;
+  }
+};
+
+// Helper to set data to localStorage
+const setInStorage = <T,>(key: string, value: T) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`Error setting localStorage key “${key}”:`, error);
+  }
+};
+
+// Context type definition
+interface AdminContextType {
+  marketingCampaigns: MarketingCampaign[];
+  teamMembers: TeamMember[];
+  testimonials: Testimonial[];
+  setMarketingCampaigns: (campaigns: MarketingCampaign[]) => void;
+  setTeamMembers: (members: TeamMember[]) => void;
+  setTestimonials: (testimonials: Testimonial[]) => void;
+  resetData: () => void;
+}
+
+const AdminContext = createContext<AdminContextType | undefined>(undefined);
+
+export const useAdmin = () => {
+  const context = useContext(AdminContext);
+  if (!context) {
+    throw new Error('useAdmin must be used within an AdminProvider');
+  }
+  return context;
+};
+
+export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [marketingCampaigns, setMarketingCampaignsState] = useState<MarketingCampaign[]>([]);
+  const [teamMembers, setTeamMembersState] = useState<TeamMember[]>([]);
+  const [testimonials, setTestimonialsState] = useState<Testimonial[]>([]);
+
+  // Load initial data from localStorage or defaults
+  useEffect(() => {
+    setMarketingCampaignsState(getFromStorage('marketingCampaigns', defaultData.marketingCampaigns));
+    setTeamMembersState(getFromStorage('teamMembers', defaultData.teamMembers));
+    setTestimonialsState(getFromStorage('testimonials', defaultData.testimonials));
+  }, []);
+
+  const setMarketingCampaigns = (campaigns: MarketingCampaign[]) => {
+    setInStorage('marketingCampaigns', campaigns);
+    setMarketingCampaignsState(campaigns);
+  };
+
+  const setTeamMembers = (members: TeamMember[]) => {
+    setInStorage('teamMembers', members);
+    setTeamMembersState(members);
+  };
+
+  const setTestimonials = (testimonials: Testimonial[]) => {
+    setInStorage('testimonials', testimonials);
+    setTestimonialsState(testimonials);
+  };
+
+  const resetData = () => {
+    setMarketingCampaigns(defaultData.marketingCampaigns);
+    setTeamMembers(defaultData.teamMembers);
+    setTestimonials(defaultData.testimonials);
+  };
   
   return (
     <AdminContext.Provider value={{
       marketingCampaigns,
       teamMembers,
-      testimonials
+      testimonials,
+      setMarketingCampaigns,
+      setTeamMembers,
+      setTestimonials,
+      resetData
     }}>
       {children}
     </AdminContext.Provider>

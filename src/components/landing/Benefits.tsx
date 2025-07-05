@@ -24,7 +24,7 @@ export const Benefits = () => {
   }];
   return <section id="beneficios" className="py-8 md:py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-[#A21C1C] mb-3">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-3">
           POR QUE SE CADASTRAR NO MAIS DELIVERY?
         </h2>
         
@@ -34,11 +34,11 @@ export const Benefits = () => {
           {features.map((feature, index) => <div key={index} className={`bg-white rounded-xl shadow-md p-6 transition-all duration-500 hover:shadow-lg hover:scale-[1.02] ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{
           transitionDelay: `${index * 100}ms`
         }}>
-              <div className="w-12 h-12 rounded-full bg-[#A21C1C]/10 flex items-center justify-center mb-4">
-                <Check className="w-6 h-6 text-[#F59F00]" />
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Check className="w-6 h-6 text-accent-cta" />
               </div>
               
-              <h3 className="text-lg font-bold text-[#A21C1C] mb-2">
+              <h3 className="text-lg font-bold text-primary mb-2">
                 {feature.title}
               </h3>
               

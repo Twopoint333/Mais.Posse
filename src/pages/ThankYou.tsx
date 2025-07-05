@@ -14,9 +14,9 @@ const ThankYou = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="container mx-auto px-4 py-16 flex flex-col items-center justify-center flex-grow">
-        <Card className="w-full max-w-2xl shadow-lg border-t-4 border-t-[#A21C1C] animate-fade-in">
+        <Card className="w-full max-w-2xl shadow-lg border-t-4 border-t-primary animate-fade-in">
           <CardHeader className="text-center pb-2">
-            <CheckCircle className="h-16 w-16 text-[#A21C1C] mx-auto mb-4" />
+            <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
             <CardTitle className="text-3xl font-bold text-[#1F2937]">
               Obrigado pelo seu interesse!
             </CardTitle>

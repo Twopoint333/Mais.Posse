@@ -136,7 +136,7 @@ export const ContactForm = () => {
           )}
         />
         
-        <Button type="submit" className="w-full bg-[#A21C1C] hover:bg-[#911616] transition-colors duration-300 shadow-md hover:shadow-lg">
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 transition-colors duration-300 shadow-md hover:shadow-lg">
           Enviar
         </Button>
       </form>

@@ -30,7 +30,7 @@ export const Pricing = () => {
   return (
     <section id="precos" className="py-16 px-4 bg-white">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-[#A21C1C]">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
           Preços Transparentes
         </h2>
         
@@ -46,7 +46,7 @@ export const Pricing = () => {
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
-              <div className={`bg-gradient-to-br from-[#A21C1C] to-[#F59F00] py-6 px-8 text-white`}>
+              <div className={`bg-gradient-to-br from-primary to-accent-cta py-6 px-8 text-white`}>
                 <h3 className="text-xl font-bold">{option.title}</h3>
                 <p className="text-3xl font-bold">{option.price}</p>
               </div>
@@ -58,7 +58,7 @@ export const Pricing = () => {
                     return (
                       <li key={idx} className="flex items-start gap-3">
                         <div className="mt-1 flex-shrink-0">
-                          <div className="h-4 w-4 bg-[#F59F00] rounded-full opacity-60"></div>
+                          <div className="h-4 w-4 bg-accent-cta rounded-full opacity-60"></div>
                         </div>
                         <div>
                           <p className="font-medium text-[#1F2937]">{title}</p>

@@ -10,7 +10,7 @@ export const BusinessTypes = () => {
   return (
     <section className="py-16 px-4 bg-white">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-3 text-[#A21C1C]">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-3 text-primary">
           Posso cadastrar minha loja mesmo não sendo restaurante?
         </h2>
         
@@ -25,17 +25,17 @@ export const BusinessTypes = () => {
         >
           {[
             {
-              icon: <Store className="w-12 h-12 text-[#F59F00]" />,
+              icon: <Store className="w-12 h-12 text-accent-cta" />,
               title: "Farmácias",
               description: "Ofereça medicamentos e produtos de saúde com entrega rápida para clientes que precisam de pronta disponibilidade."
             },
             {
-              icon: <ShoppingBag className="w-12 h-12 text-[#F59F00]" />,
+              icon: <ShoppingBag className="w-12 h-12 text-accent-cta" />,
               title: "Lojas de conveniência",
               description: "Ofereça produtos essenciais com a praticidade que seus clientes precisam a qualquer hora do dia."
             },
             {
-              icon: <Users className="w-12 h-12 text-[#F59F00]" />,
+              icon: <Users className="w-12 h-12 text-accent-cta" />,
               title: "Serviços gerais",
               description: "Amplie seu alcance oferecendo serviços diversos através da nossa plataforma de delivery."
             }
@@ -57,7 +57,7 @@ export const BusinessTypes = () => {
                 {type.icon}
               </div>
               
-              <h3 className="text-xl font-bold text-[#A21C1C] mb-3">
+              <h3 className="text-xl font-bold text-primary mb-3">
                 {type.title}
               </h3>
               

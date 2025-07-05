@@ -20,7 +20,7 @@ export const Hero = () => {
         backgroundPosition: "center center"
       }}
     >
-      <div className="absolute inset-0 bg-[#A21C1C] bg-opacity-90"></div>
+      <div className="absolute inset-0 bg-primary bg-opacity-90"></div>
       
       <div className="container mx-auto relative z-10 text-center">
         <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 transform translate-y-0 opacity-100 transition-all duration-700 delay-300">
@@ -35,7 +35,7 @@ export const Hero = () => {
           <Button 
             asChild 
             size="lg" 
-            className="w-full md:w-auto bg-[#F59F00] hover:bg-[#E08E00] text-white border-2 border-white"
+            className="w-full md:w-auto bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground border-2 border-white shadow-lg"
           >
             <a href="#cta">Quero ser parceiro</a>
           </Button>
@@ -47,7 +47,7 @@ export const Hero = () => {
             className="w-full md:w-auto bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white/20"
           >
             <a href="https://www.youtube.com/watch?v=DDDqWTgDNsI" target="_blank" rel="noopener noreferrer">
-              <Play className="mr-2 text-[#F59F00]" /> Assista o vídeo
+              <Play className="mr-2 text-accent-cta" /> Assista o vídeo
             </a>
           </Button>
         </div>

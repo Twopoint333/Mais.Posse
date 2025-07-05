@@ -9,12 +9,12 @@ export const DeliveryOptions = () => {
   
   const deliveryOptions = [
     {
-      icon: <Truck className="w-12 h-12 text-[#F59F00]" />,
+      icon: <Truck className="w-12 h-12 text-accent-cta" />,
       title: "Entrega pelo Mais Delivery",
       description: "Utilize nossa equipe de entregadores treinados e agilize seus pedidos com total segurança."
     },
     {
-      icon: <ShoppingBag className="w-12 h-12 text-[#F59F00]" />,
+      icon: <ShoppingBag className="w-12 h-12 text-accent-cta" />,
       title: "Entrega própria",
       description: "Mantenha sua própria equipe de entregadores e gerencie as entregas do seu jeito."
     }
@@ -23,7 +23,7 @@ export const DeliveryOptions = () => {
   return (
     <section className="py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-3 text-[#A21C1C]">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-3 text-primary">
           Flexibilidade nas entregas
         </h2>
         
@@ -57,11 +57,11 @@ export const DeliveryOptions = () => {
                 }}
               >
                 <div className="flex items-center mb-4">
-                  <div className="p-2 bg-[#A21C1C]/10 rounded-full mr-4">
+                  <div className="p-2 bg-primary/10 rounded-full mr-4">
                     {option.icon}
                   </div>
                   
-                  <h3 className="text-xl font-bold text-[#A21C1C]">
+                  <h3 className="text-xl font-bold text-primary">
                     {option.title}
                   </h3>
                 </div>

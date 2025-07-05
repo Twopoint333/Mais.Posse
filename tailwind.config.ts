@@ -45,6 +45,7 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
+        'accent-cta': 'hsl(var(--accent-cta))',
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'
@@ -150,4 +151,3 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
-

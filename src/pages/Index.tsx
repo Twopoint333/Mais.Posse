@@ -12,7 +12,6 @@ import { TeamSection } from '@/components/landing/TeamSection';
 import { MarketingCampaigns } from '@/components/landing/MarketingCampaigns';
 import { CallToAction } from '@/components/landing/CallToAction';
 import { Footer } from '@/components/landing/Footer';
-import { AdminProvider } from '@/context/AdminContext';
 
 const Index = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -50,22 +49,20 @@ const Index = () => {
   }, [lastScrollY]);
 
   return (
-    <AdminProvider>
-      <div className="relative bg-white overflow-x-hidden">
-        <Header isScrolled={isScrolled} visible={headerVisible} />
-        <Hero />
-        <Benefits />
-        <HowItWorks />
-        <TeamSection />
-        <MarketingCampaigns />
-        <Testimonials />
-        <DeliveryOptions />
-        <BusinessTypes />
-        <Advantages />
-        <CallToAction />
-        <Footer />
-      </div>
-    </AdminProvider>
+    <div className="relative bg-white overflow-x-hidden">
+      <Header isScrolled={isScrolled} visible={headerVisible} />
+      <Hero />
+      <Benefits />
+      <HowItWorks />
+      <TeamSection />
+      <MarketingCampaigns />
+      <Testimonials />
+      <DeliveryOptions />
+      <BusinessTypes />
+      <Advantages />
+      <CallToAction />
+      <Footer />
+    </div>
   );
 };
 

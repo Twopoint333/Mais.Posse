@@ -16,16 +16,15 @@ export const MarketingCampaigns = () => {
   
   const isMobile = useIsMobile();
   const { marketingCampaigns } = useAdmin();
-  const campaigns = marketingCampaigns.map(campaign => campaign.imageUrl);
   
-  if (campaigns.length === 0) {
+  if (!marketingCampaigns || marketingCampaigns.length === 0) {
     return null;
   }
   
   return (
     <section className="py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-[#A21C1C]">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM
         </h2>
         
@@ -39,11 +38,11 @@ export const MarketingCampaigns = () => {
             loop: true
           }}>
             <CarouselContent>
-              {campaigns.map((campaign, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2 xl:basis-1/3">
+              {marketingCampaigns.map((campaign, index) => (
+                <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/2 xl:basis-1/3">
                   <div className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-1 h-full">
                     <img 
-                      src={campaign} 
+                      src={campaign.imageUrl} 
                       alt={`Campanha de Marketing ${index + 1}`} 
                       className="w-full h-auto object-contain rounded-lg hover:scale-105 transition-transform duration-300"
                       style={isMobile ? 
@@ -63,11 +62,11 @@ export const MarketingCampaigns = () => {
         
         <div className="flex justify-center w-full mt-6">
           <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-2 text-[#A21C1C] text-sm">
+            <div className="flex items-center gap-2 text-primary text-sm">
               <span>Arraste para ver mais</span>
               <ArrowRight className="w-4 h-4 animate-bounce animate-infinite" />
             </div>
-            <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-[#A21C1C] to-transparent animate-pulse"></div>
+            <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
           </div>
         </div>
       </div>
