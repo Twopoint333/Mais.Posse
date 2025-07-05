@@ -37,7 +37,8 @@ export const DeliveryOptions = () => {
             className="w-full md:w-1/2 mb-8 md:mb-0"
           >
             <img 
-              src="https://i.imgur.com/l7zw4p9.jpeg" 
+              src="https://placehold.co/400x500.png"
+              data-ai-hint="delivery person"
               alt="Entregador Mais Delivery" 
               className={`w-full h-auto rounded-lg shadow-lg transition-all duration-800 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
             />
