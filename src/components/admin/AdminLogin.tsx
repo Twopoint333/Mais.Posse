@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { LogIn } from 'lucide-react';
+import { LogIn, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -31,7 +32,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
@@ -60,6 +61,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
           </CardFooter>
         </form>
       </Card>
+      <Link to="/" className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+        <ArrowLeft className="w-4 h-4" />
+        Voltar para o site
+      </Link>
     </div>
   );
 };
