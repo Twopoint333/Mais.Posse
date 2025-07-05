@@ -41,7 +41,7 @@ export const TeamSection = () => {
               <CarouselContent>
                 {teamMembers.map((member, index) => (
                   <CarouselItem key={member.id} className="basis-full">
-                    <img src={member.imageUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-70 md:h-80 w-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src={member.imageUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-72 md:h-80 w-full object-cover hover:scale-105 transition-transform duration-300" />
                   </CarouselItem>
                 ))}
               </CarouselContent>

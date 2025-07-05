@@ -4,7 +4,7 @@ import { useInView } from '@/hooks/useInView';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { ArrowRight } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 export const MarketingCampaigns = () => {
   const {
@@ -14,7 +14,6 @@ export const MarketingCampaigns = () => {
     threshold: 0.1
   });
   
-  const isMobile = useIsMobile();
   const { marketingCampaigns } = useAdmin();
   
   if (!marketingCampaigns || marketingCampaigns.length === 0) {
@@ -32,23 +31,22 @@ export const MarketingCampaigns = () => {
           Impulsione sua marca com ações estratégicas de marketing cooperado para conquistar mais clientes!
         </p>
         
-        <div ref={ref} className={`transition-all duration-500 shadow-lg rounded-lg overflow-hidden ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <Carousel className="w-full mx-auto" opts={{
-            align: "center",
+            align: "start",
             loop: true
           }}>
             <CarouselContent>
               {marketingCampaigns.map((campaign, index) => (
-                <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/2 xl:basis-1/3">
-                  <div className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-1 h-full">
-                    <img 
-                      src={campaign.imageUrl} 
-                      alt={`Campanha de Marketing ${index + 1}`} 
-                      className="w-full h-auto object-contain rounded-lg hover:scale-105 transition-transform duration-300"
-                      style={isMobile ? 
-                        { height: '450px', width: '100%', objectFit: 'contain' } : 
-                        { height: '550px', width: '100%', objectFit: 'contain' }}
-                    />
+                <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    <AspectRatio ratio={9 / 16} className="overflow-hidden rounded-lg shadow-md group hover:shadow-xl transition-all duration-300">
+                      <img 
+                        src={campaign.imageUrl} 
+                        alt={`Campanha de Marketing ${index + 1}`} 
+                        className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </AspectRatio>
                   </div>
                 </CarouselItem>
               ))}
@@ -64,7 +62,7 @@ export const MarketingCampaigns = () => {
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-2 text-primary text-sm">
               <span>Arraste para ver mais</span>
-              <ArrowRight className="w-4 h-4 animate-bounce animate-infinite" />
+              <ArrowRight className="w-4 h-4 animate-bounce" />
             </div>
             <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
           </div>
