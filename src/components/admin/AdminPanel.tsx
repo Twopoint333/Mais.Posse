@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAdmin, MarketingCampaign, TeamMember, Testimonial } from '@/context/AdminContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Trash, Edit, Plus, LogOut, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -17,7 +18,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 interface AdminPanelProps {
@@ -34,18 +34,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const { toast } = useToast();
 
   // State for forms
-  const [newCampaignUrl, setNewCampaignUrl] = useState('');
-  const [newTeamMemberUrl, setNewTeamMemberUrl] = useState('');
+  const [newCampaignFile, setNewCampaignFile] = useState<File | null>(null);
+  const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [testimonialLogoFile, setTestimonialLogoFile] = useState<File | null>(null);
   const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
+
+  const campaignInputRef = useRef<HTMLInputElement>(null);
+  const teamMemberInputRef = useRef<HTMLInputElement>(null);
 
   // Handlers for Marketing Campaigns
   const handleAddCampaign = () => {
-    if (!newCampaignUrl.trim()) return;
-    const newCampaign: MarketingCampaign = { id: crypto.randomUUID(), imageUrl: newCampaignUrl };
-    setMarketingCampaigns([...marketingCampaigns, newCampaign]);
-    setNewCampaignUrl('');
-    toast({ title: 'Campanha adicionada!' });
+    if (!newCampaignFile) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newCampaign: MarketingCampaign = { id: crypto.randomUUID(), imageUrl: reader.result as string };
+      setMarketingCampaigns([...marketingCampaigns, newCampaign]);
+      setNewCampaignFile(null);
+      if (campaignInputRef.current) {
+        campaignInputRef.current.value = '';
+      }
+      toast({ title: 'Campanha adicionada!' });
+    }
+    reader.readAsDataURL(newCampaignFile);
   };
 
   const handleDeleteCampaign = (id: string) => {
@@ -55,11 +66,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
   // Handlers for Team Members
   const handleAddTeamMember = () => {
-    if (!newTeamMemberUrl.trim()) return;
-    const newMember: TeamMember = { id: crypto.randomUUID(), imageUrl: newTeamMemberUrl };
-    setTeamMembers([...teamMembers, newMember]);
-    setNewTeamMemberUrl('');
-    toast({ title: 'Membro da equipe adicionado!' });
+    if (!newTeamMemberFile) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newMember: TeamMember = { id: crypto.randomUUID(), imageUrl: reader.result as string };
+      setTeamMembers([...teamMembers, newMember]);
+      setNewTeamMemberFile(null);
+      if (teamMemberInputRef.current) {
+        teamMemberInputRef.current.value = '';
+      }
+      toast({ title: 'Membro da equipe adicionado!' });
+    }
+    reader.readAsDataURL(newTeamMemberFile);
   };
 
   const handleDeleteTeamMember = (id: string) => {
@@ -70,30 +88,64 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   // Handlers for Testimonials
   const handleOpenTestimonialDialog = (testimonial: Testimonial | null) => {
     setEditingTestimonial(testimonial);
+    setTestimonialLogoFile(null);
     setIsTestimonialDialogOpen(true);
   };
 
   const handleSaveTestimonial = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const testimonialData = Object.fromEntries(formData.entries()) as Omit<Testimonial, 'id'>;
-    
-    if (editingTestimonial) {
-      // Edit existing
-      const updatedTestimonials = testimonials.map(t =>
-        t.id === editingTestimonial.id ? { ...t, ...testimonialData } : t
-      );
-      setTestimonials(updatedTestimonials);
-      toast({ title: 'Depoimento atualizado!' });
+    const testimonialTextData = {
+      quote: formData.get('quote') as string,
+      author: formData.get('author') as string,
+      business: formData.get('business') as string,
+      location: formData.get('location') as string,
+    };
+
+    const saveTestimonial = (finalLogoUrl: string) => {
+      if (editingTestimonial) {
+        const updatedTestimonial: Testimonial = {
+          ...editingTestimonial,
+          ...testimonialTextData,
+          logoUrl: finalLogoUrl,
+        };
+        const updatedTestimonials = testimonials.map(t =>
+          t.id === editingTestimonial.id ? updatedTestimonial : t
+        );
+        setTestimonials(updatedTestimonials);
+        toast({ title: 'Depoimento atualizado!' });
+      } else {
+        const newTestimonial: Testimonial = {
+          ...testimonialTextData,
+          logoUrl: finalLogoUrl,
+          id: crypto.randomUUID(),
+        };
+        setTestimonials([...testimonials, newTestimonial]);
+        toast({ title: 'Depoimento adicionado!' });
+      }
+      
+      setIsTestimonialDialogOpen(false);
+      setEditingTestimonial(null);
+      setTestimonialLogoFile(null);
+    };
+
+    if (testimonialLogoFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        saveTestimonial(reader.result as string);
+      };
+      reader.readAsDataURL(testimonialLogoFile);
     } else {
-      // Add new
-      const newTestimonial: Testimonial = { ...testimonialData, id: crypto.randomUUID() };
-      setTestimonials([...testimonials, newTestimonial]);
-      toast({ title: 'Depoimento adicionado!' });
+      if (editingTestimonial && editingTestimonial.logoUrl) {
+        saveTestimonial(editingTestimonial.logoUrl);
+      } else {
+        toast({
+          title: "Erro",
+          description: "Por favor, selecione uma imagem para o logo.",
+          variant: "destructive",
+        });
+      }
     }
-    
-    setIsTestimonialDialogOpen(false);
-    setEditingTestimonial(null);
   };
   
   const handleDeleteTestimonial = (id: string) => {
@@ -153,17 +205,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <Input
-                  placeholder="URL da imagem da campanha"
-                  value={newCampaignUrl}
-                  onChange={(e) => setNewCampaignUrl(e.target.value)}
+                  ref={campaignInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewCampaignFile(e.target.files ? e.target.files[0] : null)}
+                  className="cursor-pointer"
                 />
-                <Button onClick={handleAddCampaign}><Plus className="mr-2 h-4 w-4" /> Adicionar</Button>
+                <Button onClick={handleAddCampaign} disabled={!newCampaignFile}><Plus className="mr-2 h-4 w-4" /> Adicionar</Button>
               </div>
               <div className="space-y-2">
                 {marketingCampaigns.map(campaign => (
                   <div key={campaign.id} className="flex items-center gap-2 p-2 border rounded-md">
                     <img src={campaign.imageUrl} alt="Campanha" className="w-16 h-16 object-cover rounded" />
-                    <span className="flex-grow truncate text-sm">{campaign.imageUrl}</span>
+                    <span className="flex-grow truncate text-sm">Imagem da campanha</span>
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteCampaign(campaign.id)}>
                       <Trash className="h-4 w-4 text-destructive" />
                     </Button>
@@ -184,17 +238,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <Input
-                  placeholder="URL da imagem do membro da equipe"
-                  value={newTeamMemberUrl}
-                  onChange={(e) => setNewTeamMemberUrl(e.target.value)}
+                  ref={teamMemberInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewTeamMemberFile(e.target.files ? e.target.files[0] : null)}
+                  className="cursor-pointer"
                 />
-                <Button onClick={handleAddTeamMember}><Plus className="mr-2 h-4 w-4" /> Adicionar</Button>
+                <Button onClick={handleAddTeamMember} disabled={!newTeamMemberFile}><Plus className="mr-2 h-4 w-4" /> Adicionar</Button>
               </div>
               <div className="space-y-2">
                 {teamMembers.map(member => (
                   <div key={member.id} className="flex items-center gap-2 p-2 border rounded-md">
                     <img src={member.imageUrl} alt="Equipe" className="w-16 h-16 object-cover rounded" />
-                    <span className="flex-grow truncate text-sm">{member.imageUrl}</span>
+                    <span className="flex-grow truncate text-sm">Imagem do membro da equipe</span>
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteTeamMember(member.id)}>
                       <Trash className="h-4 w-4 text-destructive" />
                     </Button>
@@ -252,7 +308,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               <Input name="author" placeholder="Autor" defaultValue={editingTestimonial?.author} required />
               <Input name="business" placeholder="Nome do negócio" defaultValue={editingTestimonial?.business} required />
               <Input name="location" placeholder="Localização (Cidade/UF)" defaultValue={editingTestimonial?.location} required />
-              <Input name="logoUrl" placeholder="URL do logo" defaultValue={editingTestimonial?.logoUrl} required />
+              <div className="space-y-2">
+                <Label htmlFor="logo">Logo do Parceiro</Label>
+                <Input
+                  id="logo"
+                  name="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setTestimonialLogoFile(e.target.files ? e.target.files[0] : null)}
+                  className="cursor-pointer"
+                />
+                {editingTestimonial?.logoUrl && !testimonialLogoFile && (
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <p>Logo atual:</p>
+                    <img src={editingTestimonial.logoUrl} alt="Logo" className="h-8 w-8 rounded-full object-contain bg-gray-100" />
+                  </div>
+                )}
+                {testimonialLogoFile && (
+                  <p className="text-sm text-muted-foreground">Novo logo selecionado: {testimonialLogoFile.name}</p>
+                )}
+              </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setIsTestimonialDialogOpen(false)}>Cancelar</Button>
               <Button type="submit">Salvar</Button>
