@@ -3,6 +3,7 @@ import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Truck, ShoppingBag } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import entregadorImg from '@/entregador.jpg';
 
 export const DeliveryOptions = () => {
   const { ref, inView } = useInView({ threshold: 0.1 });
@@ -37,8 +38,7 @@ export const DeliveryOptions = () => {
             className="w-full md:w-1/2 mb-8 md:mb-0"
           >
             <img 
-              src="https://placehold.co/400x500.png"
-              data-ai-hint="delivery person"
+              src={entregadorImg}
               alt="Entregador Mais Delivery" 
               className={`w-full h-auto rounded-lg shadow-lg transition-all duration-800 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
             />
