@@ -68,7 +68,7 @@ This project uses Supabase for the database and file storage to power the Admin 
 1.  **Create a Supabase Project:** If you haven't already, create a new project at [database.new](https://database.new).
 2.  **Get API Keys:** In your Supabase project dashboard, go to **Project Settings** (the gear icon) > **API**. You will find the **Project URL** and the **`anon` public API key**.
 3.  **Update Client:** Paste these values into `src/integrations/supabase/client.ts`.
-4.  **Run Setup Script:** Go to the **SQL Editor** in your Supabase dashboard and execute the following script. This will create the necessary tables, storage bucket, and access policies.
+4.  **Run Setup Script:** Go to the **SQL Editor** in your Supabase dashboard and execute the full setup script provided below. This will create the necessary tables, storage bucket, and access policies.
 
 ### Troubleshooting: Data Not Appearing on Site
 If you can upload and delete items from the Admin Panel, but they don't appear on the live site after a page refresh, the issue is almost certainly with Supabase's Row Level Security (RLS) policies blocking read access.
@@ -155,6 +155,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
 
 
 
