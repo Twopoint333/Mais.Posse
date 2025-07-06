@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
 import { useAdmin, Testimonial } from '@/context/AdminContext';
+import { useToast } from "@/components/ui/use-toast";
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -18,48 +19,105 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     teamMembers, addTeamMember, deleteTeamMember, isLoadingTeam,
     testimonials, addTestimonial, updateTestimonial, deleteTestimonial, isLoadingTestimonials,
   } = useAdmin();
+  const { toast } = useToast();
 
   // State for forms
-  const [newCampaignUrl, setNewCampaignUrl] = useState('');
-  const [newTeamMemberUrl, setNewTeamMemberUrl] = useState('');
-  const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
+  const [newCampaignFile, setNewCampaignFile] = useState<File | null>(null);
+  const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Refs for file inputs
+  const campaignFileRef = useRef<HTMLInputElement>(null);
+  const teamMemberFileRef = useRef<HTMLInputElement>(null);
+  const testimonialLogoRef = useRef<HTMLInputElement>(null);
+
+  const handleApiError = (error: unknown, action: string) => {
+    console.error(`Failed to ${action}:`, error);
+    toast({
+      variant: "destructive",
+      title: `Erro ao ${action}`,
+      description: "Ocorreu um erro. Por favor, tente novamente.",
+    });
+  };
 
   // Handlers for Marketing Campaigns
-  const handleAddCampaign = () => {
-    if (newCampaignUrl.trim()) {
-      addCampaign({ image_url: newCampaignUrl.trim() });
-      setNewCampaignUrl('');
+  const handleAddCampaign = async () => {
+    if (newCampaignFile) {
+      setIsSubmitting(true);
+      try {
+        await addCampaign({ file: newCampaignFile });
+        setNewCampaignFile(null);
+        if (campaignFileRef.current) campaignFileRef.current.value = "";
+        toast({ title: "Campanha adicionada com sucesso!" });
+      } catch (error) {
+        handleApiError(error, "adicionar campanha");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   // Handlers for Team Members
-  const handleAddTeamMember = () => {
-    if (newTeamMemberUrl.trim()) {
-      addTeamMember({ image_url: newTeamMemberUrl.trim() });
-      setNewTeamMemberUrl('');
+  const handleAddTeamMember = async () => {
+    if (newTeamMemberFile) {
+      setIsSubmitting(true);
+      try {
+        await addTeamMember({ file: newTeamMemberFile });
+        setNewTeamMemberFile(null);
+        if (teamMemberFileRef.current) teamMemberFileRef.current.value = "";
+        toast({ title: "Membro da equipe adicionado com sucesso!" });
+      } catch (error) {
+        handleApiError(error, "adicionar membro da equipe");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   // Handlers for Testimonials
-  const handleSaveTestimonial = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveTestimonial = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingTestimonial) return;
-  
-    const { id, created_at, ...data } = editingTestimonial;
-  
-    if (id) {
-      // It's an update, so we need the ID.
-      updateTestimonial({ id, ...data });
-    } else {
-      // It's an insert, we pass data without id.
-      addTestimonial(data);
+
+    setIsSubmitting(true);
+    try {
+      const { id, created_at, logo_file, ...data } = editingTestimonial;
+
+      if (id) { // Update
+        const originalTestimonial = testimonials?.find(t => t.id === id);
+        await updateTestimonial({ 
+            ...data, 
+            id,
+            logo_file,
+            old_logo_url: logo_file ? originalTestimonial?.logo_url : undefined 
+        });
+        toast({ title: "Depoimento atualizado com sucesso!" });
+      } else { // Insert
+        if (logo_file && data.quote && data.author && data.business && data.location) {
+          await addTestimonial({ 
+              quote: data.quote,
+              author: data.author,
+              business: data.business,
+              location: data.location,
+              logo_file: logo_file,
+           });
+          toast({ title: "Depoimento adicionado com sucesso!" });
+        } else {
+            toast({ variant: "destructive", title: "Todos os campos e o logo são obrigatórios." });
+        }
+      }
+      setEditingTestimonial(null);
+    } catch (error) {
+        handleApiError(error, id ? "atualizar depoimento" : "adicionar depoimento");
+    } finally {
+      setIsSubmitting(false);
     }
-    setEditingTestimonial(null);
   };
   
   const openNewTestimonialDialog = () => {
     setEditingTestimonial({
-        quote: '', author: '', business: '', location: '', logo_url: ''
+        quote: '', author: '', business: '', location: ''
     })
   }
   
@@ -93,11 +151,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <Input
-                  placeholder="URL da imagem da campanha"
-                  value={newCampaignUrl}
-                  onChange={(e) => setNewCampaignUrl(e.target.value)}
+                  type="file"
+                  accept="image/*"
+                  ref={campaignFileRef}
+                  onChange={(e) => setNewCampaignFile(e.target.files?.[0] || null)}
+                  disabled={isSubmitting}
                 />
-                <Button onClick={handleAddCampaign}><PlusCircle className="mr-2 h-4 w-4" /> Adicionar</Button>
+                <Button onClick={handleAddCampaign} disabled={!newCampaignFile || isSubmitting}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                  Adicionar
+                </Button>
               </div>
               {isLoadingCampaigns ? <div className="flex justify-center"><Loader2 className="animate-spin" /></div> : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -108,7 +171,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                         variant="destructive"
                         size="icon"
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => deleteCampaign(campaign.id)}
+                        onClick={async () => {
+                            try {
+                                await deleteCampaign(campaign);
+                                toast({ title: "Campanha removida com sucesso!" });
+                            } catch (e) {
+                                handleApiError(e, "remover campanha");
+                            }
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -130,11 +200,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             <CardContent className="space-y-4">
                <div className="flex gap-2">
                 <Input
-                  placeholder="URL da imagem do membro da equipe"
-                  value={newTeamMemberUrl}
-                  onChange={(e) => setNewTeamMemberUrl(e.target.value)}
+                  type="file"
+                  accept="image/*"
+                  ref={teamMemberFileRef}
+                  onChange={(e) => setNewTeamMemberFile(e.target.files?.[0] || null)}
+                  disabled={isSubmitting}
                 />
-                <Button onClick={handleAddTeamMember}><PlusCircle className="mr-2 h-4 w-4" /> Adicionar</Button>
+                <Button onClick={handleAddTeamMember} disabled={!newTeamMemberFile || isSubmitting}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                    Adicionar
+                </Button>
               </div>
               {isLoadingTeam ? <div className="flex justify-center"><Loader2 className="animate-spin" /></div> : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -145,7 +220,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                         variant="destructive"
                         size="icon"
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => deleteTeamMember(member.id)}
+                        onClick={async () => {
+                            try {
+                                await deleteTeamMember(member);
+                                toast({ title: "Membro da equipe removido com sucesso!" });
+                            } catch(e) {
+                                handleApiError(e, "remover membro da equipe");
+                            }
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -181,7 +263,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <Button variant="outline" size="icon" onClick={() => openEditTestimonialDialog(testimonial)}>
                                     <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="destructive" size="icon" onClick={() => deleteTestimonial(testimonial.id)}>
+                                <Button variant="destructive" size="icon" onClick={async () => {
+                                    try {
+                                        await deleteTestimonial(testimonial);
+                                        toast({ title: "Depoimento removido com sucesso!" });
+                                    } catch(e) {
+                                        handleApiError(e, "remover depoimento");
+                                    }
+                                }}>
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                                 </div>
@@ -200,19 +289,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           <DialogHeader>
             <DialogTitle>{editingTestimonial?.id ? 'Editar' : 'Adicionar'} Depoimento</DialogTitle>
             <DialogDescription>
-              Preencha as informações do depoimento.
+              Preencha as informações do depoimento. Para editar, apenas o logo não é obrigatório.
             </DialogDescription>
           </DialogHeader>
           {editingTestimonial && (
              <form onSubmit={handleSaveTestimonial} className="space-y-4">
-              <Input placeholder="URL do Logo" value={editingTestimonial.logo_url || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, logo_url: e.target.value })} required />
+              <div>
+                <label className='text-sm font-medium'>Logo</label>
+                <Input type="file" accept='image/*' ref={testimonialLogoRef} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, logo_file: e.target.files?.[0] || undefined })} required={!editingTestimonial.id} />
+                {editingTestimonial.id && editingTestimonial.logo_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter o logo atual: <a href={editingTestimonial.logo_url} target="_blank" rel="noopener noreferrer" className="underline">ver imagem</a></p>}
+              </div>
               <Textarea placeholder="Citação do depoimento" value={editingTestimonial.quote || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })} required rows={4}/>
               <Input placeholder="Autor" value={editingTestimonial.author || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, author: e.target.value })} required />
               <Input placeholder="Negócio" value={editingTestimonial.business || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, business: e.target.value })} required />
               <Input placeholder="Localização (Cidade/Estado)" value={editingTestimonial.location || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, location: e.target.value })} required />
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)}>Cancelar</Button>
-                <Button type="submit">Salvar</Button>
+                <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)} disabled={isSubmitting}>Cancelar</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Salvar
+                </Button>
               </DialogFooter>
             </form>
           )}

@@ -5,34 +5,33 @@ import { Database } from '@/integrations/supabase/types';
 
 // Type aliases for convenience
 type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
-type NewMarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Insert'];
+type NewMarketingCampaign = { file: File };
 type TeamMember = Database['public']['Tables']['team_members']['Row'];
-type NewTeamMember = Database['public']['Tables']['team_members']['Insert'];
+type NewTeamMember = { file: File };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
-export type NewTestimonial = Database['public']['Tables']['testimonials']['Insert'];
-export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'];
-
+export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { logo_file: File };
+export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { logo_file?: File; old_logo_url?: string };
 
 // Context type definition
 interface AdminContextType {
   // Marketing Campaigns
   marketingCampaigns: MarketingCampaign[] | undefined;
   isLoadingCampaigns: boolean;
-  addCampaign: (campaign: NewMarketingCampaign) => void;
-  deleteCampaign: (id: string) => void;
+  addCampaign: (campaign: NewMarketingCampaign) => Promise<void>;
+  deleteCampaign: (campaign: MarketingCampaign) => Promise<void>;
 
   // Team Members
   teamMembers: TeamMember[] | undefined;
   isLoadingTeam: boolean;
-  addTeamMember: (member: NewTeamMember) => void;
-  deleteTeamMember: (id: string) => void;
+  addTeamMember: (member: NewTeamMember) => Promise<void>;
+  deleteTeamMember: (member: TeamMember) => Promise<void>;
 
   // Testimonials
   testimonials: Testimonial[] | undefined;
   isLoadingTestimonials: boolean;
-  addTestimonial: (testimonial: NewTestimonial) => void;
-  updateTestimonial: (testimonial: UpdateTestimonial) => void;
-  deleteTestimonial: (id: string) => void;
+  addTestimonial: (testimonial: NewTestimonial) => Promise<void>;
+  updateTestimonial: (testimonial: UpdateTestimonial) => Promise<void>;
+  deleteTestimonial: (testimonial: Testimonial) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -45,23 +44,49 @@ export const useAdmin = () => {
   return context;
 };
 
-// API functions
+// --- Helper Functions ---
+const SUPABASE_STORAGE_URL = "https://hvdhsjwdcfzozlyrqoqc.supabase.co/storage/v1/object/public/site_assets/";
+
+const uploadFile = async (bucket: string, file: File): Promise<string> => {
+    const fileName = `${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from(bucket).upload(fileName, file);
+    if (error) throw error;
+    return `${SUPABASE_STORAGE_URL}${fileName}`;
+};
+
+const deleteFileFromUrl = async (bucket: string, fileUrl: string) => {
+    if (!fileUrl || !fileUrl.includes(bucket)) {
+        console.log("Skipping deletion of non-storage file:", fileUrl);
+        return;
+    }
+    const fileName = fileUrl.split('/').pop();
+    if (!fileName) return;
+
+    const { error } = await supabase.storage.from(bucket).remove([fileName]);
+    if (error) {
+        console.error("Failed to delete file from storage:", error.message);
+    }
+};
+
+// --- API Functions ---
 const fetcher = async (table: string) => {
-  const { data, error } = await supabase.from(table).select('*').order('created_at');
+  const { data, error } = await supabase.from(table).select('*').order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 };
 
 const inserter = async (table: string, newItem: any) => {
-  const { error } = await supabase.from(table).insert(newItem);
+  const { data, error } = await supabase.from(table).insert(newItem).select();
   if (error) throw new Error(error.message);
+  return data;
 };
 
 const updater = async (table: string, updatedItem: any) => {
     const { id, ...rest } = updatedItem;
     if (!id) throw new Error("Update requires an ID");
-    const { error } = await supabase.from(table).update(rest).eq('id', id);
+    const { data, error } = await supabase.from(table).update(rest).eq('id', id).select();
     if (error) throw new Error(error.message);
+    return data;
 }
 
 const deleter = async (table: string, id: string) => {
@@ -69,71 +94,104 @@ const deleter = async (table: string, id: string) => {
   if (error) throw new Error(error.message);
 };
 
+
 export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
 
   // --- Marketing Campaigns ---
-  const { data: marketingCampaigns, isLoading: isLoadingCampaigns } = useQuery({
+  const { data: marketingCampaigns, isLoading: isLoadingCampaigns } = useQuery<MarketingCampaign[]>({
     queryKey: ['marketing_campaigns'],
-    queryFn: () => fetcher('marketing_campaigns') as Promise<MarketingCampaign[]>,
+    queryFn: () => fetcher('marketing_campaigns'),
   });
   const addCampaignMutation = useMutation({
-    mutationFn: (campaign: NewMarketingCampaign) => inserter('marketing_campaigns', campaign),
+    mutationFn: async ({ file }: NewMarketingCampaign) => {
+        const imageUrl = await uploadFile('site_assets', file);
+        return inserter('marketing_campaigns', { image_url: imageUrl });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
   });
   const deleteCampaignMutation = useMutation({
-    mutationFn: (id: string) => deleter('marketing_campaigns', id),
+    mutationFn: async (campaign: MarketingCampaign) => {
+        await deleteFileFromUrl('site_assets', campaign.image_url);
+        return deleter('marketing_campaigns', campaign.id);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
   });
 
   // --- Team Members ---
-  const { data: teamMembers, isLoading: isLoadingTeam } = useQuery({
+  const { data: teamMembers, isLoading: isLoadingTeam } = useQuery<TeamMember[]>({
     queryKey: ['team_members'],
-    queryFn: () => fetcher('team_members') as Promise<TeamMember[]>,
+    queryFn: () => fetcher('team_members'),
   });
   const addTeamMemberMutation = useMutation({
-    mutationFn: (member: NewTeamMember) => inserter('team_members', member),
+    mutationFn: async ({ file }: NewTeamMember) => {
+        const imageUrl = await uploadFile('site_assets', file);
+        return inserter('team_members', { image_url: imageUrl });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
   });
   const deleteTeamMemberMutation = useMutation({
-    mutationFn: (id: string) => deleter('team_members', id),
+    mutationFn: async (member: TeamMember) => {
+        await deleteFileFromUrl('site_assets', member.image_url);
+        return deleter('team_members', member.id);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
   });
 
   // --- Testimonials ---
-  const { data: testimonials, isLoading: isLoadingTestimonials } = useQuery({
+  const { data: testimonials, isLoading: isLoadingTestimonials } = useQuery<Testimonial[]>({
     queryKey: ['testimonials'],
-    queryFn: () => fetcher('testimonials') as Promise<Testimonial[]>,
+    queryFn: () => fetcher('testimonials'),
   });
   const addTestimonialMutation = useMutation({
-    mutationFn: (testimonial: NewTestimonial) => inserter('testimonials', testimonial),
+    mutationFn: async (testimonial: NewTestimonial) => {
+        const logoUrl = await uploadFile('site_assets', testimonial.logo_file);
+        const { logo_file, ...dbData } = testimonial;
+        return inserter('testimonials', { ...dbData, logo_url: logoUrl });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const updateTestimonialMutation = useMutation({
-    mutationFn: (testimonial: UpdateTestimonial) => updater('testimonials', testimonial),
+    mutationFn: async (testimonial: UpdateTestimonial) => {
+        const { logo_file, old_logo_url, ...dbData } = testimonial;
+        let newLogoUrl: string | undefined = undefined;
+
+        if (logo_file) {
+            newLogoUrl = await uploadFile('site_assets', logo_file);
+            if (old_logo_url) {
+                await deleteFileFromUrl('site_assets', old_logo_url);
+            }
+        }
+        
+        const dataToUpdate = newLogoUrl ? { ...dbData, logo_url: newLogoUrl } : dbData;
+        return updater('testimonials', dataToUpdate);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const deleteTestimonialMutation = useMutation({
-    mutationFn: (id: string) => deleter('testimonials', id),
+    mutationFn: async (testimonial: Testimonial) => {
+        await deleteFileFromUrl('site_assets', testimonial.logo_url);
+        return deleter('testimonials', testimonial.id);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
 
   const value = {
     marketingCampaigns,
     isLoadingCampaigns,
-    addCampaign: addCampaignMutation.mutate,
-    deleteCampaign: deleteCampaignMutation.mutate,
+    addCampaign: addCampaignMutation.mutateAsync,
+    deleteCampaign: deleteCampaignMutation.mutateAsync,
 
     teamMembers,
     isLoadingTeam,
-    addTeamMember: addTeamMemberMutation.mutate,
-    deleteTeamMember: deleteTeamMemberMutation.mutate,
+    addTeamMember: addTeamMemberMutation.mutateAsync,
+    deleteTeamMember: deleteTeamMemberMutation.mutateAsync,
 
     testimonials,
     isLoadingTestimonials,
-    addTestimonial: addTestimonialMutation.mutate,
-    updateTestimonial: updateTestimonialMutation.mutate,
-    deleteTestimonial: deleteTestimonialMutation.mutate,
+    addTestimonial: addTestimonialMutation.mutateAsync,
+    updateTestimonial: updateTestimonialMutation.mutateAsync,
+    deleteTestimonial: deleteTestimonialMutation.mutateAsync,
   };
 
   return (
