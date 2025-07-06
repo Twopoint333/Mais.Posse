@@ -49,7 +49,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const newCampaign: MarketingCampaign = { id: crypto.randomUUID(), imageUrl: reader.result as string };
-      setMarketingCampaigns([...marketingCampaigns, newCampaign]);
+      setMarketingCampaigns(prev => [...prev, newCampaign]);
       setNewCampaignFile(null);
       if (campaignInputRef.current) {
         campaignInputRef.current.value = '';
@@ -60,7 +60,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
 
   const handleDeleteCampaign = (id: string) => {
-    setMarketingCampaigns(marketingCampaigns.filter(c => c.id !== id));
+    setMarketingCampaigns(prev => prev.filter(c => c.id !== id));
     toast({ title: 'Campanha removida!', variant: 'destructive' });
   };
 
@@ -70,7 +70,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const newMember: TeamMember = { id: crypto.randomUUID(), imageUrl: reader.result as string };
-      setTeamMembers([...teamMembers, newMember]);
+      setTeamMembers(prev => [...prev, newMember]);
       setNewTeamMemberFile(null);
       if (teamMemberInputRef.current) {
         teamMemberInputRef.current.value = '';
@@ -81,7 +81,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
 
   const handleDeleteTeamMember = (id: string) => {
-    setTeamMembers(teamMembers.filter(m => m.id !== id));
+    setTeamMembers(prev => prev.filter(m => m.id !== id));
     toast({ title: 'Membro da equipe removido!', variant: 'destructive' });
   };
 
@@ -109,10 +109,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           ...testimonialTextData,
           logoUrl: finalLogoUrl,
         };
-        const updatedTestimonials = testimonials.map(t =>
+        setTestimonials(prev => prev.map(t =>
           t.id === editingTestimonial.id ? updatedTestimonial : t
-        );
-        setTestimonials(updatedTestimonials);
+        ));
         toast({ title: 'Depoimento atualizado!' });
       } else {
         const newTestimonial: Testimonial = {
@@ -120,7 +119,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           logoUrl: finalLogoUrl,
           id: crypto.randomUUID(),
         };
-        setTestimonials([...testimonials, newTestimonial]);
+        setTestimonials(prev => [...prev, newTestimonial]);
         toast({ title: 'Depoimento adicionado!' });
       }
       
@@ -149,7 +148,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
   
   const handleDeleteTestimonial = (id: string) => {
-    setTestimonials(testimonials.filter(t => t.id !== id));
+    setTestimonials(prev => prev.filter(t => t.id !== id));
     toast({ title: 'Depoimento removido!', variant: 'destructive' });
   };
 
