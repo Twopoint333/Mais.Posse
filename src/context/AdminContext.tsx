@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
 
 // Interfaces for data structures
 export interface MarketingCampaign {
@@ -20,7 +20,7 @@ export interface Testimonial {
   logoUrl: string;
 }
 
-// Default data if localStorage is empty
+// Default data
 const defaultData = {
   marketingCampaigns: [
     { id: '1', imageUrl: '/lovable-uploads/352c9ee3-e2b5-4ad6-bd4c-f074346670be.png' },
@@ -61,36 +61,6 @@ const defaultData = {
   ]
 };
 
-// Helper to get data from localStorage
-const getFromStorage = <T extends any[]>(key: string, defaultValue: T): T => {
-  if (typeof window === 'undefined') return defaultValue;
-  try {
-    const item = window.localStorage.getItem(key);
-    if (item) {
-      const parsed = JSON.parse(item);
-      // Ensure the parsed value is an array before returning, to prevent crashes.
-      if (Array.isArray(parsed)) {
-        return parsed as T;
-      }
-    }
-    return defaultValue;
-  } catch (error) {
-    console.warn(`Error reading localStorage key “${key}”:`, error);
-    return defaultValue;
-  }
-};
-
-
-// Helper to set data to localStorage
-const setInStorage = <T,>(key: string, value: T) => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.warn(`Error setting localStorage key “${key}”:`, error);
-  }
-};
-
 // Context type definition
 interface AdminContextType {
   marketingCampaigns: MarketingCampaign[];
@@ -113,33 +83,14 @@ export const useAdmin = () => {
 };
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [marketingCampaigns, setMarketingCampaigns] = useState<MarketingCampaign[]>(() => getFromStorage('marketingCampaigns', defaultData.marketingCampaigns));
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() => getFromStorage('teamMembers', defaultData.teamMembers));
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(() => getFromStorage('testimonials', defaultData.testimonials));
-
-  useEffect(() => {
-    setInStorage('marketingCampaigns', marketingCampaigns);
-  }, [marketingCampaigns]);
-
-  useEffect(() => {
-    setInStorage('teamMembers', teamMembers);
-  }, [teamMembers]);
-
-  useEffect(() => {
-    setInStorage('testimonials', testimonials);
-  }, [testimonials]);
+  const [marketingCampaigns, setMarketingCampaigns] = useState<MarketingCampaign[]>(defaultData.marketingCampaigns);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultData.teamMembers);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(defaultData.testimonials);
 
   const resetData = () => {
-    // Reset state to default values
     setMarketingCampaigns(defaultData.marketingCampaigns);
     setTeamMembers(defaultData.teamMembers);
     setTestimonials(defaultData.testimonials);
-    // Also clear from storage to ensure no corrupted data persists
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('marketingCampaigns');
-      window.localStorage.removeItem('teamMembers');
-      window.localStorage.removeItem('testimonials');
-    }
   };
   
   return (
