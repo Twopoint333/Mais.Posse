@@ -73,9 +73,8 @@ const deleteFileFromUrl = async (fileUrl: string) => {
         
         const filePath = decodeURIComponent(url.pathname.substring(pathStartIndex + pathSegment.length));
 
-        const { error } = await supabase.storage.from(bucketName).remove([filePath]);
+        const { data, error } = await supabase.storage.from(bucketName).remove([filePath]);
         
-        // It's okay if the file is not found (e.g., already deleted), but log other errors.
         if (error && error.message !== 'The resource was not found') {
             throw error;
         }
@@ -115,40 +114,16 @@ const deleter = async (table: string, id: string) => {
 export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
 
-  // Generic status toggle mutation with optimistic update
+  // Generic status toggle mutation
   const updateItemStatusMutation = useMutation({
     mutationFn: async ({ table, id, currentStatus }: { table: string, id: string, currentStatus: boolean }) => {
         return updater(table, { id, is_published: !currentStatus });
     },
-    onMutate: async (variables) => {
-        const { table, id } = variables;
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries({ queryKey: [table] });
-
-        // Snapshot the previous value
-        const previousData = queryClient.getQueryData<any[]>([table]);
-
-        // Optimistically update to the new value
-        if (previousData) {
-            queryClient.setQueryData<any[]>(
-                [table],
-                (oldData) => oldData ? oldData.map((item) =>
-                    item.id === id ? { ...item, is_published: !item.is_published } : item
-                  ) : []
-            );
-        }
-
-        // Return a context object with the snapshotted value
-        return { previousData, table };
-    },
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err, variables, context) => {
-        if (context?.previousData) {
-            queryClient.setQueryData([context.table], context.previousData);
-        }
-    },
     // Always refetch after error or success to ensure data consistency
     onSettled: (data, error, variables) => {
+        if (error) {
+            console.error(`Failed to update status for ${variables.table}:`, error);
+        }
         queryClient.invalidateQueries({ queryKey: [variables.table] });
     },
   });
@@ -237,20 +212,20 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isLoadingCampaigns,
     addCampaign: addCampaignMutation.mutateAsync,
     deleteCampaign: deleteCampaignMutation.mutateAsync,
-    toggleCampaignStatus: (campaign) => updateItemStatusMutation.mutateAsync({ table: 'marketing_campaigns', id: campaign.id, currentStatus: campaign.is_published }),
+    toggleCampaignStatus: (campaign) => updateItemStatusMutation.mutateAsync({ table: 'marketing_campaigns', id: campaign.id, currentStatus: campaign.is_published }) as Promise<void>,
 
     teamMembers,
     isLoadingTeam,
     addTeamMember: addTeamMemberMutation.mutateAsync,
     deleteTeamMember: deleteTeamMemberMutation.mutateAsync,
-    toggleTeamMemberStatus: (member) => updateItemStatusMutation.mutateAsync({ table: 'team_members', id: member.id, currentStatus: member.is_published }),
+    toggleTeamMemberStatus: (member) => updateItemStatusMutation.mutateAsync({ table: 'team_members', id: member.id, currentStatus: member.is_published }) as Promise<void>,
 
     testimonials,
     isLoadingTestimonials,
     addTestimonial: addTestimonialMutation.mutateAsync,
     updateTestimonial: updateTestimonialMutation.mutateAsync,
     deleteTestimonial: deleteTestimonialMutation.mutateAsync,
-    toggleTestimonialStatus: (testimonial) => updateItemStatusMutation.mutateAsync({ table: 'testimonials', id: testimonial.id, currentStatus: testimonial.is_published }),
+    toggleTestimonialStatus: (testimonial) => updateItemStatusMutation.mutateAsync({ table: 'testimonials', id: testimonial.id, currentStatus: testimonial.is_published }) as Promise<void>,
   };
 
   return (
