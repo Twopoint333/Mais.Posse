@@ -1,7 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Play } from 'lucide-react';
+import heroBg from '@/motoboy.jpg';
 
 export const Hero = () => {
   useEffect(() => {
@@ -16,7 +16,7 @@ export const Hero = () => {
       id="hero" 
       className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 md:py-24 bg-cover bg-center" 
       style={{
-        backgroundImage: "url('https://placehold.co/1920x1080.png')",
+        backgroundImage: `url(${heroBg})`,
         backgroundPosition: "center center"
       }}
       data-ai-hint="delivery food"
