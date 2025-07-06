@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-out ${isScrolled ? 'bg-white shadow-md' : 'bg-accent-cta'} ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-out ${isScrolled ? 'bg-white shadow-md' : 'bg-transparent'} ${visible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <a href="#hero" className="flex items-center">
             <img src="/lovable-uploads/476b844f-a75b-468e-ba6a-1e7345b83181.png" alt="Mais Delivery Logo" className="h-12 md:h-12" />
@@ -30,16 +30,16 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#beneficios" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-primary-foreground'}`}>Benefícios</a>
-            <a href="#como-funciona" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-primary-foreground'}`}>Como Funciona</a>
-            <a href="#depoimentos" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-primary-foreground'}`}>Depoimentos</a>
+            <a href="#beneficios" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Benefícios</a>
+            <a href="#como-funciona" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Como Funciona</a>
+            <a href="#depoimentos" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Depoimentos</a>
             <Button asChild className="bg-primary hover:bg-primary/90 px-6">
               <a href="#cta">Seja Parceiro</a>
             </Button>
           </nav>
 
           {/* Mobile Menu Button */}
-          <Button variant="ghost" onClick={() => setMenuOpen(true)} size="icon" className={`md:hidden ${isScrolled ? 'text-primary' : 'text-primary-foreground'}`}>
+          <Button variant="ghost" onClick={() => setMenuOpen(true)} size="icon" className={`md:hidden ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>
             <Menu className="h-6 w-6" />
           </Button>
         </div>
