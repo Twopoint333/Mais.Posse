@@ -45,7 +45,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
   
   // --- Generic Status Toggle Handler ---
-  const handleToggleStatus = async <T extends { id: string }>(
+  const handleToggleStatus = async <T extends { id: string; is_published: boolean }>(
     item: T, 
     toggleFunction: (item: T) => Promise<void>, 
     itemName: string
