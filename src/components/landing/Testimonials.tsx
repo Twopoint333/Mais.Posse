@@ -14,7 +14,8 @@ export const Testimonials = () => {
     threshold: 0.1
   });
   
-  const { testimonials } = useAdmin();
+  const { testimonials: allTestimonials } = useAdmin();
+  const testimonials = allTestimonials?.filter(t => t.is_published);
   
   if (!testimonials || testimonials.length === 0) {
     return null;

@@ -9,7 +9,7 @@ type NewMarketingCampaign = { file: File };
 type TeamMember = Database['public']['Tables']['team_members']['Row'];
 type NewTeamMember = { file: File };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
-export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { logo_file: File };
+export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url' | 'is_published'> & { logo_file: File };
 export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { logo_file?: File; old_logo_url?: string };
 
 // Context type definition
@@ -19,12 +19,14 @@ interface AdminContextType {
   isLoadingCampaigns: boolean;
   addCampaign: (campaign: NewMarketingCampaign) => Promise<void>;
   deleteCampaign: (campaign: MarketingCampaign) => Promise<void>;
+  toggleCampaignStatus: (campaign: MarketingCampaign) => Promise<void>;
 
   // Team Members
   teamMembers: TeamMember[] | undefined;
   isLoadingTeam: boolean;
   addTeamMember: (member: NewTeamMember) => Promise<void>;
   deleteTeamMember: (member: TeamMember) => Promise<void>;
+  toggleTeamMemberStatus: (member: TeamMember) => Promise<void>;
 
   // Testimonials
   testimonials: Testimonial[] | undefined;
@@ -32,6 +34,7 @@ interface AdminContextType {
   addTestimonial: (testimonial: NewTestimonial) => Promise<void>;
   updateTestimonial: (testimonial: UpdateTestimonial) => Promise<void>;
   deleteTestimonial: (testimonial: Testimonial) => Promise<void>;
+  toggleTestimonialStatus: (testimonial: Testimonial) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -45,24 +48,27 @@ export const useAdmin = () => {
 };
 
 // --- Helper Functions ---
-const SUPABASE_STORAGE_URL = "https://hvdhsjwdcfzozlyrqoqc.supabase.co/storage/v1/object/public/site_assets/";
+const SUPABASE_STORAGE_URL_PREFIX = "https://hvdhsjwdcfzozlyrqoqc.supabase.co/storage/v1/object/public/";
 
 const uploadFile = async (bucket: string, file: File): Promise<string> => {
-    const fileName = `${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from(bucket).upload(fileName, file);
+    const fileName = `site_assets/${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage.from(bucket).upload(fileName, file);
     if (error) throw error;
-    return `${SUPABASE_STORAGE_URL}${fileName}`;
+    return `${SUPABASE_STORAGE_URL_PREFIX}${bucket}/${data.path}`;
 };
 
-const deleteFileFromUrl = async (bucket: string, fileUrl: string) => {
-    if (!fileUrl || !fileUrl.includes(bucket)) {
+const deleteFileFromUrl = async (fileUrl: string) => {
+    if (!fileUrl || !fileUrl.startsWith(SUPABASE_STORAGE_URL_PREFIX)) {
         console.log("Skipping deletion of non-storage file:", fileUrl);
         return;
     }
-    const fileName = fileUrl.split('/').pop();
-    if (!fileName) return;
+    const urlParts = fileUrl.replace(SUPABASE_STORAGE_URL_PREFIX, '').split('/');
+    const bucket = urlParts.shift();
+    const path = urlParts.join('/');
+    
+    if (!bucket || !path) return;
 
-    const { error } = await supabase.storage.from(bucket).remove([fileName]);
+    const { error } = await supabase.storage.from(bucket).remove([path]);
     if (error) {
         console.error("Failed to delete file from storage:", error.message);
     }
@@ -98,6 +104,17 @@ const deleter = async (table: string, id: string) => {
 export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
 
+  // Generic status toggle mutation
+  const updateItemStatusMutation = useMutation({
+    mutationFn: async ({ table, id, currentStatus }: { table: string, id: string, currentStatus: boolean }) => {
+        return updater(table, { id, is_published: !currentStatus });
+    },
+    onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: [variables.table] });
+    }
+  });
+
+
   // --- Marketing Campaigns ---
   const { data: marketingCampaigns, isLoading: isLoadingCampaigns } = useQuery<MarketingCampaign[]>({
     queryKey: ['marketing_campaigns'],
@@ -106,13 +123,13 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const addCampaignMutation = useMutation({
     mutationFn: async ({ file }: NewMarketingCampaign) => {
         const imageUrl = await uploadFile('site_assets', file);
-        return inserter('marketing_campaigns', { image_url: imageUrl });
+        return inserter('marketing_campaigns', { image_url: imageUrl, is_published: true });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
   });
   const deleteCampaignMutation = useMutation({
     mutationFn: async (campaign: MarketingCampaign) => {
-        await deleteFileFromUrl('site_assets', campaign.image_url);
+        await deleteFileFromUrl(campaign.image_url);
         return deleter('marketing_campaigns', campaign.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
@@ -126,13 +143,13 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const addTeamMemberMutation = useMutation({
     mutationFn: async ({ file }: NewTeamMember) => {
         const imageUrl = await uploadFile('site_assets', file);
-        return inserter('team_members', { image_url: imageUrl });
+        return inserter('team_members', { image_url: imageUrl, is_published: true });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
   });
   const deleteTeamMemberMutation = useMutation({
     mutationFn: async (member: TeamMember) => {
-        await deleteFileFromUrl('site_assets', member.image_url);
+        await deleteFileFromUrl(member.image_url);
         return deleter('team_members', member.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
@@ -147,7 +164,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     mutationFn: async (testimonial: NewTestimonial) => {
         const logoUrl = await uploadFile('site_assets', testimonial.logo_file);
         const { logo_file, ...dbData } = testimonial;
-        return inserter('testimonials', { ...dbData, logo_url: logoUrl });
+        return inserter('testimonials', { ...dbData, logo_url: logoUrl, is_published: true });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
@@ -159,7 +176,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (logo_file) {
             newLogoUrl = await uploadFile('site_assets', logo_file);
             if (old_logo_url) {
-                await deleteFileFromUrl('site_assets', old_logo_url);
+                await deleteFileFromUrl(old_logo_url);
             }
         }
         
@@ -170,28 +187,31 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const deleteTestimonialMutation = useMutation({
     mutationFn: async (testimonial: Testimonial) => {
-        await deleteFileFromUrl('site_assets', testimonial.logo_url);
+        await deleteFileFromUrl(testimonial.logo_url);
         return deleter('testimonials', testimonial.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
 
-  const value = {
+  const value: AdminContextType = {
     marketingCampaigns,
     isLoadingCampaigns,
     addCampaign: addCampaignMutation.mutateAsync,
     deleteCampaign: deleteCampaignMutation.mutateAsync,
+    toggleCampaignStatus: (campaign) => updateItemStatusMutation.mutateAsync({ table: 'marketing_campaigns', id: campaign.id, currentStatus: campaign.is_published }),
 
     teamMembers,
     isLoadingTeam,
     addTeamMember: addTeamMemberMutation.mutateAsync,
     deleteTeamMember: deleteTeamMemberMutation.mutateAsync,
+    toggleTeamMemberStatus: (member) => updateItemStatusMutation.mutateAsync({ table: 'team_members', id: member.id, currentStatus: member.is_published }),
 
     testimonials,
     isLoadingTestimonials,
     addTestimonial: addTestimonialMutation.mutateAsync,
     updateTestimonial: updateTestimonialMutation.mutateAsync,
     deleteTestimonial: deleteTestimonialMutation.mutateAsync,
+    toggleTestimonialStatus: (testimonial) => updateItemStatusMutation.mutateAsync({ table: 'testimonials', id: testimonial.id, currentStatus: testimonial.is_published }),
   };
 
   return (

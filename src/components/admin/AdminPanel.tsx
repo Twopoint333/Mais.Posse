@@ -5,9 +5,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
+import { LogOut, PlusCircle, Trash2, Edit, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAdmin, Testimonial } from '@/context/AdminContext';
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from '@/components/ui/switch';
+import type { MarketingCampaign, TeamMember } from '@/context/AdminContext';
+
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -15,9 +18,9 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const {
-    marketingCampaigns, addCampaign, deleteCampaign, isLoadingCampaigns,
-    teamMembers, addTeamMember, deleteTeamMember, isLoadingTeam,
-    testimonials, addTestimonial, updateTestimonial, deleteTestimonial, isLoadingTestimonials,
+    marketingCampaigns, addCampaign, deleteCampaign, toggleCampaignStatus, isLoadingCampaigns,
+    teamMembers, addTeamMember, deleteTeamMember, toggleTeamMemberStatus, isLoadingTeam,
+    testimonials, addTestimonial, updateTestimonial, deleteTestimonial, toggleTestimonialStatus, isLoadingTestimonials,
   } = useAdmin();
   const { toast } = useToast();
 
@@ -40,6 +43,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       description: "Ocorreu um erro. Por favor, tente novamente.",
     });
   };
+  
+  // --- Generic Status Toggle Handler ---
+  const handleToggleStatus = async <T extends { id: string }>(
+    item: T, 
+    toggleFunction: (item: T) => Promise<void>, 
+    itemName: string
+  ) => {
+    try {
+      await toggleFunction(item);
+      toast({ title: `Status de ${itemName} atualizado.` });
+    } catch (e) {
+      handleApiError(e, `atualizar status de ${itemName}`);
+    }
+  };
+
 
   // Handlers for Marketing Campaigns
   const handleAddCampaign = async () => {
@@ -82,7 +100,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
     setIsSubmitting(true);
     try {
-      const { id, created_at, logo_file, ...data } = editingTestimonial;
+      const { id, created_at, logo_file, is_published, ...data } = editingTestimonial;
 
       if (id) { // Update
         const originalTestimonial = testimonials?.find(t => t.id === id);
@@ -146,7 +164,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Campanhas de Marketing</CardTitle>
-              <CardDescription>Adicione ou remova imagens das campanhas de marketing.</CardDescription>
+              <CardDescription>Adicione ou remova imagens e altere sua visibilidade no site.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
@@ -166,22 +184,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {marketingCampaigns?.map(campaign => (
                     <div key={campaign.id} className="relative group">
-                      <img src={campaign.image_url} alt="Campanha" className="rounded-md object-cover aspect-[9/16]" />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={async () => {
-                            try {
-                                await deleteCampaign(campaign);
-                                toast({ title: "Campanha removida com sucesso!" });
-                            } catch (e) {
-                                handleApiError(e, "remover campanha");
-                            }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <img src={campaign.image_url} alt="Campanha" className={`rounded-md object-cover aspect-[9/16] transition-opacity ${!campaign.is_published ? 'opacity-40 grayscale' : ''}`} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-md p-2 flex flex-col justify-between">
+                        <div className="flex justify-end">
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={async () => {
+                                try {
+                                    await deleteCampaign(campaign);
+                                    toast({ title: "Campanha removida com sucesso!" });
+                                } catch (e) {
+                                    handleApiError(e, "remover campanha");
+                                }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between bg-black/70 p-2 rounded-md">
+                           <span className="text-white text-xs font-bold">{campaign.is_published ? 'Publicado' : 'Rascunho'}</span>
+                           <Switch
+                             checked={campaign.is_published}
+                             onCheckedChange={() => handleToggleStatus(campaign, toggleCampaignStatus, 'campanha')}
+                           />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -195,7 +223,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Membros da Equipe</CardTitle>
-              <CardDescription>Adicione ou remova fotos da equipe.</CardDescription>
+              <CardDescription>Adicione ou remova fotos da equipe e altere sua visibilidade.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex gap-2">
@@ -215,22 +243,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {teamMembers?.map(member => (
                     <div key={member.id} className="relative group">
-                      <img src={member.image_url} alt="Membro da Equipe" className="rounded-md object-cover aspect-square" />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={async () => {
-                            try {
-                                await deleteTeamMember(member);
-                                toast({ title: "Membro da equipe removido com sucesso!" });
-                            } catch(e) {
-                                handleApiError(e, "remover membro da equipe");
-                            }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <img src={member.image_url} alt="Membro da Equipe" className={`rounded-md object-cover aspect-square transition-opacity ${!member.is_published ? 'opacity-40 grayscale' : ''}`} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-md p-2 flex flex-col justify-between">
+                        <div className="flex justify-end">
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={async () => {
+                                    try {
+                                        await deleteTeamMember(member);
+                                        toast({ title: "Membro da equipe removido com sucesso!" });
+                                    } catch(e) {
+                                        handleApiError(e, "remover membro da equipe");
+                                    }
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div className="flex items-center justify-between bg-black/70 p-2 rounded-md">
+                           <span className="text-white text-xs font-bold">{member.is_published ? 'Publicado' : 'Rascunho'}</span>
+                           <Switch
+                             checked={member.is_published}
+                             onCheckedChange={() => handleToggleStatus(member, toggleTeamMemberStatus, 'membro da equipe')}
+                           />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -244,7 +282,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Depoimentos</CardTitle>
-              <CardDescription>Adicione, edite ou remova depoimentos de parceiros.</CardDescription>
+              <CardDescription>Adicione, edite ou remova depoimentos de parceiros e altere sua visibilidade.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <Button onClick={openNewTestimonialDialog}>
@@ -253,26 +291,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 {isLoadingTestimonials ? <div className="flex justify-center"><Loader2 className="animate-spin" /></div> : (
                     <div className="space-y-4">
                         {testimonials?.map(testimonial => (
-                            <Card key={testimonial.id} className="flex items-start gap-4 p-4">
+                            <Card key={testimonial.id} className={`flex items-start gap-4 p-4 transition-opacity ${!testimonial.is_published ? 'opacity-50' : ''}`}>
                                 <img src={testimonial.logo_url} alt={testimonial.business} className="w-16 h-16 object-contain rounded-full border" />
                                 <div className="flex-grow">
                                 <blockquote className="italic">"{testimonial.quote}"</blockquote>
                                 <p className="text-sm text-muted-foreground mt-2">- {testimonial.author}, {testimonial.business} ({testimonial.location})</p>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                <Button variant="outline" size="icon" onClick={() => openEditTestimonialDialog(testimonial)}>
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button variant="destructive" size="icon" onClick={async () => {
-                                    try {
-                                        await deleteTestimonial(testimonial);
-                                        toast({ title: "Depoimento removido com sucesso!" });
-                                    } catch(e) {
-                                        handleApiError(e, "remover depoimento");
-                                    }
-                                }}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+                                <div className="flex items-center gap-4">
+                                  <div className="flex flex-col gap-2">
+                                    <Button variant="outline" size="icon" onClick={() => openEditTestimonialDialog(testimonial)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="destructive" size="icon" onClick={async () => {
+                                        try {
+                                            await deleteTestimonial(testimonial);
+                                            toast({ title: "Depoimento removido com sucesso!" });
+                                        } catch(e) {
+                                            handleApiError(e, "remover depoimento");
+                                        }
+                                    }}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                  <div className="flex flex-col items-center justify-center gap-1">
+                                    <Switch
+                                      checked={testimonial.is_published}
+                                      onCheckedChange={() => handleToggleStatus(testimonial, toggleTestimonialStatus, 'depoimento')}
+                                      id={`testimonial-${testimonial.id}`}
+                                    />
+                                    <label htmlFor={`testimonial-${testimonial.id}`} className="text-xs text-muted-foreground cursor-pointer">
+                                      {testimonial.is_published ? 'Visível' : 'Oculto'}
+                                    </label>
+                                  </div>
                                 </div>
                             </Card>
                         ))}

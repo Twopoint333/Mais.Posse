@@ -14,16 +14,19 @@ export type Database = {
           id: string
           image_url: string
           created_at: string
+          is_published: boolean
         }
         Insert: {
           id?: string
           image_url: string
           created_at?: string
+          is_published?: boolean
         }
         Update: {
           id?: string
           image_url?: string
           created_at?: string
+          is_published?: boolean
         }
       }
       team_members: {
@@ -31,16 +34,19 @@ export type Database = {
           id: string
           image_url: string
           created_at: string
+          is_published: boolean
         }
         Insert: {
           id?: string
           image_url: string
           created_at?: string
+          is_published?: boolean
         }
         Update: {
           id?: string
           image_url?: string
           created_at?: string
+          is_published?: boolean
         }
       }
       testimonials: {
@@ -52,6 +58,7 @@ export type Database = {
           location: string
           logo_url: string
           created_at: string
+          is_published: boolean
         }
         Insert: {
           id?: string
@@ -61,6 +68,7 @@ export type Database = {
           location: string
           logo_url: string
           created_at?: string
+          is_published?: boolean
         }
         Update: {
           id?: string
@@ -70,6 +78,7 @@ export type Database = {
           location?: string
           logo_url?: string
           created_at?: string
+          is_published?: boolean
         }
       }
     }
