@@ -2,19 +2,36 @@
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Loader2, AlertTriangle } from 'lucide-react';
-import { useAdmin } from '@/context/AdminContext';
+import { useQuery } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
+
+type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
+
+const fetchCampaigns = async (): Promise<MarketingCampaign[]> => {
+  const { data, error } = await supabase
+    .from('marketing_campaigns')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    throw new Error(`Supabase error: ${error.message} (Hint: Check RLS policies for 'marketing_campaigns' table)`);
+  }
+  return data || [];
+};
 
 export const MarketingCampaigns = () => {
-  const {
-    ref,
-    inView
-  } = useInView({
-    threshold: 0.1
-  });
+  const { ref, inView } = useInView({ threshold: 0.1 });
   
-  const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
+  const { 
+    data: marketingCampaigns, 
+    isLoading: isLoadingCampaigns, 
+    isError: isErrorCampaigns, 
+    error: errorCampaigns 
+  } = useQuery<MarketingCampaign[], Error>({
+    queryKey: ['marketing_campaigns_direct'], // Use a new query key to avoid cache conflicts
+    queryFn: fetchCampaigns,
+  });
 
   const renderContent = () => {
     if (isLoadingCampaigns) {
@@ -27,7 +44,7 @@ export const MarketingCampaigns = () => {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Erro ao Carregar Campanhas</AlertTitle>
           <AlertDescription>
-            Não foi possível buscar os dados. Verifique se as políticas de segurança (RLS) no Supabase estão configuradas corretamente.
+            Não foi possível buscar os dados. Verifique o console para mais detalhes.
             <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
               {errorCampaigns?.message || JSON.stringify(errorCampaigns, null, 2)}
             </pre>
