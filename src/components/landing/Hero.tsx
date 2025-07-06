@@ -21,7 +21,7 @@ export const Hero = () => {
         src={heroBg}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover opacity-30"
+        className="absolute inset-0 h-full w-full object-cover opacity-[0.22]"
       />
       
       <div className="container mx-auto relative z-10 text-center">
