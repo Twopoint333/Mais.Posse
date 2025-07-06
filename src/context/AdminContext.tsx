@@ -76,7 +76,9 @@ const deleteFileFromUrl = async (fileUrl: string) => {
         const { data, error } = await supabase.storage.from(bucketName).remove([filePath]);
         
         if (error && error.message !== 'The resource was not found') {
-            throw error;
+            // Do not throw for "not found" errors, as it can happen in normal operation
+            // (e.g. trying to delete a file that was already deleted).
+            console.warn(`Supabase storage delete warning: ${error.message}`);
         }
     } catch (e) {
         // Catch parsing errors for invalid URLs
@@ -114,17 +116,44 @@ const deleter = async (table: string, id: string) => {
 export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
 
-  // Generic status toggle mutation
+  // Generic status toggle mutation with optimistic updates
   const updateItemStatusMutation = useMutation({
     mutationFn: async ({ table, id, currentStatus }: { table: string, id: string, currentStatus: boolean }) => {
         return updater(table, { id, is_published: !currentStatus });
     },
+    onMutate: async (variables) => {
+      const { table, id, currentStatus } = variables;
+      const queryKey = [table];
+
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData<any[]>(queryKey);
+
+      // Optimistically update to the new value
+      if (previousData) {
+        queryClient.setQueryData(queryKey, (oldData: any[] | undefined) =>
+          oldData ? oldData.map(item =>
+            item.id === id ? { ...item, is_published: !currentStatus } : item
+          ) : []
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData, queryKey };
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+    },
     // Always refetch after error or success to ensure data consistency
-    onSettled: (data, error, variables) => {
-        if (error) {
-            console.error(`Failed to update status for ${variables.table}:`, error);
-        }
-        queryClient.invalidateQueries({ queryKey: [variables.table] });
+    onSettled: (data, error, variables, context) => {
+      if (context?.queryKey) {
+          queryClient.invalidateQueries({ queryKey: context.queryKey });
+      }
     },
   });
 

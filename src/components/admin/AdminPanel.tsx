@@ -29,6 +29,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [togglingItemId, setTogglingItemId] = useState<string | null>(null);
+
 
   // Refs for file inputs
   const campaignFileRef = useRef<HTMLInputElement>(null);
@@ -58,11 +60,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     toggleFunction: (item: T) => Promise<void>, 
     itemName: string
   ) => {
+    setTogglingItemId(item.id);
     try {
       await toggleFunction(item);
-      toast({ title: `Status de ${itemName} atualizado com sucesso.` });
+      // Success is handled optimistically, no toast needed.
     } catch (e) {
+      // Error toast will be shown by handleApiError, and react-query will rollback the UI.
       handleApiError(e, `atualizar status de ${itemName}`);
+    } finally {
+      setTogglingItemId(null);
     }
   };
 
@@ -215,6 +221,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                            <Switch
                              checked={campaign.is_published}
                              onCheckedChange={() => handleToggleStatus(campaign, toggleCampaignStatus, 'campanha')}
+                             disabled={togglingItemId === campaign.id}
                            />
                         </div>
                       </div>
@@ -274,6 +281,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                            <Switch
                              checked={member.is_published}
                              onCheckedChange={() => handleToggleStatus(member, toggleTeamMemberStatus, 'membro da equipe')}
+                             disabled={togglingItemId === member.id}
                            />
                         </div>
                       </div>
@@ -326,6 +334,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       checked={testimonial.is_published}
                                       onCheckedChange={() => handleToggleStatus(testimonial, toggleTestimonialStatus, 'depoimento')}
                                       id={`testimonial-${testimonial.id}`}
+                                      disabled={togglingItemId === testimonial.id}
                                     />
                                     <label htmlFor={`testimonial-${testimonial.id}`} className="text-xs text-muted-foreground cursor-pointer">
                                       {testimonial.is_published ? 'Visível' : 'Oculto'}
