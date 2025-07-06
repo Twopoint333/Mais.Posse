@@ -115,14 +115,42 @@ const deleter = async (table: string, id: string) => {
 export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
 
-  // Generic status toggle mutation
+  // Generic status toggle mutation with optimistic update
   const updateItemStatusMutation = useMutation({
     mutationFn: async ({ table, id, currentStatus }: { table: string, id: string, currentStatus: boolean }) => {
         return updater(table, { id, is_published: !currentStatus });
     },
-    onSuccess: (_, variables) => {
+    onMutate: async (variables) => {
+        const { table, id } = variables;
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries({ queryKey: [table] });
+
+        // Snapshot the previous value
+        const previousData = queryClient.getQueryData<any[]>([table]);
+
+        // Optimistically update to the new value
+        if (previousData) {
+            queryClient.setQueryData<any[]>(
+                [table],
+                (oldData) => oldData ? oldData.map((item) =>
+                    item.id === id ? { ...item, is_published: !item.is_published } : item
+                  ) : []
+            );
+        }
+
+        // Return a context object with the snapshotted value
+        return { previousData, table };
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (err, variables, context) => {
+        if (context?.previousData) {
+            queryClient.setQueryData([context.table], context.previousData);
+        }
+    },
+    // Always refetch after error or success to ensure data consistency
+    onSettled: (data, error, variables) => {
         queryClient.invalidateQueries({ queryKey: [variables.table] });
-    }
+    },
   });
 
 

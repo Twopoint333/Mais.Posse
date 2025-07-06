@@ -29,6 +29,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
 
   // Refs for file inputs
   const campaignFileRef = useRef<HTMLInputElement>(null);
@@ -58,11 +59,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     toggleFunction: (item: T) => Promise<void>, 
     itemName: string
   ) => {
+    setUpdatingStatusId(item.id);
     try {
       await toggleFunction(item);
-      toast({ title: `Status de ${itemName} atualizado.` });
+      toast({ title: `Status de ${itemName} atualizado com sucesso.` });
     } catch (e) {
       handleApiError(e, `atualizar status de ${itemName}`);
+    } finally {
+      setUpdatingStatusId(null);
     }
   };
 
@@ -215,6 +219,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                            <Switch
                              checked={campaign.is_published}
                              onCheckedChange={() => handleToggleStatus(campaign, toggleCampaignStatus, 'campanha')}
+                             disabled={updatingStatusId === campaign.id}
                            />
                         </div>
                       </div>
@@ -274,6 +279,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                            <Switch
                              checked={member.is_published}
                              onCheckedChange={() => handleToggleStatus(member, toggleTeamMemberStatus, 'membro da equipe')}
+                             disabled={updatingStatusId === member.id}
                            />
                         </div>
                       </div>
@@ -326,6 +332,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       checked={testimonial.is_published}
                                       onCheckedChange={() => handleToggleStatus(testimonial, toggleTestimonialStatus, 'depoimento')}
                                       id={`testimonial-${testimonial.id}`}
+                                      disabled={updatingStatusId === testimonial.id}
                                     />
                                     <label htmlFor={`testimonial-${testimonial.id}`} className="text-xs text-muted-foreground cursor-pointer">
                                       {testimonial.is_published ? 'Visível' : 'Oculto'}
