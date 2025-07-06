@@ -14,8 +14,7 @@ export const MarketingCampaigns = () => {
     threshold: 0.1
   });
   
-  const { marketingCampaigns: allCampaigns } = useAdmin();
-  const marketingCampaigns = allCampaigns?.filter(c => c.is_published);
+  const { marketingCampaigns } = useAdmin();
   
   if (!marketingCampaigns || marketingCampaigns.length === 0) {
     return null;

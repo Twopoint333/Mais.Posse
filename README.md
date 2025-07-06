@@ -90,15 +90,13 @@ DROP POLICY IF EXISTS "Admin Delete Access" ON storage.objects;
 CREATE TABLE IF NOT EXISTS public.marketing_campaigns (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   image_url TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  is_published BOOLEAN DEFAULT TRUE NOT NULL
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.team_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   image_url TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  is_published BOOLEAN DEFAULT TRUE NOT NULL
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.testimonials (
@@ -108,8 +106,7 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
   business TEXT NOT NULL,
   location TEXT NOT NULL,
   logo_url TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  is_published BOOLEAN DEFAULT TRUE NOT NULL
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 2. Habilita RLS (se ainda não estiver) e cria as políticas de acesso para as tabelas
@@ -152,4 +149,3 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-

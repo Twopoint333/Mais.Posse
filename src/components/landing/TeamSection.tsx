@@ -13,8 +13,7 @@ export const TeamSection = () => {
     threshold: 0.1
   });
   
-  const { teamMembers: allTeamMembers } = useAdmin();
-  const teamMembers = allTeamMembers?.filter(m => m.is_published);
+  const { teamMembers } = useAdmin();
   
   if (!teamMembers || teamMembers.length === 0) {
     return null;
