@@ -30,15 +30,15 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#beneficios" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Benefícios</a>
-            <a href="#como-funciona" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Como Funciona</a>
-            <a href="#depoimentos" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Depoimentos</a>
+            <a href="#beneficios" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-white'}`}>Benefícios</a>
+            <a href="#como-funciona" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-white'}`}>Como Funciona</a>
+            <a href="#depoimentos" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-white'}`}>Depoimentos</a>
             <Button
               asChild
               className={`px-6 transition-colors duration-300 ${
                 isScrolled
                   ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-accent-cta text-primary hover:bg-accent-cta/90'
+                  : 'bg-white text-primary hover:bg-white/90'
               }`}
             >
               <a href="#cta">Seja Parceiro</a>
@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Mobile Menu Button */}
-          <Button variant="ghost" onClick={() => setMenuOpen(true)} size="icon" className={`md:hidden ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>
+          <Button variant="ghost" onClick={() => setMenuOpen(true)} size="icon" className={`md:hidden ${isScrolled ? 'text-primary' : 'text-white'}`}>
             <Menu className="h-6 w-6" />
           </Button>
         </div>
