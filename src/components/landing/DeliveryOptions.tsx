@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Truck, ShoppingBag } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
-import entregadorImg from '@/entregador.jpg';
+import entregadorImg from '../../entregador.jpg';
 
 export const DeliveryOptions = () => {
   const { ref, inView } = useInView({ threshold: 0.1 });

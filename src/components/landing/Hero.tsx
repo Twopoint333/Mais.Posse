@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Play } from 'lucide-react';
-import heroBg from '@/motoboy.jpg';
+import heroBg from '../../motoboy.jpg';
 
 export const Hero = () => {
   useEffect(() => {
