@@ -1,75 +1,38 @@
-import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
-// Interfaces for data structures
-export interface MarketingCampaign {
-  id: string;
-  imageUrl: string;
-}
+// Type aliases for convenience
+type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
+type NewMarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Insert'];
+type TeamMember = Database['public']['Tables']['team_members']['Row'];
+type NewTeamMember = Database['public']['Tables']['team_members']['Insert'];
+export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
+export type NewTestimonial = Database['public']['Tables']['testimonials']['Insert'];
+export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'];
 
-export interface TeamMember {
-  id: string;
-  imageUrl: string;
-}
-
-export interface Testimonial {
-  id: string;
-  quote: string;
-  author: string;
-  business: string;
-  location: string;
-  logoUrl: string;
-}
-
-// Default data
-const defaultData = {
-  marketingCampaigns: [
-    { id: '1', imageUrl: '/lovable-uploads/352c9ee3-e2b5-4ad6-bd4c-f074346670be.png' },
-    { id: '2', imageUrl: '/lovable-uploads/3026788e-bc43-493f-9082-c4f5cd2d0a6b.png' },
-    { id: '3', imageUrl: '/lovable-uploads/32fc0e1d-e6dc-4e3a-95e3-040557da4601.png' },
-    { id: '4', imageUrl: '/lovable-uploads/cb108444-5f14-4286-a0de-ece70d147d42.png' },
-    { id: '5', imageUrl: '/lovable-uploads/8cae2fea-a2f7-4120-927e-a63700a263f1.png' }
-  ],
-  teamMembers: [
-    { id: '1', imageUrl: '/motoboy.jpg' },
-    { id: '2', imageUrl: 'https://i.imgur.com/oILzGmK.jpeg' }
-  ],
-  testimonials: [
-    {
-      id: '1',
-      quote: "No dia que aceitei integrar meu estabelecimento ao Mais Delivery, vi resultados imediatos. Agora estamos oferecendo nossos produtos para um público muito maior, sem precisar de investimento.",
-      author: "José Pereira",
-      business: "JP LANCHES",
-      location: "Ibotirama/BA",
-      logoUrl: "/lovable-uploads/f77b271e-548c-4262-acd1-cc6a29a145d8.png"
-    },
-    {
-      id: '2',
-      quote: "A parceria com o Mais Delivery transformou nossa visibilidade no mercado. O aumento nas vendas foi notável já nos primeiros meses, e a taxa justa torna o serviço extremamente vantajoso.",
-      author: "Jairo Chagas",
-      business: "JC IMPORTS",
-      location: "Ibotirama/BA",
-      logoUrl: "/lovable-uploads/fd760325-58a6-411e-a047-98f63307db41.png"
-    },
-    {
-      id: '3',
-      quote: "Nossa entrada no Mais Delivery foi uma decisão acertada. A plataforma é intuitiva e a equipe de suporte realmente se importa com nosso sucesso. Recomendamos o serviço.",
-      author: "Eriques Fonseca",
-      business: "Lanchonete Pinguim",
-      location: "Barra/BA",
-      logoUrl: "/lovable-uploads/c301d3fe-5693-4938-b64e-be25b2d44acf.png"
-    }
-  ]
-};
 
 // Context type definition
 interface AdminContextType {
-  marketingCampaigns: MarketingCampaign[];
-  teamMembers: TeamMember[];
-  testimonials: Testimonial[];
-  setMarketingCampaigns: Dispatch<SetStateAction<MarketingCampaign[]>>;
-  setTeamMembers: Dispatch<SetStateAction<TeamMember[]>>;
-  setTestimonials: Dispatch<SetStateAction<Testimonial[]>>;
-  resetData: () => void;
+  // Marketing Campaigns
+  marketingCampaigns: MarketingCampaign[] | undefined;
+  isLoadingCampaigns: boolean;
+  addCampaign: (campaign: NewMarketingCampaign) => void;
+  deleteCampaign: (id: string) => void;
+
+  // Team Members
+  teamMembers: TeamMember[] | undefined;
+  isLoadingTeam: boolean;
+  addTeamMember: (member: NewTeamMember) => void;
+  deleteTeamMember: (id: string) => void;
+
+  // Testimonials
+  testimonials: Testimonial[] | undefined;
+  isLoadingTestimonials: boolean;
+  addTestimonial: (testimonial: NewTestimonial) => void;
+  updateTestimonial: (testimonial: UpdateTestimonial) => void;
+  deleteTestimonial: (id: string) => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -82,27 +45,99 @@ export const useAdmin = () => {
   return context;
 };
 
-export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [marketingCampaigns, setMarketingCampaigns] = useState<MarketingCampaign[]>(defaultData.marketingCampaigns);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultData.teamMembers);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(defaultData.testimonials);
+// API functions
+const fetcher = async (table: string) => {
+  const { data, error } = await supabase.from(table).select('*').order('created_at');
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-  const resetData = () => {
-    setMarketingCampaigns(defaultData.marketingCampaigns);
-    setTeamMembers(defaultData.teamMembers);
-    setTestimonials(defaultData.testimonials);
+const inserter = async (table: string, newItem: any) => {
+  const { error } = await supabase.from(table).insert(newItem);
+  if (error) throw new Error(error.message);
+};
+
+const updater = async (table: string, updatedItem: any) => {
+    const { id, ...rest } = updatedItem;
+    if (!id) throw new Error("Update requires an ID");
+    const { error } = await supabase.from(table).update(rest).eq('id', id);
+    if (error) throw new Error(error.message);
+}
+
+const deleter = async (table: string, id: string) => {
+  const { error } = await supabase.from(table).delete().eq('id', id);
+  if (error) throw new Error(error.message);
+};
+
+export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const queryClient = useQueryClient();
+
+  // --- Marketing Campaigns ---
+  const { data: marketingCampaigns, isLoading: isLoadingCampaigns } = useQuery({
+    queryKey: ['marketing_campaigns'],
+    queryFn: () => fetcher('marketing_campaigns') as Promise<MarketingCampaign[]>,
+  });
+  const addCampaignMutation = useMutation({
+    mutationFn: (campaign: NewMarketingCampaign) => inserter('marketing_campaigns', campaign),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
+  });
+  const deleteCampaignMutation = useMutation({
+    mutationFn: (id: string) => deleter('marketing_campaigns', id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
+  });
+
+  // --- Team Members ---
+  const { data: teamMembers, isLoading: isLoadingTeam } = useQuery({
+    queryKey: ['team_members'],
+    queryFn: () => fetcher('team_members') as Promise<TeamMember[]>,
+  });
+  const addTeamMemberMutation = useMutation({
+    mutationFn: (member: NewTeamMember) => inserter('team_members', member),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
+  });
+  const deleteTeamMemberMutation = useMutation({
+    mutationFn: (id: string) => deleter('team_members', id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
+  });
+
+  // --- Testimonials ---
+  const { data: testimonials, isLoading: isLoadingTestimonials } = useQuery({
+    queryKey: ['testimonials'],
+    queryFn: () => fetcher('testimonials') as Promise<Testimonial[]>,
+  });
+  const addTestimonialMutation = useMutation({
+    mutationFn: (testimonial: NewTestimonial) => inserter('testimonials', testimonial),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
+  });
+  const updateTestimonialMutation = useMutation({
+    mutationFn: (testimonial: UpdateTestimonial) => updater('testimonials', testimonial),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
+  });
+  const deleteTestimonialMutation = useMutation({
+    mutationFn: (id: string) => deleter('testimonials', id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
+  });
+
+  const value = {
+    marketingCampaigns,
+    isLoadingCampaigns,
+    addCampaign: addCampaignMutation.mutate,
+    deleteCampaign: deleteCampaignMutation.mutate,
+
+    teamMembers,
+    isLoadingTeam,
+    addTeamMember: addTeamMemberMutation.mutate,
+    deleteTeamMember: deleteTeamMemberMutation.mutate,
+
+    testimonials,
+    isLoadingTestimonials,
+    addTestimonial: addTestimonialMutation.mutate,
+    updateTestimonial: updateTestimonialMutation.mutate,
+    deleteTestimonial: deleteTestimonialMutation.mutate,
   };
-  
+
   return (
-    <AdminContext.Provider value={{
-      marketingCampaigns,
-      teamMembers,
-      testimonials,
-      setMarketingCampaigns,
-      setTeamMembers,
-      setTestimonials,
-      resetData
-    }}>
+    <AdminContext.Provider value={value}>
       {children}
     </AdminContext.Provider>
   );

@@ -41,7 +41,7 @@ export const Testimonials = () => {
                     <div className="flex justify-center mb-4">
                       <div className="bg-primary rounded-full p-2 flex items-center justify-center">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={testimonial.logoUrl} alt={`${testimonial.business} Logo`} className="object-contain" />
+                          <AvatarImage src={testimonial.logo_url} alt={`${testimonial.business} Logo`} className="object-contain" />
                           <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
                         </Avatar>
                       </div>

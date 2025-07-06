@@ -42,7 +42,7 @@ export const MarketingCampaigns = () => {
                   <div className="p-1">
                     <AspectRatio ratio={9 / 16} className="overflow-hidden rounded-lg shadow-md group hover:shadow-xl transition-all duration-300">
                       <img 
-                        src={campaign.imageUrl} 
+                        src={campaign.image_url} 
                         alt={`Campanha de Marketing ${index + 1}`} 
                         className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
                       />
