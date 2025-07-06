@@ -14,14 +14,15 @@ export const Hero = () => {
   return (
     <section 
       id="hero" 
-      className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 md:py-24 bg-cover bg-center" 
-      style={{
-        backgroundImage: `url(${heroBg})`,
-        backgroundPosition: "center center"
-      }}
+      className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 md:py-24 bg-primary"
       data-ai-hint="delivery food"
     >
-      <div className="absolute inset-0 bg-primary bg-opacity-90"></div>
+      <img
+        src={heroBg}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover opacity-30"
+      />
       
       <div className="container mx-auto relative z-10 text-center">
         <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 transform translate-y-0 opacity-100 transition-all duration-700 delay-300">
