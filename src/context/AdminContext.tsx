@@ -62,16 +62,24 @@ const defaultData = {
 };
 
 // Helper to get data from localStorage
-const getFromStorage = <T,>(key: string, defaultValue: T): T => {
+const getFromStorage = <T extends any[]>(key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
   try {
     const item = window.localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    if (item) {
+      const parsed = JSON.parse(item);
+      // Ensure the parsed value is an array before returning, to prevent crashes.
+      if (Array.isArray(parsed)) {
+        return parsed as T;
+      }
+    }
+    return defaultValue;
   } catch (error) {
     console.warn(`Error reading localStorage key “${key}”:`, error);
     return defaultValue;
   }
 };
+
 
 // Helper to set data to localStorage
 const setInStorage = <T,>(key: string, value: T) => {
@@ -122,9 +130,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [testimonials]);
 
   const resetData = () => {
+    // Reset state to default values
     setMarketingCampaigns(defaultData.marketingCampaigns);
     setTeamMembers(defaultData.teamMembers);
     setTestimonials(defaultData.testimonials);
+    // Also clear from storage to ensure no corrupted data persists
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('marketingCampaigns');
+      window.localStorage.removeItem('teamMembers');
+      window.localStorage.removeItem('testimonials');
+    }
   };
   
   return (
