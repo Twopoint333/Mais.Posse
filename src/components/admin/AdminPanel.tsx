@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
 import { useAdmin, Testimonial } from '@/context/AdminContext';
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from 'react-router-dom';
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -20,6 +21,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     testimonials, addTestimonial, updateTestimonial, deleteTestimonial, isLoadingTestimonials,
   } = useAdmin();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // State for forms
   const [newCampaignFile, setNewCampaignFile] = useState<File | null>(null);
@@ -47,6 +49,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       title: `Erro ao ${action}`,
       description: description,
     });
+  };
+
+  const handleLogoutAndRedirect = () => {
+    onLogout();
+    navigate('/');
   };
 
   // Handlers for Marketing Campaigns
@@ -137,7 +144,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     <div className="p-4 md:p-8 space-y-6">
       <header className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Painel Administrativo</h1>
-        <Button onClick={onLogout} variant="destructive">
+        <Button onClick={handleLogoutAndRedirect} variant="destructive">
           <LogOut className="mr-2 h-4 w-4" /> Sair
         </Button>
       </header>
