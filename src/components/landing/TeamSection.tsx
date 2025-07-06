@@ -4,6 +4,7 @@ import { useInView } from '@/hooks/useInView';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from '@/integrations/supabase/client';
 
 export const TeamSection = () => {
   const {
@@ -64,11 +65,17 @@ export const TeamSection = () => {
           
           <div className="relative shadow-lg rounded-lg overflow-hidden">
             <div className="grid grid-cols-2 gap-4">
-              {teamMembers.map((member, index) => (
-                <div key={member.id}>
-                  <img src={member.image_url} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />
-                </div>
-              ))}
+              {teamMembers.map((member, index) => {
+                const publicUrl = member.image_url 
+                  ? supabase.storage.from('site_assets').getPublicUrl(member.image_url).data.publicUrl
+                  : '';
+                  
+                return (
+                  <div key={member.id}>
+                    <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

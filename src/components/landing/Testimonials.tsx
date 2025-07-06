@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from '@/integrations/supabase/client';
 
 export const Testimonials = () => {
   const {
@@ -58,29 +59,35 @@ export const Testimonials = () => {
         
         <div ref={ref} className="relative">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <div key={testimonial.id} className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 h-full transition-all duration-500 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`} style={{
-                  transitionDelay: `${index * 150}ms`
-                }}>
-                  <div className="flex justify-center mb-4">
-                    <div className="bg-primary rounded-full p-2 flex items-center justify-center">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={testimonial.logo_url} alt={`${testimonial.business} Logo`} className="object-contain" />
-                        <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
-                      </Avatar>
+            {testimonials.map((testimonial, index) => {
+              const publicUrl = testimonial.logo_url
+                ? supabase.storage.from('site_assets').getPublicUrl(testimonial.logo_url).data.publicUrl
+                : '';
+
+              return (
+                <div key={testimonial.id} className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 h-full transition-all duration-500 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`} style={{
+                    transitionDelay: `${index * 150}ms`
+                  }}>
+                    <div className="flex justify-center mb-4">
+                      <div className="bg-primary rounded-full p-2 flex items-center justify-center">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={publicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />
+                          <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
+                        </Avatar>
+                      </div>
                     </div>
+                    
+                    <blockquote className="mb-6">
+                      <p className="text-[#1F2937] italic mb-4">"{testimonial.quote}"</p>
+                      <footer className="text-sm">
+                        <span className="font-bold text-[#1F2937]">{testimonial.author}, </span>
+                        <span className="text-[#1F2937]">{testimonial.business} – </span>
+                        <span className="text-primary font-medium">{testimonial.location}</span>
+                      </footer>
+                    </blockquote>
                   </div>
-                  
-                  <blockquote className="mb-6">
-                    <p className="text-[#1F2937] italic mb-4">"{testimonial.quote}"</p>
-                    <footer className="text-sm">
-                      <span className="font-bold text-[#1F2937]">{testimonial.author}, </span>
-                      <span className="text-[#1F2937]">{testimonial.business} – </span>
-                      <span className="text-primary font-medium">{testimonial.location}</span>
-                    </footer>
-                  </blockquote>
-                </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

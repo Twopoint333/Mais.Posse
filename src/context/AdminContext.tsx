@@ -10,7 +10,8 @@ type TeamMember = Database['public']['Tables']['team_members']['Row'];
 type NewTeamMember = { file: File };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
 export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { logo_file: File };
-export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { logo_file?: File; old_logo_url?: string };
+// Note: logo_url and old_logo_path will be paths, not full URLs
+export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { logo_file?: File; old_logo_path?: string };
 
 // Context type definition
 interface AdminContextType {
@@ -50,32 +51,22 @@ export const useAdmin = () => {
   return context;
 };
 
+const BUCKET_NAME = 'site_assets';
+
 // --- Helper Functions ---
-const uploadFile = async (bucket: string, file: File): Promise<string> => {
+// Returns the path of the uploaded file
+const uploadFile = async (file: File): Promise<string> => {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    const fileName = `public/${Date.now()}-${sanitizedFileName}`;
-    const { error } = await supabase.storage.from(bucket).upload(fileName, file);
+    const path = `public/${Date.now()}-${sanitizedFileName}`;
+    const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, file);
     if (error) throw error;
-    
-    const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
-    return data.publicUrl;
+    return path;
 };
 
-const deleteFileFromUrl = async (fileUrl: string) => {
-    if (!fileUrl) return;
-
-    const url = new URL(fileUrl);
-    const bucketId = 'site_assets';
-    const pathPrefix = `/storage/v1/object/public/${bucketId}/`;
-
-    if (!url.pathname.includes(pathPrefix)) {
-        throw new Error(`Could not parse Supabase file path from URL: ${fileUrl}`);
-    }
-
-    const filePath = decodeURIComponent(url.pathname.substring(url.pathname.indexOf(pathPrefix) + pathPrefix.length));
-    
-    const { error } = await supabase.storage.from(bucketId).remove([filePath]);
-
+// Deletes a file by its path
+const deleteFile = async (path: string) => {
+    if (!path) return;
+    const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
     if (error && error.message !== 'The resource was not found') {
         throw error;
     }
@@ -118,14 +109,14 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const addCampaignMutation = useMutation<unknown, Error, NewMarketingCampaign>({
     mutationFn: async ({ file }) => {
-        const imageUrl = await uploadFile('site_assets', file);
-        return inserter('marketing_campaigns', { image_url: imageUrl });
+        const imagePath = await uploadFile(file);
+        return inserter('marketing_campaigns', { image_url: imagePath });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
   });
   const deleteCampaignMutation = useMutation<void, Error, MarketingCampaign>({
     mutationFn: async (campaign) => {
-        await deleteFileFromUrl(campaign.image_url);
+        await deleteFile(campaign.image_url);
         await deleter('marketing_campaigns', campaign.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
@@ -138,14 +129,14 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const addTeamMemberMutation = useMutation<unknown, Error, NewTeamMember>({
     mutationFn: async ({ file }) => {
-        const imageUrl = await uploadFile('site_assets', file);
-        return inserter('team_members', { image_url: imageUrl });
+        const imagePath = await uploadFile(file);
+        return inserter('team_members', { image_url: imagePath });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
   });
   const deleteTeamMemberMutation = useMutation<void, Error, TeamMember>({
     mutationFn: async (member) => {
-        await deleteFileFromUrl(member.image_url);
+        await deleteFile(member.image_url);
         await deleter('team_members', member.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
@@ -158,32 +149,32 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const addTestimonialMutation = useMutation<unknown, Error, NewTestimonial>({
     mutationFn: async (testimonial) => {
-        const logoUrl = await uploadFile('site_assets', testimonial.logo_file);
+        const logoPath = await uploadFile(testimonial.logo_file);
         const { logo_file, ...dbData } = testimonial;
-        return inserter('testimonials', { ...dbData, logo_url: logoUrl });
+        return inserter('testimonials', { ...dbData, logo_url: logoPath });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const updateTestimonialMutation = useMutation<unknown, Error, UpdateTestimonial>({
     mutationFn: async (testimonial) => {
-        const { logo_file, old_logo_url, ...dbData } = testimonial;
-        let newLogoUrl: string | undefined = undefined;
+        const { logo_file, old_logo_path, ...dbData } = testimonial;
+        let newLogoPath: string | undefined = undefined;
 
         if (logo_file) {
-            newLogoUrl = await uploadFile('site_assets', logo_file);
-            if (old_logo_url) {
-                await deleteFileFromUrl(old_logo_url);
+            newLogoPath = await uploadFile(logo_file);
+            if (old_logo_path) {
+                await deleteFile(old_logo_path);
             }
         }
         
-        const dataToUpdate = newLogoUrl ? { ...dbData, logo_url: newLogoUrl } : dbData;
+        const dataToUpdate = newLogoPath ? { ...dbData, logo_url: newLogoPath } : dbData;
         return updater('testimonials', dataToUpdate);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const deleteTestimonialMutation = useMutation<void, Error, Testimonial>({
     mutationFn: async (testimonial) => {
-        await deleteFileFromUrl(testimonial.logo_url);
+        await deleteFile(testimonial.logo_url);
         await deleter('testimonials', testimonial.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),

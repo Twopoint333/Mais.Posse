@@ -4,6 +4,7 @@ import { useInView } from '@/hooks/useInView';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from '@/integrations/supabase/client';
 
 export const MarketingCampaigns = () => {
   const {
@@ -61,15 +62,21 @@ export const MarketingCampaigns = () => {
         
         <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {marketingCampaigns.map((campaign, index) => (
-              <div key={campaign.id} className="p-1">
-                 <img 
-                    src={campaign.image_url} 
-                    alt={`Campanha de Marketing ${index + 1}`} 
-                    className="w-full h-full object-cover rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-                  />
-              </div>
-            ))}
+            {marketingCampaigns.map((campaign, index) => {
+              const publicUrl = campaign.image_url 
+                ? supabase.storage.from('site_assets').getPublicUrl(campaign.image_url).data.publicUrl 
+                : '';
+              
+              return (
+                <div key={campaign.id} className="p-1">
+                  <img 
+                      src={publicUrl} 
+                      alt={`Campanha de Marketing ${index + 1}`} 
+                      className="w-full h-full object-cover rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                    />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
