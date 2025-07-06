@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, PlusCircle, Trash2, Edit, Loader2, Eye, EyeOff } from 'lucide-react';
+import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
 import { useAdmin, Testimonial } from '@/context/AdminContext';
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from '@/components/ui/switch';
@@ -36,11 +36,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const testimonialLogoRef = useRef<HTMLInputElement>(null);
 
   const handleApiError = (error: unknown, action: string) => {
+    let description = "Ocorreu um erro. Por favor, tente novamente.";
+    if (error instanceof Error) {
+        if (error.message.includes('security rules') || error.message.includes('permission denied')) {
+            description = "Falha de permissão. Verifique as políticas de segurança (RLS) no Supabase.";
+        } else {
+            description = error.message;
+        }
+    }
     console.error(`Failed to ${action}:`, error);
     toast({
       variant: "destructive",
       title: `Erro ao ${action}`,
-      description: "Ocorreu um erro. Por favor, tente novamente.",
+      description: description,
     });
   };
   

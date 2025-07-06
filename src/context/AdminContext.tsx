@@ -49,7 +49,9 @@ export const useAdmin = () => {
 
 // --- Helper Functions ---
 const uploadFile = async (bucket: string, file: File): Promise<string> => {
-    const fileName = `public/${Date.now()}-${file.name}`;
+    // Sanitize file name to remove special characters and spaces
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const fileName = `public/${Date.now()}-${sanitizedFileName}`;
     const { error } = await supabase.storage.from(bucket).upload(fileName, file);
     if (error) throw error;
     
@@ -59,35 +61,32 @@ const uploadFile = async (bucket: string, file: File): Promise<string> => {
 
 const deleteFileFromUrl = async (fileUrl: string) => {
     if (!fileUrl) {
-        console.warn("Skipping deletion of empty file URL");
+        console.warn("Skipping deletion of empty or invalid file URL");
         return;
     }
     try {
         const url = new URL(fileUrl);
-        // Pathname looks like: /storage/v1/object/public/site_assets/public/12345-image.png
-        const pathWithBucket = url.pathname.split('/public/').pop();
-        if (!pathWithBucket) {
-             console.error("Could not parse path from URL:", fileUrl);
+        const bucketName = 'site_assets'; // Bucket name is known
+        const bucketPathSegment = `/storage/v1/object/public/${bucketName}/`;
+        
+        if (!url.pathname.includes(bucketPathSegment)) {
+             console.error("Could not parse path from URL, bucket segment not found:", fileUrl);
              return;
         }
-        
-        const [bucket, ...pathParts] = pathWithBucket.split('/');
-        const path = pathParts.join('/');
 
-        if (!bucket || !path) {
-            console.error("Could not parse bucket and path from URL:", fileUrl);
+        const path = url.pathname.substring(url.pathname.indexOf(bucketPathSegment) + bucketPathSegment.length);
+
+        if (!path) {
+            console.error("Could not extract file path for deletion from URL:", fileUrl);
             return;
         }
 
-        const { error } = await supabase.storage.from(bucket).remove([path]);
-        if (error) {
-            // It's okay if the file doesn't exist, might have been manually deleted.
-            if (error.message !== 'The resource was not found') {
-                console.error("Failed to delete file from storage:", error.message);
-            }
+        const { error } = await supabase.storage.from(bucketName).remove([path]);
+        if (error && error.message !== 'The resource was not found') {
+            console.error("Failed to delete file from storage:", error.message);
         }
     } catch (e) {
-        console.error("Invalid URL for file deletion:", fileUrl, e);
+        console.error("Invalid URL or failed to parse for file deletion:", fileUrl, e);
     }
 };
 
