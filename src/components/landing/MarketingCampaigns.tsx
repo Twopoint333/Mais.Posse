@@ -27,9 +27,9 @@ export const MarketingCampaigns = () => {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Erro ao Carregar Campanhas</AlertTitle>
           <AlertDescription>
-            Não foi possível buscar os dados. Verifique as permissões no Supabase. Erro:
+            Não foi possível buscar os dados. Verifique se as políticas de segurança (RLS) no Supabase estão configuradas corretamente.
             <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
-              {JSON.stringify(errorCampaigns, null, 2)}
+              {errorCampaigns?.message || JSON.stringify(errorCampaigns, null, 2)}
             </pre>
           </AlertDescription>
         </Alert>
