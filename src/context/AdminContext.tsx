@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, SetStateAction } from 'react';
+import React, { createContext, useContext, useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 // Interfaces for data structures
 export interface MarketingCampaign {
@@ -88,9 +88,9 @@ interface AdminContextType {
   marketingCampaigns: MarketingCampaign[];
   teamMembers: TeamMember[];
   testimonials: Testimonial[];
-  setMarketingCampaigns: React.Dispatch<SetStateAction<MarketingCampaign[]>>;
-  setTeamMembers: React.Dispatch<SetStateAction<TeamMember[]>>;
-  setTestimonials: React.Dispatch<SetStateAction<Testimonial[]>>;
+  setMarketingCampaigns: Dispatch<SetStateAction<MarketingCampaign[]>>;
+  setTeamMembers: Dispatch<SetStateAction<TeamMember[]>>;
+  setTestimonials: Dispatch<SetStateAction<Testimonial[]>>;
   resetData: () => void;
 }
 
@@ -105,33 +105,21 @@ export const useAdmin = () => {
 };
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [marketingCampaigns, _setMarketingCampaigns] = useState<MarketingCampaign[]>(() => getFromStorage('marketingCampaigns', defaultData.marketingCampaigns));
-  const [teamMembers, _setTeamMembers] = useState<TeamMember[]>(() => getFromStorage('teamMembers', defaultData.teamMembers));
-  const [testimonials, _setTestimonials] = useState<Testimonial[]>(() => getFromStorage('testimonials', defaultData.testimonials));
+  const [marketingCampaigns, setMarketingCampaigns] = useState<MarketingCampaign[]>(() => getFromStorage('marketingCampaigns', defaultData.marketingCampaigns));
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() => getFromStorage('teamMembers', defaultData.teamMembers));
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(() => getFromStorage('testimonials', defaultData.testimonials));
 
-  const setMarketingCampaigns = (value: SetStateAction<MarketingCampaign[]>) => {
-    _setMarketingCampaigns(prev => {
-      const newValue = typeof value === 'function' ? (value as (prevState: MarketingCampaign[]) => MarketingCampaign[])(prev) : value;
-      setInStorage('marketingCampaigns', newValue);
-      return newValue;
-    });
-  };
+  useEffect(() => {
+    setInStorage('marketingCampaigns', marketingCampaigns);
+  }, [marketingCampaigns]);
 
-  const setTeamMembers = (value: SetStateAction<TeamMember[]>) => {
-    _setTeamMembers(prev => {
-      const newValue = typeof value === 'function' ? (value as (prevState: TeamMember[]) => TeamMember[])(prev) : value;
-      setInStorage('teamMembers', newValue);
-      return newValue;
-    });
-  };
+  useEffect(() => {
+    setInStorage('teamMembers', teamMembers);
+  }, [teamMembers]);
 
-  const setTestimonials = (value: SetStateAction<Testimonial[]>) => {
-    _setTestimonials(prev => {
-      const newValue = typeof value === 'function' ? (value as (prevState: Testimonial[]) => Testimonial[])(prev) : value;
-      setInStorage('testimonials', newValue);
-      return newValue;
-    });
-  };
+  useEffect(() => {
+    setInStorage('testimonials', testimonials);
+  }, [testimonials]);
 
   const resetData = () => {
     setMarketingCampaigns(defaultData.marketingCampaigns);
