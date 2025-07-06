@@ -35,6 +35,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const testimonialLogoRef = useRef<HTMLInputElement>(null);
 
   const handleApiError = (error: unknown, action: string) => {
+    console.error(`Full error object when trying to ${action}:`, error);
     let description = "Ocorreu um erro. Por favor, tente novamente.";
     if (error instanceof Error) {
         if (error.message.includes('security rules') || error.message.includes('permission denied') || error.message.includes('violates row-level security policy')) {
