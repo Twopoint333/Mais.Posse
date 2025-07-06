@@ -33,7 +33,14 @@ export const Header: React.FC<HeaderProps> = ({
             <a href="#beneficios" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Benefícios</a>
             <a href="#como-funciona" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Como Funciona</a>
             <a href="#depoimentos" className={`font-medium transition-colors hover:opacity-80 ${isScrolled ? 'text-primary' : 'text-accent-cta'}`}>Depoimentos</a>
-            <Button asChild className="bg-primary hover:bg-primary/90 px-6">
+            <Button
+              asChild
+              className={`px-6 transition-colors duration-300 ${
+                isScrolled
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  : 'bg-accent-cta text-primary hover:bg-accent-cta/90'
+              }`}
+            >
               <a href="#cta">Seja Parceiro</a>
             </Button>
           </nav>
