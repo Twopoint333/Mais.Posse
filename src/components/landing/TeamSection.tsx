@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const TeamSection = () => {
   const {
@@ -12,7 +13,7 @@ export const TeamSection = () => {
     threshold: 0.1
   });
   
-  const { teamMembers, isLoadingTeam } = useAdmin();
+  const { teamMembers, isLoadingTeam, isErrorTeam, errorTeam } = useAdmin();
 
   if (isLoadingTeam) {
     return (
@@ -22,6 +23,23 @@ export const TeamSection = () => {
         </div>
       </section>
     );
+  }
+
+  if (isErrorTeam) {
+    return (
+       <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar equipe</AlertTitle>
+            <AlertDescription>
+              Não foi possível buscar os dados. Verifique suas políticas de RLS (Row Level Security) no Supabase.
+              <pre className="mt-2 whitespace-pre-wrap text-xs">{errorTeam?.message}</pre>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </section>
+    )
   }
   
   if (!teamMembers || teamMembers.length === 0) {

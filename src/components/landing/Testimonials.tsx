@@ -2,8 +2,9 @@
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const Testimonials = () => {
   const {
@@ -13,7 +14,7 @@ export const Testimonials = () => {
     threshold: 0.1
   });
   
-  const { testimonials, isLoadingTestimonials } = useAdmin();
+  const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
 
   if (isLoadingTestimonials) {
     return (
@@ -23,6 +24,23 @@ export const Testimonials = () => {
         </div>
       </section>
     );
+  }
+
+  if (isErrorTestimonials) {
+    return (
+       <section className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar depoimentos</AlertTitle>
+            <AlertDescription>
+              Não foi possível buscar os dados. Verifique suas políticas de RLS (Row Level Security) no Supabase.
+              <pre className="mt-2 whitespace-pre-wrap text-xs">{errorTestimonials?.message}</pre>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </section>
+    )
   }
   
   if (!testimonials || testimonials.length === 0) {

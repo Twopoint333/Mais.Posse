@@ -17,18 +17,24 @@ interface AdminContextType {
   // Marketing Campaigns
   marketingCampaigns: MarketingCampaign[] | undefined;
   isLoadingCampaigns: boolean;
+  isErrorCampaigns: boolean;
+  errorCampaigns: Error | null;
   addCampaign: (campaign: NewMarketingCampaign) => Promise<void>;
   deleteCampaign: (campaign: MarketingCampaign) => Promise<void>;
 
   // Team Members
   teamMembers: TeamMember[] | undefined;
   isLoadingTeam: boolean;
+  isErrorTeam: boolean;
+  errorTeam: Error | null;
   addTeamMember: (member: NewTeamMember) => Promise<void>;
   deleteTeamMember: (member: TeamMember) => Promise<void>;
 
   // Testimonials
   testimonials: Testimonial[] | undefined;
   isLoadingTestimonials: boolean;
+  isErrorTestimonials: boolean;
+  errorTestimonials: Error | null;
   addTestimonial: (testimonial: NewTestimonial) => Promise<void>;
   updateTestimonial: (testimonial: UpdateTestimonial) => Promise<void>;
   deleteTestimonial: (testimonial: Testimonial) => Promise<void>;
@@ -111,7 +117,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const queryClient = useQueryClient();
 
   // --- Marketing Campaigns ---
-  const { data: marketingCampaigns, isLoading: isLoadingCampaigns } = useQuery<MarketingCampaign[]>({
+  const { data: marketingCampaigns, isLoading: isLoadingCampaigns, isError: isErrorCampaigns, error: errorCampaigns } = useQuery<MarketingCampaign[], Error>({
     queryKey: ['marketing_campaigns'],
     queryFn: () => fetcher('marketing_campaigns'),
   });
@@ -131,7 +137,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
 
   // --- Team Members ---
-  const { data: teamMembers, isLoading: isLoadingTeam } = useQuery<TeamMember[]>({
+  const { data: teamMembers, isLoading: isLoadingTeam, isError: isErrorTeam, error: errorTeam } = useQuery<TeamMember[], Error>({
     queryKey: ['team_members'],
     queryFn: () => fetcher('team_members'),
   });
@@ -151,7 +157,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
 
   // --- Testimonials ---
-  const { data: testimonials, isLoading: isLoadingTestimonials } = useQuery<Testimonial[]>({
+  const { data: testimonials, isLoading: isLoadingTestimonials, isError: isErrorTestimonials, error: errorTestimonials } = useQuery<Testimonial[], Error>({
     queryKey: ['testimonials'],
     queryFn: () => fetcher('testimonials'),
   });
@@ -191,16 +197,22 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const value: AdminContextType = {
     marketingCampaigns,
     isLoadingCampaigns,
+    isErrorCampaigns,
+    errorCampaigns,
     addCampaign: addCampaignMutation.mutateAsync,
     deleteCampaign: deleteCampaignMutation.mutateAsync,
 
     teamMembers,
     isLoadingTeam,
+    isErrorTeam,
+    errorTeam,
     addTeamMember: addTeamMemberMutation.mutateAsync,
     deleteTeamMember: deleteTeamMemberMutation.mutateAsync,
 
     testimonials,
     isLoadingTestimonials,
+    isErrorTestimonials,
+    errorTestimonials,
     addTestimonial: addTestimonialMutation.mutateAsync,
     updateTestimonial: updateTestimonialMutation.mutateAsync,
     deleteTestimonial: deleteTestimonialMutation.mutateAsync,

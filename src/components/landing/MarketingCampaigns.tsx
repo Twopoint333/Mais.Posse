@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const MarketingCampaigns = () => {
   const {
@@ -13,7 +13,7 @@ export const MarketingCampaigns = () => {
     threshold: 0.1
   });
   
-  const { marketingCampaigns, isLoadingCampaigns } = useAdmin();
+  const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
 
   if (isLoadingCampaigns) {
     return (
@@ -23,6 +23,23 @@ export const MarketingCampaigns = () => {
         </div>
       </section>
     );
+  }
+
+  if (isErrorCampaigns) {
+    return (
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar campanhas</AlertTitle>
+            <AlertDescription>
+              Não foi possível buscar os dados. Verifique suas políticas de RLS (Row Level Security) no Supabase.
+              <pre className="mt-2 whitespace-pre-wrap text-xs">{errorCampaigns?.message}</pre>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </section>
+    )
   }
   
   if (!marketingCampaigns || marketingCampaigns.length === 0) {
@@ -44,13 +61,11 @@ export const MarketingCampaigns = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {marketingCampaigns.map((campaign, index) => (
               <div key={campaign.id} className="p-1">
-                <AspectRatio ratio={9 / 16} className="overflow-hidden rounded-lg shadow-md group hover:shadow-xl transition-all duration-300">
-                  <img 
+                 <img 
                     src={campaign.image_url} 
                     alt={`Campanha de Marketing ${index + 1}`} 
-                    className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
                   />
-                </AspectRatio>
               </div>
             ))}
           </div>
