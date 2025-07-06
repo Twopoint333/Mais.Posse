@@ -37,8 +37,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const handleApiError = (error: unknown, action: string) => {
     let description = "Ocorreu um erro. Por favor, tente novamente.";
     if (error instanceof Error) {
-        if (error.message.includes('security rules') || error.message.includes('permission denied')) {
-            description = "Falha de permissão. Verifique as políticas de segurança (RLS) no Supabase.";
+        if (error.message.includes('security rules') || error.message.includes('permission denied') || error.message.includes('violates row-level security policy')) {
+            description = "Falha de permissão. Verifique se o script SQL mais recente foi executado corretamente no Supabase.";
         } else {
             description = error.message;
         }
