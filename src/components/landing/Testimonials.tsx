@@ -32,10 +32,12 @@ export const Testimonials = () => {
         <div className="container mx-auto">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Erro ao carregar depoimentos</AlertTitle>
+            <AlertTitle>Erro ao Carregar Depoimentos</AlertTitle>
             <AlertDescription>
-              Não foi possível buscar os dados. Verifique suas políticas de RLS (Row Level Security) no Supabase.
-              <pre className="mt-2 whitespace-pre-wrap text-xs">{errorTestimonials?.message}</pre>
+               Não foi possível buscar os dados do Supabase. Este é o objeto de erro detalhado:
+              <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
+                {JSON.stringify(errorTestimonials, null, 2)}
+              </pre>
             </AlertDescription>
           </Alert>
         </div>

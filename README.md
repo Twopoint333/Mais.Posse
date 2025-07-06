@@ -94,53 +94,49 @@ ALTER TABLE public.testimonials DISABLE ROW LEVEL SECURITY;
 If disabling RLS solves the problem, you can use the more robust script below to set up the correct permissions and re-enable security.
 
 ### Full Setup Script
-This script creates the tables and sets up the necessary Row Level Security (RLS) policies and Storage permissions for the site and admin panel to function correctly.
+This script creates the tables and sets up the necessary Row Level Security (RLS) policies and Storage permissions for the site and admin panel to function correctly. This is the most comprehensive script to fix permission issues.
 
 ```sql
 -- =================================================================
--- SCRIPT DE EMERGÊNCIA: ABRE TODAS AS PERMISSÕES
--- Este script remove todas as políticas de segurança anteriores
--- e concede acesso TOTAL (leitura, escrita, exclusão) para o site.
--- Use isso para confirmar se o problema é de permissão.
+-- SCRIPT DE RECONFIGURAÇÃO COMPLETA E FINAL
+-- Este script redefine as permissões fundamentais e as políticas de RLS.
+-- É o passo mais completo para resolver problemas de acesso.
 -- =================================================================
 
--- Etapa 1: Apaga TODAS as políticas antigas para evitar conflitos
+-- Etapa 1: Concede permissões básicas ao role 'anon' (visitante do site)
+-- Isso garante que o site pode interagir com o schema e as tabelas.
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;
+
+-- Etapa 2: Limpa todas as políticas antigas para evitar conflitos
 DROP POLICY IF EXISTS "Public Read Access" ON public.marketing_campaigns;
 DROP POLICY IF EXISTS "Admin Full Access" ON public.marketing_campaigns;
 DROP POLICY IF EXISTS "Public Full Access" ON public.marketing_campaigns;
-
 DROP POLICY IF EXISTS "Public Read Access" ON public.team_members;
 DROP POLICY IF EXISTS "Admin Full Access" ON public.team_members;
 DROP POLICY IF EXISTS "Public Full Access" ON public.team_members;
-
 DROP POLICY IF EXISTS "Public Read Access" ON public.testimonials;
 DROP POLICY IF EXISTS "Admin Full Access" ON public.testimonials;
 DROP POLICY IF EXISTS "Public Full Access" ON public.testimonials;
-
-DROP POLICY IF EXISTS "Public Read Access" ON storage.objects;
-DROP POLICY IF EXISTS "Admin Upload Access" ON storage.objects;
-DROP POLICY IF EXISTS "Admin Update Access" ON storage.objects;
-DROP POLICY IF EXISTS "Admin Delete Access" ON storage.objects;
 DROP POLICY IF EXISTS "Public Full Access" ON storage.objects;
 
--- Etapa 2: Cria as tabelas se elas não existirem
+-- Etapa 3: Garante que as tabelas existem
 CREATE TABLE IF NOT EXISTS public.marketing_campaigns (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), image_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS public.team_members (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), image_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS public.testimonials (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), quote TEXT NOT NULL, author TEXT NOT NULL, business TEXT NOT NULL, location TEXT NOT NULL, logo_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
 
--- Etapa 3: Garante que RLS esteja ATIVADA
+-- Etapa 4: Habilita RLS e cria uma política única e totalmente permissiva
 ALTER TABLE public.marketing_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
--- Etapa 4: Cria UMA ÚNICA POLÍTICA DE ACESSO TOTAL para cada tabela
 CREATE POLICY "Public Full Access" ON public.marketing_campaigns FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Public Full Access" ON public.team_members FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Public Full Access" ON public.testimonials FOR ALL TO anon USING (true) WITH CHECK (true);
 
--- Etapa 5: Configura o Armazenamento de Arquivos com ACESSO TOTAL
+-- Etapa 5: Reconfigura o Storage
 INSERT INTO storage.buckets (id, name, public) VALUES ('site_assets', 'site_assets', true) ON CONFLICT (id) DO NOTHING;
-DROP POLICY IF EXISTS "Public Full Access" ON storage.objects;
 CREATE POLICY "Public Full Access" ON storage.objects FOR ALL TO anon USING (bucket_id = 'site_assets') WITH CHECK (bucket_id = 'site_assets');
 ```
 
@@ -155,8 +151,3 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-
-
-
-
-
