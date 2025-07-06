@@ -2,7 +2,7 @@
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -14,7 +14,17 @@ export const MarketingCampaigns = () => {
     threshold: 0.1
   });
   
-  const { marketingCampaigns } = useAdmin();
+  const { marketingCampaigns, isLoadingCampaigns } = useAdmin();
+
+  if (isLoadingCampaigns) {
+    return (
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
   
   if (!marketingCampaigns || marketingCampaigns.length === 0) {
     return null;

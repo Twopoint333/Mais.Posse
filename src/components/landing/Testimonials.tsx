@@ -3,7 +3,7 @@ import React from 'react';
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useInView } from '@/hooks/useInView';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
 export const Testimonials = () => {
@@ -14,7 +14,17 @@ export const Testimonials = () => {
     threshold: 0.1
   });
   
-  const { testimonials } = useAdmin();
+  const { testimonials, isLoadingTestimonials } = useAdmin();
+
+  if (isLoadingTestimonials) {
+    return (
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
   
   if (!testimonials || testimonials.length === 0) {
     return null;

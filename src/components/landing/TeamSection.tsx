@@ -2,7 +2,7 @@
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
 export const TeamSection = () => {
@@ -13,7 +13,17 @@ export const TeamSection = () => {
     threshold: 0.1
   });
   
-  const { teamMembers } = useAdmin();
+  const { teamMembers, isLoadingTeam } = useAdmin();
+
+  if (isLoadingTeam) {
+    return (
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
   
   if (!teamMembers || teamMembers.length === 0) {
     return null;

@@ -114,13 +114,13 @@ ALTER TABLE public.marketing_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public Read Access" ON public.marketing_campaigns FOR SELECT USING (true);
+CREATE POLICY "Public Read Access" ON public.marketing_campaigns FOR SELECT TO anon USING (true);
 CREATE POLICY "Admin Full Access" ON public.marketing_campaigns FOR ALL TO anon WITH CHECK (true);
 
-CREATE POLICY "Public Read Access" ON public.team_members FOR SELECT USING (true);
+CREATE POLICY "Public Read Access" ON public.team_members FOR SELECT TO anon USING (true);
 CREATE POLICY "Admin Full Access" ON public.team_members FOR ALL TO anon WITH CHECK (true);
 
-CREATE POLICY "Public Read Access" ON public.testimonials FOR SELECT USING (true);
+CREATE POLICY "Public Read Access" ON public.testimonials FOR SELECT TO anon USING (true);
 CREATE POLICY "Admin Full Access" ON public.testimonials FOR ALL TO anon WITH CHECK (true);
 
 
