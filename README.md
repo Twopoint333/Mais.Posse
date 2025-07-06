@@ -70,6 +70,32 @@ This project uses Supabase for the database and file storage to power the Admin 
 3.  **Update Client:** Paste these values into `src/integrations/supabase/client.ts`.
 4.  **Run Setup Script:** Go to the **SQL Editor** in your Supabase dashboard and execute the following script. This will create the necessary tables, storage bucket, and access policies.
 
+### Troubleshooting: Data Not Appearing on Site
+If you can upload and delete items from the Admin Panel, but they don't appear on the live site after a page refresh, the issue is almost certainly with Supabase's Row Level Security (RLS) policies blocking read access.
+
+To confirm this, run the following diagnostic script in the **SQL Editor**. This will temporarily disable all security so you can verify if the data loads.
+
+```sql
+-- =================================================================
+-- SCRIPT DE DIAGNÓSTICO: DESABILITA A SEGURANÇA RLS
+-- Use este script APENAS para confirmar se o problema é de permissão.
+-- Ele torna suas tabelas completamente públicas.
+-- =================================================================
+
+ALTER TABLE public.marketing_campaigns DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_members DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonials DISABLE ROW LEVEL SECURITY;
+
+-- Após executar, recarregue o site. Se as imagens aparecerem,
+-- o problema está 100% nas políticas de RLS.
+-- Podemos então criar políticas seguras que funcionem.
+```
+
+If disabling RLS solves the problem, you can use the more robust script below to set up the correct permissions and re-enable security.
+
+### Full Setup Script
+This script creates the tables and sets up the necessary Row Level Security (RLS) policies and Storage permissions for the site and admin panel to function correctly.
+
 ```sql
 -- =================================================================
 -- SCRIPT DE EMERGÊNCIA: ABRE TODAS AS PERMISSÕES
@@ -129,5 +155,6 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
 
 
