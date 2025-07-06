@@ -72,22 +72,26 @@ This project uses Supabase for the database and file storage to power the Admin 
 4.  **Run Setup Script:** Go to the **SQL Editor** in your Supabase dashboard and execute the following script. This will create the necessary tables, storage bucket, and access policies.
 
 ```sql
--- Apaga políticas antigas para garantir uma configuração limpa
-DROP POLICY IF EXISTS "Public Full Access" ON public.marketing_campaigns;
+-- =================================================================
+-- ESTE É O SCRIPT DE CONFIGURAÇÃO DEFINITIVO PARA O SUPABASE
+-- Ele limpa configurações antigas e cria tabelas e permissões.
+-- É seguro executá-lo várias vezes.
+-- =================================================================
+
+-- Etapa 1: Apaga políticas antigas para evitar conflitos
 DROP POLICY IF EXISTS "Public Read Access" ON public.marketing_campaigns;
 DROP POLICY IF EXISTS "Admin Full Access" ON public.marketing_campaigns;
-DROP POLICY IF EXISTS "Public Full Access" ON public.team_members;
 DROP POLICY IF EXISTS "Public Read Access" ON public.team_members;
 DROP POLICY IF EXISTS "Admin Full Access" ON public.team_members;
-DROP POLICY IF EXISTS "Public Full Access" ON public.testimonials;
 DROP POLICY IF EXISTS "Public Read Access" ON public.testimonials;
 DROP POLICY IF EXISTS "Admin Full Access" ON public.testimonials;
+
 DROP POLICY IF EXISTS "Public Read Access" ON storage.objects;
 DROP POLICY IF EXISTS "Admin Upload Access" ON storage.objects;
 DROP POLICY IF EXISTS "Admin Update Access" ON storage.objects;
 DROP POLICY IF EXISTS "Admin Delete Access" ON storage.objects;
 
--- 1. Cria as tabelas se elas não existirem
+-- Etapa 2: Cria as tabelas se elas não existirem
 CREATE TABLE IF NOT EXISTS public.marketing_campaigns (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   image_url TEXT NOT NULL,
@@ -110,28 +114,29 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Habilita RLS (se ainda não estiver) e cria as políticas de acesso para as tabelas
+-- Etapa 3: Habilita a Row Level Security (RLS)
 ALTER TABLE public.marketing_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
+-- Etapa 4: Cria as Políticas de Acesso (Regras de Permissão)
+-- Concede permissão de LEITURA para todos (para o site exibir os dados).
 CREATE POLICY "Public Read Access" ON public.marketing_campaigns FOR SELECT TO anon USING (true);
-CREATE POLICY "Admin Full Access" ON public.marketing_campaigns FOR ALL TO anon WITH CHECK (true);
-
 CREATE POLICY "Public Read Access" ON public.team_members FOR SELECT TO anon USING (true);
-CREATE POLICY "Admin Full Access" ON public.team_members FOR ALL TO anon WITH CHECK (true);
-
 CREATE POLICY "Public Read Access" ON public.testimonials FOR SELECT TO anon USING (true);
+
+-- Concede permissão TOTAL (criar, atualizar, apagar) para o painel de admin.
+CREATE POLICY "Admin Full Access" ON public.marketing_campaigns FOR ALL TO anon WITH CHECK (true);
+CREATE POLICY "Admin Full Access" ON public.team_members FOR ALL TO anon WITH CHECK (true);
 CREATE POLICY "Admin Full Access" ON public.testimonials FOR ALL TO anon WITH CHECK (true);
 
+-- Etapa 5: Configura o Armazenamento de Arquivos (Storage)
+-- Cria o "bucket" (pasta) para os arquivos de imagem.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('site_assets', 'site_assets', true)
+ON CONFLICT (id) DO NOTHING;
 
--- 3. Configura o Storage (Armazenamento de Arquivos)
--- Cria o bucket se ele não existir
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('site_assets', 'site_assets', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-ON CONFLICT (id) DO UPDATE SET public = true, file_size_limit = 5242880, allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-
--- Cria políticas de acesso para o bucket 'site_assets'
+-- Cria as políticas de permissão para o bucket.
 CREATE POLICY "Public Read Access" ON storage.objects FOR SELECT TO anon USING (bucket_id = 'site_assets');
 CREATE POLICY "Admin Upload Access" ON storage.objects FOR INSERT TO anon WITH CHECK (bucket_id = 'site_assets');
 CREATE POLICY "Admin Update Access" ON storage.objects FOR UPDATE TO anon USING (bucket_id = 'site_assets');
