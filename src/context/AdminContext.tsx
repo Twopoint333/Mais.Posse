@@ -49,7 +49,6 @@ export const useAdmin = () => {
 
 // --- Helper Functions ---
 const uploadFile = async (bucket: string, file: File): Promise<string> => {
-    // Sanitize file name to remove special characters and spaces
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     const fileName = `public/${Date.now()}-${sanitizedFileName}`;
     const { error } = await supabase.storage.from(bucket).upload(fileName, file);
@@ -60,33 +59,29 @@ const uploadFile = async (bucket: string, file: File): Promise<string> => {
 };
 
 const deleteFileFromUrl = async (fileUrl: string) => {
-    if (!fileUrl) {
-        console.warn("Skipping deletion of empty or invalid file URL");
-        return;
-    }
+    if (!fileUrl) return;
     try {
         const url = new URL(fileUrl);
-        const bucketName = 'site_assets'; // Bucket name is known
-        const bucketPathSegment = `/storage/v1/object/public/${bucketName}/`;
+        const bucketName = 'site_assets';
+        const pathSegment = `/storage/v1/object/public/${bucketName}/`;
+        const pathStartIndex = url.pathname.indexOf(pathSegment);
         
-        if (!url.pathname.includes(bucketPathSegment)) {
-             console.error("Could not parse path from URL, bucket segment not found:", fileUrl);
-             return;
-        }
-
-        const path = url.pathname.substring(url.pathname.indexOf(bucketPathSegment) + bucketPathSegment.length);
-
-        if (!path) {
-            console.error("Could not extract file path for deletion from URL:", fileUrl);
+        if (pathStartIndex === -1) {
+            console.error("Could not parse file path from URL:", fileUrl);
             return;
         }
+        
+        const filePath = decodeURIComponent(url.pathname.substring(pathStartIndex + pathSegment.length));
 
-        const { error } = await supabase.storage.from(bucketName).remove([path]);
+        const { error } = await supabase.storage.from(bucketName).remove([filePath]);
+        
+        // It's okay if the file is not found (e.g., already deleted), but log other errors.
         if (error && error.message !== 'The resource was not found') {
-            console.error("Failed to delete file from storage:", error.message);
+            throw error;
         }
     } catch (e) {
-        console.error("Invalid URL or failed to parse for file deletion:", fileUrl, e);
+        // Catch parsing errors for invalid URLs
+        console.error("Failed to process or delete file from storage:", e);
     }
 };
 
