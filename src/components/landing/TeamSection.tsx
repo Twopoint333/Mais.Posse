@@ -16,39 +16,53 @@ export const TeamSection = () => {
   
   const { teamMembers, isLoadingTeam, isErrorTeam, errorTeam } = useAdmin();
 
-  if (isLoadingTeam) {
-    return (
-      <section className="py-16 px-4 bg-white">
-        <div className="container mx-auto flex justify-center items-center h-40">
+  const renderContent = () => {
+    if (isLoadingTeam) {
+      return (
+        <div className="flex justify-center items-center h-40">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </section>
+      );
+    }
+  
+    if (isErrorTeam) {
+      return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Erro ao Carregar Equipe</AlertTitle>
+          <AlertDescription>
+             Não foi possível buscar os dados. Verifique as permissões no Supabase. Erro:
+            <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
+              {JSON.stringify(errorTeam, null, 2)}
+            </pre>
+          </AlertDescription>
+        </Alert>
+      )
+    }
+    
+    if (!teamMembers || teamMembers.length === 0) {
+      return <p className="text-center text-muted-foreground">Nenhuma foto da equipe para exibir no momento.</p>;
+    }
+
+    return (
+      <div className="relative shadow-lg rounded-lg overflow-hidden">
+        <div className="grid grid-cols-2 gap-4">
+          {teamMembers.map((member, index) => {
+            const publicUrl = member.image_url 
+              ? supabase.storage.from('site_assets').getPublicUrl(member.image_url).data.publicUrl
+              : '';
+              
+            return (
+              <div key={member.id}>
+                <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
   }
 
-  if (isErrorTeam) {
-    return (
-       <section className="py-16 px-4 bg-white">
-        <div className="container mx-auto">
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Erro ao Carregar Equipe</AlertTitle>
-            <AlertDescription>
-               Não foi possível buscar os dados do Supabase. Este é o objeto de erro detalhado:
-              <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
-                {JSON.stringify(errorTeam, null, 2)}
-              </pre>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </section>
-    )
-  }
-  
-  if (!teamMembers || teamMembers.length === 0) {
-    return null;
-  }
-  
   return (
     <section className="py-16 px-4 bg-white">
       <div className="container mx-auto">
@@ -63,21 +77,8 @@ export const TeamSection = () => {
             </p>
           </div>
           
-          <div className="relative shadow-lg rounded-lg overflow-hidden">
-            <div className="grid grid-cols-2 gap-4">
-              {teamMembers.map((member, index) => {
-                const publicUrl = member.image_url 
-                  ? supabase.storage.from('site_assets').getPublicUrl(member.image_url).data.publicUrl
-                  : '';
-                  
-                return (
-                  <div key={member.id}>
-                    <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {renderContent()}
+
         </div>
       </div>
     </section>
