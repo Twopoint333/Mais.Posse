@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -42,35 +41,18 @@ export const MarketingCampaigns = () => {
         </p>
         
         <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <Carousel className="w-full mx-auto" opts={{
-            align: "start",
-            loop: true
-          }}>
-            <CarouselContent>
-              {marketingCampaigns.map((campaign, index) => (
-                <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-1">
-                    <AspectRatio ratio={9 / 16} className="overflow-hidden rounded-lg shadow-md group hover:shadow-xl transition-all duration-300">
-                      <img 
-                        src={campaign.image_url} 
-                        alt={`Campanha de Marketing ${index + 1}`} 
-                        className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </AspectRatio>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
-        
-        <div className="flex justify-center w-full mt-6">
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-2 text-primary text-sm">
-              <span>Arraste para ver mais</span>
-              <ArrowRight className="w-4 h-4 animate-bounce" />
-            </div>
-            <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {marketingCampaigns.map((campaign, index) => (
+              <div key={campaign.id} className="p-1">
+                <AspectRatio ratio={9 / 16} className="overflow-hidden rounded-lg shadow-md group hover:shadow-xl transition-all duration-300">
+                  <img 
+                    src={campaign.image_url} 
+                    alt={`Campanha de Marketing ${index + 1}`} 
+                    className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                  />
+                </AspectRatio>
+              </div>
+            ))}
           </div>
         </div>
       </div>

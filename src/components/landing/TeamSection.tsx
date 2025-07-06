@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useInView } from '@/hooks/useInView';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
 export const TeamSection = () => {
@@ -44,28 +43,13 @@ export const TeamSection = () => {
           </div>
           
           <div className="relative shadow-lg rounded-lg overflow-hidden">
-            <Carousel opts={{
-              align: "start",
-              loop: true
-            }} className="w-full">
-              <CarouselContent>
-                {teamMembers.map((member, index) => (
-                  <CarouselItem key={member.id} className="basis-full">
-                    <img src={member.image_url} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-72 md:h-80 w-full object-cover hover:scale-105 transition-transform duration-300" />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          </div>
-        </div>
-        
-        <div className="flex justify-center w-full mt-6">
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-2 text-primary text-sm">
-              <span>Arraste para ver mais</span>
-              <ArrowRight className="w-4 h-4 animate-bounce animate-infinite" />
+            <div className="grid grid-cols-2 gap-4">
+              {teamMembers.map((member, index) => (
+                <div key={member.id}>
+                  <img src={member.image_url} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />
+                </div>
+              ))}
             </div>
-            <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
           </div>
         </div>
       </div>
