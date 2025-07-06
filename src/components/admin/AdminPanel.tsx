@@ -24,6 +24,8 @@ interface AdminPanelProps {
   onLogout: () => void;
 }
 
+const newId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
 const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const {
     marketingCampaigns, setMarketingCampaigns,
@@ -48,7 +50,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     if (!newCampaignFile) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      const newCampaign: MarketingCampaign = { id: crypto.randomUUID(), imageUrl: reader.result as string };
+      const newCampaign: MarketingCampaign = { id: newId(), imageUrl: reader.result as string };
       setMarketingCampaigns(prev => [...prev, newCampaign]);
       setNewCampaignFile(null);
       if (campaignInputRef.current) {
@@ -69,7 +71,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     if (!newTeamMemberFile) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      const newMember: TeamMember = { id: crypto.randomUUID(), imageUrl: reader.result as string };
+      const newMember: TeamMember = { id: newId(), imageUrl: reader.result as string };
       setTeamMembers(prev => [...prev, newMember]);
       setNewTeamMemberFile(null);
       if (teamMemberInputRef.current) {
@@ -117,7 +119,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         const newTestimonial: Testimonial = {
           ...testimonialTextData,
           logoUrl: finalLogoUrl,
-          id: crypto.randomUUID(),
+          id: newId(),
         };
         setTestimonials(prev => [...prev, newTestimonial]);
         toast({ title: 'Depoimento adicionado!' });
