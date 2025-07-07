@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
 // Type aliases for convenience
-type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
-type NewMarketingCampaign = { file: File };
+export type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
+type NewMarketingCampaign = { files: File[] };
 type TeamMember = Database['public']['Tables']['team_members']['Row'];
 type NewTeamMember = { file: File };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
@@ -67,7 +67,9 @@ const uploadFile = async (file: File): Promise<string> => {
 // Deletes a file by its path
 const deleteFile = async (path: string | null) => {
     if (!path) return;
-    const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
+    // Robustly handle old paths that might still include "public/"
+    const imagePath = path.replace(/^public\//, '');
+    const { error } = await supabase.storage.from(BUCKET_NAME).remove([imagePath]);
     if (error && error.message !== 'The resource was not found') {
         // Log the error but don't throw, to allow DB record deletion even if file deletion fails
         console.error("Failed to delete file from storage:", error);
@@ -110,9 +112,11 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     queryFn: () => fetcher('marketing_campaigns'),
   });
   const addCampaignMutation = useMutation<unknown, Error, NewMarketingCampaign>({
-    mutationFn: async ({ file }) => {
-        const imagePath = await uploadFile(file);
-        return inserter('marketing_campaigns', { image_url: imagePath });
+    mutationFn: async ({ files }) => {
+        const uploadPromises = files.map(file => uploadFile(file));
+        const imagePaths = await Promise.all(uploadPromises);
+        const newCampaigns = imagePaths.map(image_url => ({ image_url }));
+        return inserter('marketing_campaigns', newCampaigns);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['marketing_campaigns'] }),
   });

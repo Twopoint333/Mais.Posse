@@ -1,16 +1,18 @@
 
 import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
-import { useAdmin, Testimonial } from '@/context/AdminContext';
+import { useAdmin, Testimonial, MarketingCampaign } from '@/context/AdminContext';
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -36,10 +38,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const navigate = useNavigate();
 
   // State for forms
-  const [newCampaignFile, setNewCampaignFile] = useState<File | null>(null);
+  const [newCampaignFiles, setNewCampaignFiles] = useState<FileList | null>(null);
   const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState<MarketingCampaign | null>(null);
 
   // Refs for file inputs
   const campaignFileRef = useRef<HTMLInputElement>(null);
@@ -70,19 +73,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
 
   // Handlers for Marketing Campaigns
-  const handleAddCampaign = async () => {
-    if (newCampaignFile) {
+  const handleAddCampaigns = async () => {
+    if (newCampaignFiles) {
       setIsSubmitting(true);
       try {
-        await addCampaign({ file: newCampaignFile });
-        setNewCampaignFile(null);
+        await addCampaign({ files: Array.from(newCampaignFiles) });
+        setNewCampaignFiles(null);
         if (campaignFileRef.current) campaignFileRef.current.value = "";
-        toast({ title: "Campanha adicionada com sucesso!" });
+        toast({ title: `${newCampaignFiles.length} campanha(s) adicionada(s) com sucesso!` });
       } catch (error) {
-        handleApiError(error, "adicionar campanha");
+        handleApiError(error, "adicionar campanhas");
       } finally {
         setIsSubmitting(false);
       }
+    }
+  };
+
+  const handleDeleteCampaign = async () => {
+    if (!campaignToDelete) return;
+    try {
+      await deleteCampaign(campaignToDelete);
+      toast({ title: "Campanha removida com sucesso!" });
+    } catch (e) {
+      handleApiError(e, "remover campanha");
+    } finally {
+      setCampaignToDelete(null);
     }
   };
 
@@ -181,11 +196,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <Input
                   type="file"
                   accept="image/*"
+                  multiple
                   ref={campaignFileRef}
-                  onChange={(e) => setNewCampaignFile(e.target.files?.[0] || null)}
+                  onChange={(e) => setNewCampaignFiles(e.target.files)}
                   disabled={isSubmitting}
                 />
-                <Button onClick={handleAddCampaign} disabled={!newCampaignFile || isSubmitting}>
+                <Button onClick={handleAddCampaigns} disabled={!newCampaignFiles || newCampaignFiles.length === 0 || isSubmitting}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
                   Adicionar
                 </Button>
@@ -199,14 +215,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                         <Button
                           variant="destructive"
                           size="icon"
-                          onClick={async () => {
-                              try {
-                                  await deleteCampaign(campaign);
-                                  toast({ title: "Campanha removida com sucesso!" });
-                              } catch (e) {
-                                  handleApiError(e, "remover campanha");
-                              }
-                          }}
+                          onClick={() => setCampaignToDelete(campaign)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -344,6 +353,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Delete Campaign Confirmation Dialog */}
+      <AlertDialog open={!!campaignToDelete} onOpenChange={(open) => !open && setCampaignToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta imagem? Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCampaignToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCampaign} className={cn(buttonVariants({ variant: "destructive" }))}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
