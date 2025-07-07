@@ -44,14 +44,14 @@ export const Testimonials = () => {
       author: 'Carlos Almeida',
       city: 'Posse',
       state: 'GO',
-      embedHtml: `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/p/C-i9x_yOquL/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
+      embedHtml: `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
     },
     {
       business: 'Hamburgueria do Chefe',
       author: 'Ana Pereira',
       city: 'Posse',
       state: 'GO',
-      embedHtml: `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/C8q7_I6OkD_/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
+      embedHtml: `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
     }
   ];
 
@@ -67,10 +67,11 @@ export const Testimonials = () => {
 
   React.useEffect(() => {
     // This effect triggers the Instagram script to render the embeds when the component mounts
+    // or when the videos change.
     if (window.instgrm) {
       window.instgrm.Embeds.process();
     }
-  }, []);
+  }, [videoTestimonials]);
 
   React.useEffect(() => {
     if (!api) {
@@ -200,8 +201,8 @@ export const Testimonials = () => {
                 dangerouslySetInnerHTML={{ __html: video.embedHtml }}
               />
               <div className="p-3 bg-white border-t">
-                <p className="font-bold text-base text-primary truncate">{video.business}</p>
-                <p className="text-sm font-medium text-foreground">{video.author}</p>
+                <p className="font-bold text-sm text-primary truncate">{video.business}</p>
+                <p className="text-xs font-medium text-foreground">{video.author}</p>
                 <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
               </div>
             </Card>
