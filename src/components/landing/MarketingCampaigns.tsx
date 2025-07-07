@@ -8,8 +8,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 
 export const MarketingCampaigns = () => {
@@ -51,6 +49,7 @@ export const MarketingCampaigns = () => {
           {marketingCampaigns.map((campaign, index) => {
             let publicUrl = '';
             if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
+              // Robustly handle both old paths (with "public/") and new paths (without).
               const imagePath = campaign.image_url.replace(/^public\//, '');
               const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
               publicUrl = data?.publicUrl ?? '';
@@ -75,8 +74,6 @@ export const MarketingCampaigns = () => {
             );
           })}
         </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex" />
-        <CarouselNext className="hidden sm:flex" />
       </Carousel>
     );
   };
