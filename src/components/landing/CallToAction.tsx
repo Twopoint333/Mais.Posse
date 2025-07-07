@@ -1,23 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
 
 export const CallToAction = () => {
-  const [isPulsing, setIsPulsing] = useState(false);
   const clickUpFormUrl = "https://forms.clickup.com/9007116077/f/8cdvbtd-1933/04EZ2JLNT1SGLXPAF2?Nome%20da%20tarefa=Estabelecimento%20Interessado";
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsPulsing(true);
-      const timeout = setTimeout(() => {
-        setIsPulsing(false);
-      }, 1500);
-      return () => clearTimeout(timeout);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, []);
   
   const handlePartnerClick = () => {
     window.open(clickUpFormUrl, '_blank');
@@ -36,7 +23,7 @@ export const CallToAction = () => {
             </p>
             <Button 
               size="lg" 
-              className={`w-full md:w-auto text-lg bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground font-bold shadow-lg hover:shadow-xl transition-all duration-300 ${isPulsing ? 'animate-pulse scale-105' : 'scale-100'}`}
+              className="w-full md:w-auto text-lg bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground font-bold shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-cta"
               onClick={handlePartnerClick}
             >
               Quero ser parceiro <ArrowRight className="ml-2 h-5 w-5" />
