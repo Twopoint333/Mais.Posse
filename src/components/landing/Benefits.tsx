@@ -48,7 +48,7 @@ export const Benefits = () => {
 
 
   return (
-    <section id="beneficios" className="py-8 md:py-16 px-4 bg-gray-50 overflow-hidden">
+    <section id="beneficios" className="scroll-m-20 py-8 md:py-16 px-4 bg-gray-50 overflow-hidden">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-3">
           POR QUE SE CADASTRAR NO MAIS DELIVERY?

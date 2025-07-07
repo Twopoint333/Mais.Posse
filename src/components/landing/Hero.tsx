@@ -14,7 +14,7 @@ export const Hero = () => {
   return (
     <section 
       id="hero" 
-      className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 md:py-24 bg-primary"
+      className="scroll-m-20 relative min-h-[90vh] flex items-center justify-center px-4 py-16 md:py-24 bg-primary"
       data-ai-hint="delivery food"
     >
       <img

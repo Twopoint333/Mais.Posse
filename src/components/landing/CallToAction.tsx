@@ -22,7 +22,7 @@ export const CallToAction = () => {
     window.open(clickUpFormUrl, '_blank');
   };
 
-  return <section id="cta" className="py-16 px-4 bg-gray-50 relative z-10">
+  return <section id="cta" className="scroll-m-20 py-16 px-4 bg-gray-50 relative z-10">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-[#1F2937] animate-pulse">
           Quer crescer com a gente?

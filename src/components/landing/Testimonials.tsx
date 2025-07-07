@@ -128,7 +128,7 @@ export const Testimonials = () => {
   }
 
   return (
-    <section id="depoimentos" className="py-16 px-4 bg-gray-50">
+    <section id="depoimentos" className="scroll-m-20 py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
           O que dizem nossos parceiros

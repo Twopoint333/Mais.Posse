@@ -18,7 +18,7 @@ export const Advantages = () => {
   }, [inView]);
 
   return (
-    <section id="vantagens" className="py-16 px-4 bg-gray-50">
+    <section id="vantagens" className="scroll-m-20 py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-3 text-primary">Vender mais é só o começo. Veja o que mais você ganha</h2>
         

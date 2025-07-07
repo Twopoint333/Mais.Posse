@@ -22,7 +22,7 @@ export const HowItWorks = () => {
   }];
   
   return (
-    <section id="como-funciona" className="py-16 px-4 bg-white">
+    <section id="como-funciona" className="scroll-m-20 py-16 px-4 bg-white">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
           Somos muito mais do que um aplicativo de delivery

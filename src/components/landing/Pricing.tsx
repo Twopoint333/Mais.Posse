@@ -25,7 +25,7 @@ export const Pricing = () => {
   ];
 
   return (
-    <section id="precos" className="py-16 px-4 bg-white">
+    <section id="precos" className="scroll-m-20 py-16 px-4 bg-white">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
           Preços Transparentes
