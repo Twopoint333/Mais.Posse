@@ -9,6 +9,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 export const MarketingCampaigns = () => {
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
@@ -39,9 +40,15 @@ export const MarketingCampaigns = () => {
 
     return (
       <Carousel
+        plugins={[
+          Autoplay({
+            delay: 2000,
+            stopOnInteraction: true,
+          }),
+        ]}
         opts={{
           align: "start",
-          loop: marketingCampaigns.length > 1,
+          loop: true,
         }}
         className="w-full"
       >
@@ -59,11 +66,13 @@ export const MarketingCampaigns = () => {
               <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1">
                   {publicUrl ? (
-                    <img 
-                      src={publicUrl} 
-                      alt={`Campanha de Marketing ${index + 1}`} 
-                      className="w-full object-cover rounded-lg shadow-md aspect-[9/16]"
-                    />
+                    <div className="overflow-hidden rounded-lg shadow-md">
+                      <img 
+                        src={publicUrl} 
+                        alt={`Campanha de Marketing ${index + 1}`} 
+                        className="w-full object-cover rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out hover:scale-105"
+                      />
+                    </div>
                   ) : (
                     <div className="w-full bg-muted rounded-lg aspect-[9/16] flex items-center justify-center">
                       <p className="text-sm text-muted-foreground">Imagem indisponível</p>

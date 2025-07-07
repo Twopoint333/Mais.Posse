@@ -9,6 +9,8 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+
 
 export const TeamSection = () => {
   const { teamMembers, isLoadingTeam, isErrorTeam, errorTeam } = useAdmin();
@@ -47,10 +49,16 @@ export const TeamSection = () => {
 
     return (
       <Carousel
+        plugins={[
+          Autoplay({
+            delay: 4000,
+            stopOnInteraction: true,
+          }),
+        ]}
         className="relative w-full"
         opts={{
           align: "start",
-          loop: teamMembers.length > 1,
+          loop: true,
         }}
       >
         <CarouselContent>
@@ -65,11 +73,13 @@ export const TeamSection = () => {
             return (
               publicUrl && (
                 <CarouselItem key={member.id}>
-                  <img
-                      src={publicUrl}
-                      alt={`Equipe Mais Delivery ${index + 1}`}
-                      className="rounded-lg shadow-md h-80 md:h-96 w-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
+                  <div className="overflow-hidden rounded-lg shadow-md">
+                    <img
+                        src={publicUrl}
+                        alt={`Equipe Mais Delivery ${index + 1}`}
+                        className="h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
                 </CarouselItem>
               )
             );
@@ -81,32 +91,28 @@ export const TeamSection = () => {
 
   return (
     <section className="py-16 px-4 bg-white">
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="text-left">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
-                    Uma Equipe Dedicada ao Seu Sucesso
-                </h2>
-                <p className="text-[#1F2937] text-lg mb-6">
-                    Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.
-                </p>
-            </div>
-            <div className="relative shadow-lg rounded-lg overflow-hidden">
-                {renderContent()}
-            </div>
-        </div>
-        {teamMembers && teamMembers.length > 1 && (
-             <div className="flex justify-center w-full mt-8">
-                <div className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-2 text-primary text-sm">
-                        <span>Arraste para ver mais</span>
-                        <ArrowRight className="w-4 h-4 animate-bounce"/>
-                    </div>
-                    <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
+        <div className="container mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
+                    <p className="text-[#1F2937] text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
+                </div>
+                <div className="relative">
+                    {renderContent()}
                 </div>
             </div>
-        )}
-      </div>
+             {teamMembers && teamMembers.length > 1 && (
+                <div className="flex justify-center w-full mt-6">
+                    <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-2 text-primary text-sm">
+                            <span>Arraste para ver mais</span>
+                            <ArrowRight className="w-4 h-4 animate-bounce"/>
+                        </div>
+                        <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
+                    </div>
+                </div>
+            )}
+        </div>
     </section>
   );
 };
