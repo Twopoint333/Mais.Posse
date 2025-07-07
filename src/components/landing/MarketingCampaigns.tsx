@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,13 +10,14 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { cn } from '@/lib/utils';
 
 export const MarketingCampaigns = () => {
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
-  const autoplay = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: false, stopOnMouseEnter: true }));
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: false, stopOnMouseEnter: true }));
 
   React.useEffect(() => {
     if (!api) {
@@ -27,15 +27,15 @@ export const MarketingCampaigns = () => {
     setCount(api.scrollSnapList().length)
     setCurrent(api.selectedScrollSnap())
 
-    api.on("select", () => {
+    const onSelect = () => {
       setCurrent(api.selectedScrollSnap())
-    })
-    
-    api.on("reInit", () => {
-      setCount(api.scrollSnapList().length)
-      setCurrent(api.selectedScrollSnap())
-    });
+    }
 
+    api.on("select", onSelect)
+    
+    return () => {
+      api.off("select", onSelect)
+    }
   }, [api])
 
   const renderContent = () => {
@@ -66,7 +66,7 @@ export const MarketingCampaigns = () => {
       <>
         <Carousel
           setApi={setApi}
-          plugins={[autoplay.current]}
+          plugins={[autoplayPlugin.current]}
           opts={{
             align: "start",
             loop: true,
@@ -91,7 +91,7 @@ export const MarketingCampaigns = () => {
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out md:scale-100 scale-110"
+                          className={cn("w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out", "md:scale-100 scale-110")}
                         />
                       </div>
                     ) : (

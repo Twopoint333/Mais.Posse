@@ -26,36 +26,37 @@ export const Benefits = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
-  const autoplay = useRef(Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true }));
+  const autoplayPlugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true }));
 
 
   useEffect(() => {
     if (!api) {
       return
     }
+
     setCount(api.scrollSnapList().length)
     setCurrent(api.selectedScrollSnap())
 
-    api.on("select", () => {
+    const onSelect = () => {
       setCurrent(api.selectedScrollSnap())
-    })
-    
-    api.on("reInit", () => {
-      setCount(api.scrollSnapList().length)
-      setCurrent(api.selectedScrollSnap())
-    });
+    }
 
+    api.on("select", onSelect)
+
+    return () => {
+      api.off("select", onSelect)
+    }
   }, [api])
 
 
   return (
     <section id="beneficios" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50 overflow-hidden">
       <div className="container mx-auto">
-        <h2 className="text-xl md:text-3xl font-bold text-center text-primary mb-3">
+        <h2 className="text-xl md:text-2xl font-bold text-center text-primary mb-3">
           POR QUE SE CADASTRAR NO MAIS DELIVERY?
         </h2>
         
-        <p className="text-center text-muted-foreground mb-8 md:mb-10 max-w-3xl mx-auto text-sm md:text-lg">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
+        <p className="text-center text-muted-foreground mb-8 md:mb-10 max-w-3xl mx-auto text-sm md:text-base">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
         
         {/* Desktop Grid */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -79,7 +80,7 @@ export const Benefits = () => {
           <Carousel
             setApi={setApi}
             opts={{ align: "start", loop: true }}
-            plugins={[autoplay.current]}
+            plugins={[autoplayPlugin.current]}
             className="w-full"
           >
             <CarouselContent className="-ml-4">

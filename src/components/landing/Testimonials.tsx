@@ -17,7 +17,7 @@ export const Testimonials = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
-  const autoplay = useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true }));
+  const autoplayPlugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true }));
 
   useEffect(() => {
     if (!api) {
@@ -27,15 +27,15 @@ export const Testimonials = () => {
     setCount(api.scrollSnapList().length)
     setCurrent(api.selectedScrollSnap())
 
-    api.on("select", () => {
+    const onSelect = () => {
       setCurrent(api.selectedScrollSnap())
-    })
-    
-    api.on("reInit", () => {
-      setCount(api.scrollSnapList().length)
-      setCurrent(api.selectedScrollSnap())
-    });
+    }
 
+    api.on("select", onSelect)
+
+    return () => {
+      api.off("select", onSelect)
+    }
   }, [api]);
 
   const renderContent = () => {
@@ -70,7 +70,7 @@ export const Testimonials = () => {
        <div className="relative">
         <Carousel
             setApi={setApi}
-            plugins={[autoplay.current]}
+            plugins={[autoplayPlugin.current]}
             opts={{ align: "start", loop: true }}
             className="w-full"
         >
@@ -130,7 +130,7 @@ export const Testimonials = () => {
   return (
     <section id="depoimentos" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-xl md:text-3xl font-bold text-center mb-10 text-primary">
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-10 text-primary">
           O que dizem nossos parceiros
         </h2>
         
