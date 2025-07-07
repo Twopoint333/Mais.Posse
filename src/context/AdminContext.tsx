@@ -12,6 +12,8 @@ export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
 
 export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { 
   logo_file: File;
+  video_url?: string | null;
+  thumbnail_url?: string | null;
 };
 
 export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { 

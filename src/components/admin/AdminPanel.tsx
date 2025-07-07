@@ -147,6 +147,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               city: data.city,
               state: data.state,
               logo_file,
+              video_url: data.video_url,
+              thumbnail_url: data.thumbnail_url,
            });
           toast({ title: "Depoimento adicionado com sucesso!" });
         } else {
@@ -163,7 +165,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   
   const openNewTestimonialDialog = () => {
     setEditingTestimonial({
-        quote: '', author: '', business: '', city: '', state: ''
+        quote: '', author: '', business: '', city: '', state: '', video_url: '', thumbnail_url: ''
     })
   }
   
@@ -351,6 +353,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <Input placeholder="Cidade" value={editingTestimonial.city || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, city: e.target.value })} required className="flex-grow" />
                 <Input placeholder="Estado (UF)" value={editingTestimonial.state || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, state: e.target.value })} required className="w-24" />
               </div>
+              <Input
+                placeholder="URL do Vídeo (Opcional)"
+                value={editingTestimonial.video_url || ''}
+                onChange={(e) => setEditingTestimonial({ ...editingTestimonial, video_url: e.target.value || null })}
+              />
+              <Input
+                placeholder="URL da Thumbnail (Opcional)"
+                value={editingTestimonial.thumbnail_url || ''}
+                onChange={(e) => setEditingTestimonial({ ...editingTestimonial, thumbnail_url: e.target.value || null })}
+              />
 
               <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)} disabled={isSubmitting}>Cancelar</Button>
