@@ -136,7 +136,17 @@ export default {
 						transform: 'rotateY(0)',
 						opacity: '1'
 					}
-				}
+				},
+        'bounce-horizontal': {
+          '0%, 100%': {
+            transform: 'translateX(-25%)',
+            animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
+          },
+          '50%': {
+            transform: 'translateX(0)',
+            animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
+          },
+        },
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -145,7 +155,8 @@ export default {
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
 				'pulse-cta': 'pulse-cta 2s infinite',
-				'rotate-y': 'rotate-y 0.5s ease-out forwards'
+				'rotate-y': 'rotate-y 0.5s ease-out forwards',
+        'bounce-horizontal': 'bounce-horizontal 1s infinite',
 			}
 		}
 	},

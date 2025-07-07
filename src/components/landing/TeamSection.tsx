@@ -106,7 +106,7 @@ export const TeamSection = () => {
                     <div className="flex flex-col items-center gap-1">
                         <div className="flex items-center gap-2 text-primary text-sm">
                             <span>Arraste para ver mais</span>
-                            <ArrowRight className="w-4 h-4 animate-bounce"/>
+                            <ArrowRight className="w-4 h-4 animate-bounce-horizontal"/>
                         </div>
                         <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
                     </div>
