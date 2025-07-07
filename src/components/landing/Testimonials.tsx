@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle, Quote } from 'lucide-react';
+import { Loader2, AlertTriangle, Quote, PlayCircle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +36,9 @@ export const Testimonials = () => {
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
+  const [isFirstVideoVisible, setFirstVideoVisible] = React.useState(false);
+  const [isSecondVideoVisible, setSecondVideoVisible] = React.useState(false);
+
   const videoTestimonials = [
     {
       business: 'Hamburgueria do Chefe',
@@ -43,6 +46,9 @@ export const Testimonials = () => {
       city: 'Posse',
       state: 'GO',
       permalink: 'https://www.instagram.com/reel/DK-TV6bNqBb/?igsh=MWwzYTk4b3l0ZXBtdA==',
+      thumbnail: 'https://placehold.co/500x580.png',
+      onClick: () => setFirstVideoVisible(true),
+      isVisible: isFirstVideoVisible
     },
     {
       business: 'Pizzaria Sabor Divino',
@@ -50,17 +56,20 @@ export const Testimonials = () => {
       city: 'Posse',
       state: 'GO',
       permalink: 'https://www.instagram.com/reel/DJ9a8D9yqoD/?igsh=MWhjdndmODJiZGw2dw==',
+      thumbnail: 'https://placehold.co/500x580.png',
+      onClick: () => setSecondVideoVisible(true),
+      isVisible: isSecondVideoVisible
     }
   ];
 
   React.useEffect(() => {
-    if (inView && window.instgrm) {
-      // Small delay to ensure the DOM is ready for processing
+    // Process embeds if they are visible (either initially or after a click)
+    if ((isFirstVideoVisible || isSecondVideoVisible) && window.instgrm) {
       setTimeout(() => {
         window.instgrm?.Embeds.process();
       }, 100);
     }
-  }, [inView, videoTestimonials]);
+  }, [inView, isFirstVideoVisible, isSecondVideoVisible]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -77,7 +86,6 @@ export const Testimonials = () => {
       return
     }
 
-    // Use testimonials.length for the dots count, not the duplicated slide count
     const onSelect = () => {
       if (!api || !testimonials || testimonials.length === 0) return;
       setCurrent(api.selectedScrollSnap() % testimonials.length)
@@ -196,12 +204,20 @@ export const Testimonials = () => {
           {videoTestimonials.map((video, index) => (
             <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden">
               <div className="relative">
-                <blockquote 
-                  className="instagram-media" 
-                  data-instgrm-permalink={video.permalink}
-                  data-instgrm-version="14" 
-                  style={{ background: '#FFF', border: 0, margin: 0, padding: 0, width: '100%' }}
-                ></blockquote>
+                {video.isVisible ? (
+                  <blockquote 
+                    className="instagram-media" 
+                    data-instgrm-permalink={video.permalink}
+                    data-instgrm-version="14"
+                  ></blockquote>
+                ) : (
+                  <div className="relative cursor-pointer" onClick={video.onClick}>
+                    <img src={video.thumbnail} alt={`Depoimento em vídeo de ${video.business}`} className="w-full h-auto" data-ai-hint="video thumbnail"/>
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <PlayCircle className="w-16 h-16 text-white/80" />
+                    </div>
+                  </div>
+                )}
                 <div className="absolute bottom-0 left-0 right-0 h-[48px] bg-white z-10"></div>
               </div>
               <div className="bg-white p-3 rounded-b-lg mt-[-48px] relative z-10">
