@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { cn } from '@/lib/utils';
+import { useInView } from '@/hooks/useInView';
 
 export const MarketingCampaigns = () => {
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
@@ -18,6 +20,18 @@ export const MarketingCampaigns = () => {
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
   const autoplayPlugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: false, stopOnMouseEnter: false }));
+
+  const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    if (inView) {
+      api.plugins().autoplay?.play();
+    } else {
+      api.plugins().autoplay?.stop();
+    }
+  }, [inView, api]);
 
   React.useEffect(() => {
     if (!api) {
@@ -136,7 +150,7 @@ export const MarketingCampaigns = () => {
   };
 
   return (
-    <section className="py-4 md:py-6 px-4 bg-gray-50">
+    <section ref={inViewRef} className="py-4 md:py-6 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM

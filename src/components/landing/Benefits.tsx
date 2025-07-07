@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Check } from 'lucide-react';
 import {
@@ -7,6 +8,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { useInView } from '@/hooks/useInView';
 
 export const Benefits = () => {
   const features = [{
@@ -28,6 +30,17 @@ export const Benefits = () => {
   const [count, setCount] = useState(0)
   const autoplayPlugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: false }));
 
+  const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
+
+  useEffect(() => {
+    if (!api) return;
+
+    if (inView) {
+      api.plugins().autoplay?.play();
+    } else {
+      api.plugins().autoplay?.stop();
+    }
+  }, [inView, api]);
 
   useEffect(() => {
     if (!api) {
@@ -50,7 +63,7 @@ export const Benefits = () => {
 
 
   return (
-    <section id="beneficios" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50 overflow-hidden">
+    <section ref={inViewRef} id="beneficios" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50 overflow-hidden">
       <div className="container mx-auto">
         <h2 className="text-xl md:text-2xl font-bold text-center text-primary mb-3">
           POR QUE SE CADASTRAR NO MAIS DELIVERY?

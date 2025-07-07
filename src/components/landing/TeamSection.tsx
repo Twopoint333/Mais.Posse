@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -10,6 +11,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { useInView } from '@/hooks/useInView';
 
 
 export const TeamSection = () => {
@@ -18,6 +20,18 @@ export const TeamSection = () => {
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
   const autoplayPlugin = useRef(Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: false }));
+
+  const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
+
+  useEffect(() => {
+    if (!api) return;
+
+    if (inView) {
+      api.plugins().autoplay?.play();
+    } else {
+      api.plugins().autoplay?.stop();
+    }
+  }, [inView, api]);
 
   useEffect(() => {
     if (!api) {
@@ -131,7 +145,7 @@ export const TeamSection = () => {
   }
 
   return (
-    <section className="py-8 md:py-12 px-4 bg-white">
+    <section ref={inViewRef} className="py-8 md:py-12 px-4 bg-white">
         <div className="container mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div>

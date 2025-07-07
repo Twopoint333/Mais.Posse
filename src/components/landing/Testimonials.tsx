@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -11,6 +12,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { useInView } from '@/hooks/useInView';
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
@@ -18,6 +20,18 @@ export const Testimonials = () => {
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
   const autoplayPlugin = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false }));
+
+  const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    if (inView) {
+      api.plugins().autoplay?.play();
+    } else {
+      api.plugins().autoplay?.stop();
+    }
+  }, [inView, api]);
 
   React.useEffect(() => {
     if (!api) {
@@ -141,7 +155,7 @@ export const Testimonials = () => {
   }
 
   return (
-    <section id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
+    <section ref={inViewRef} id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-xl md:text-2xl font-bold text-center mb-6 text-primary">
           O que dizem nossos parceiros
