@@ -69,6 +69,13 @@ export const MarketingCampaigns = () => {
       return <p className="text-center text-muted-foreground">Nenhuma campanha para exibir no momento.</p>;
     }
 
+    // To ensure smooth looping on desktop, we duplicate slides if there are too few.
+    // Embla Carousel disables loop if all slides are visible.
+    let displayCampaigns = [...marketingCampaigns];
+    while (displayCampaigns.length < 8 && marketingCampaigns.length > 0) {
+      displayCampaigns.push(...marketingCampaigns.map(c => ({...c, id: `${c.id}-${displayCampaigns.length}`})));
+    }
+
     return (
       <>
         <Carousel
@@ -81,7 +88,7 @@ export const MarketingCampaigns = () => {
           className="w-full"
         >
           <CarouselContent>
-            {marketingCampaigns.map((campaign, index) => {
+            {displayCampaigns.map((campaign, index) => {
               let publicUrl = '';
               if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
                 // Robustly handle both old paths (with "public/") and new paths (without).
@@ -91,7 +98,7 @@ export const MarketingCampaigns = () => {
               }
               
               return (
-                <CarouselItem key={campaign.id} className="basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <CarouselItem key={`${campaign.id}-${index}`} className="basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="p-1">
                     {publicUrl ? (
                       <div className="overflow-hidden rounded-lg shadow-md bg-muted/20">

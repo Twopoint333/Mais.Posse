@@ -71,6 +71,13 @@ export const TeamSection = () => {
       );
     }
 
+    // To ensure smooth looping, we duplicate slides if there are too few.
+    let displayMembers = [...teamMembers];
+    while (displayMembers.length < 4 && teamMembers.length > 0) {
+        displayMembers.push(...teamMembers.map(m => ({...m, id: `${m.id}-${displayMembers.length}`})));
+    }
+
+
     return (
       <div className="relative">
         <Carousel
@@ -83,7 +90,7 @@ export const TeamSection = () => {
           }}
         >
           <CarouselContent>
-            {teamMembers.map((member, index) => {
+            {displayMembers.map((member, index) => {
               let publicUrl = '';
               if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
                 const imagePath = member.image_url.replace(/^public\//, '');
@@ -93,7 +100,7 @@ export const TeamSection = () => {
               
               return (
                 publicUrl && (
-                  <CarouselItem key={member.id}>
+                  <CarouselItem key={`${member.id}-${index}`}>
                     <div className="overflow-hidden rounded-lg shadow-md">
                       <img
                           src={publicUrl}

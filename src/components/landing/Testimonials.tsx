@@ -73,6 +73,12 @@ export const Testimonials = () => {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
     
+    // To ensure smooth looping on desktop, we duplicate slides if there are too few.
+    let displayTestimonials = [...testimonials];
+    while (displayTestimonials.length < 4 && testimonials.length > 0) {
+        displayTestimonials.push(...testimonials.map(t => ({...t, id: `${t.id}-${displayTestimonials.length}`})));
+    }
+
     return (
        <div className="relative">
         <Carousel
@@ -82,7 +88,7 @@ export const Testimonials = () => {
             className="w-full"
         >
             <CarouselContent className="-ml-4">
-                {testimonials.map((testimonial) => {
+                {displayTestimonials.map((testimonial, index) => {
                     let publicUrl = '';
                     if (typeof testimonial.logo_url === 'string' && testimonial.logo_url.trim() !== '') {
                         const logoPath = testimonial.logo_url.replace(/^public\//, '');
@@ -91,7 +97,7 @@ export const Testimonials = () => {
                     }
 
                     return (
-                        <CarouselItem key={testimonial.id} className="pl-4 basis-full md:basis-1/2">
+                        <CarouselItem key={`${testimonial.id}-${index}`} className="pl-4 basis-full md:basis-1/2">
                           <div className="p-1 h-full">
                             <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-3 flex flex-col h-full">
                                 <div className="flex justify-center mb-4">
