@@ -106,7 +106,7 @@ export const Testimonials = () => {
             opts={{ align: "start", loop: true }}
             className="w-full"
         >
-            <CarouselContent className="-ml-4">
+            <CarouselContent className="-ml-4 md:items-start">
                 {displayTestimonials.map((testimonial, index) => {
                     const logoPublicUrl = getPublicUrl(testimonial.logo_url);
                     const hasVideo = !!testimonial.video_url;
@@ -114,39 +114,38 @@ export const Testimonials = () => {
                     return (
                         <CarouselItem key={`${testimonial.id}-${index}`} className="pl-4 basis-full md:basis-1/2">
                           <div className="p-1 h-full">
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                {hasVideo && (
-                                  <div className="relative aspect-video w-full bg-slate-900">
-                                    {playingVideoId === testimonial.id ? (
-                                      <video
-                                        src={testimonial.video_url ?? ''}
-                                        controls
-                                        autoPlay
+                            {hasVideo ? (
+                              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="relative aspect-video w-full bg-slate-900">
+                                  {playingVideoId === testimonial.id ? (
+                                    <video
+                                      src={testimonial.video_url ?? ''}
+                                      controls
+                                      autoPlay
+                                      className="h-full w-full object-cover"
+                                      onEnded={() => setPlayingVideoId(null)}
+                                      onPause={() => setPlayingVideoId(null)}
+                                    >
+                                      Seu navegador não suporta a tag de vídeo.
+                                    </video>
+                                  ) : (
+                                    <>
+                                      <img
+                                        src={getPublicUrl(testimonial.thumbnail_url) || 'https://placehold.co/1600x900.png'}
+                                        alt={`Thumbnail for ${testimonial.business} testimonial`}
                                         className="h-full w-full object-cover"
-                                        onEnded={() => setPlayingVideoId(null)}
-                                        onPause={() => setPlayingVideoId(null)}
+                                        loading="lazy"
+                                        data-ai-hint="video testimonial"
+                                      />
+                                      <div 
+                                        className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
+                                        onClick={() => handlePlayClick(testimonial.id)}
                                       >
-                                        Seu navegador não suporta a tag de vídeo.
-                                      </video>
-                                    ) : (
-                                      <>
-                                        <img
-                                          src={testimonial.thumbnail_url || 'https://placehold.co/1600x900.png'}
-                                          alt={`Thumbnail for ${testimonial.business} testimonial`}
-                                          className="h-full w-full object-cover"
-                                          loading="lazy"
-                                          data-ai-hint="video testimonial"
-                                        />
-                                        <div 
-                                          className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
-                                          onClick={() => handlePlayClick(testimonial.id)}
-                                        >
-                                          <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
-                                        </div>
-                                      </>
-                                    )}
-                                  </div>
-                                )}
+                                        <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
                                 <div className="p-6 flex flex-col flex-grow relative">
                                   <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                   <div className="flex items-center mb-4 relative">
@@ -166,7 +165,29 @@ export const Testimonials = () => {
                                       {testimonial.city}, {testimonial.state}
                                   </footer>
                                 </div>
-                            </div>
+                              </div>
+                            ) : (
+                              // Text-only card
+                              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                  <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
+                                  <div className="flex items-center mb-4 relative">
+                                      <Avatar className="h-12 w-12 border-2 border-primary/10">
+                                          {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
+                                          <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
+                                      </Avatar>
+                                      <div className="ml-4">
+                                          <p className="font-bold text-foreground">{testimonial.author}</p>
+                                          <p className="text-sm text-muted-foreground">{testimonial.business}</p>
+                                      </div>
+                                  </div>
+                                  <blockquote className="flex-grow relative my-4">
+                                      <p className="text-foreground/80 text-sm italic">"{testimonial.quote}"</p>
+                                  </blockquote>
+                                  <footer className="mt-auto text-xs text-primary font-medium relative text-right">
+                                      {testimonial.city}, {testimonial.state}
+                                  </footer>
+                              </div>
+                            )}
                           </div>
                         </CarouselItem>
                     );
