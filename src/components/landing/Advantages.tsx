@@ -1,10 +1,22 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
+import { useInView } from '@/hooks/useInView';
 
 export const Advantages = () => {
   const advantages = ["Catálogo do estabelecimento dentro da plataforma", "Equipe de Monitoramento (07:30–00:00)", "Suporte Técnico Online", "Equipe de Marketing", "Treinamento passo a passo", "Equipe de Entregadores", "Consultor de Suporte Local", "Campanhas, Cupons, Promoções e Parcerias", "Flexibilidade na Entrega (própria ou Mais Delivery)"];
   
+  const { ref, inView } = useInView({ threshold: 0.5, once: true });
+  const [videoUrl, setVideoUrl] = useState("https://www.youtube.com/embed/mrQK78o7hUk");
+
+  useEffect(() => {
+    if (inView) {
+      // Append autoplay and mute parameters when the video is in view
+      // Mute is required for autoplay in most browsers
+      setVideoUrl("https://www.youtube.com/embed/mrQK78o7hUk?autoplay=1&mute=1");
+    }
+  }, [inView]);
+
   return (
     <section id="vantagens" className="py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
@@ -14,9 +26,16 @@ export const Advantages = () => {
           Mais do que uma plataforma — uma solução completa para o seu negócio crescer
         </p>
 
-        <div className="max-w-3xl mx-auto mb-12">
+        <div className="max-w-3xl mx-auto mb-12" ref={ref}>
           <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg">
-            <iframe className="w-full h-64 md:h-96 rounded-lg" src="https://www.youtube.com/embed/mrQK78o7hUk" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+            <iframe 
+              className="w-full h-64 md:h-96 rounded-lg" 
+              src={videoUrl}
+              title="YouTube video player" 
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
         
