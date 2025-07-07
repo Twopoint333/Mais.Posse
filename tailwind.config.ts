@@ -120,10 +120,10 @@ export default {
 				'pulse-cta': {
           '0%, 100%': {
             transform: 'scale(1)',
-            boxShadow: '0 0 0 0 hsla(var(--accent-cta), 0.5)'
+            boxShadow: '0 0 0 0 hsla(var(--accent-cta), 0.7)'
           },
-          '70%': {
-            transform: 'scale(1.02)',
+          '50%': {
+            transform: 'scale(1.015)',
             boxShadow: '0 0 0 10px hsla(var(--accent-cta), 0)'
           }
         },
@@ -154,7 +154,7 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'pulse-cta': 'pulse-cta 3s infinite',
+				'pulse-cta': 'pulse-cta 4s infinite',
 				'rotate-y': 'rotate-y 0.5s ease-out forwards',
         'bounce-horizontal': 'bounce-horizontal 1s infinite',
 			}
