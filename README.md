@@ -124,7 +124,7 @@ DROP POLICY IF EXISTS "Public Full Access" ON storage.objects;
 -- Etapa 3: Garante que as tabelas existem
 CREATE TABLE IF NOT EXISTS public.marketing_campaigns (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), image_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS public.team_members (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), image_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
-CREATE TABLE IF NOT EXISTS public.testimonials (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), quote TEXT NOT NULL, author TEXT NOT NULL, business TEXT NOT NULL, location TEXT NOT NULL, logo_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
+CREATE TABLE IF NOT EXISTS public.testimonials (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), quote TEXT NOT NULL, author TEXT NOT NULL, business TEXT NOT NULL, city TEXT NOT NULL, state TEXT NOT NULL, logo_url TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
 
 -- Etapa 4: Habilita RLS e cria uma política única e totalmente permissiva
 ALTER TABLE public.marketing_campaigns ENABLE ROW LEVEL SECURITY;

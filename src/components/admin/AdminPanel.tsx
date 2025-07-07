@@ -43,6 +43,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<MarketingCampaign | null>(null);
+  const [campaignsToAddCount, setCampaignsToAddCount] = useState(0);
 
   // Refs for file inputs
   const campaignFileRef = useRef<HTMLInputElement>(null);
@@ -74,18 +75,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
   // Handlers for Marketing Campaigns
   const handleAddCampaigns = async () => {
-    if (newCampaignFiles) {
-      setIsSubmitting(true);
-      try {
-        await addCampaign({ files: Array.from(newCampaignFiles) });
-        setNewCampaignFiles(null);
-        if (campaignFileRef.current) campaignFileRef.current.value = "";
-        toast({ title: `${newCampaignFiles.length} campanha(s) adicionada(s) com sucesso!` });
-      } catch (error) {
-        handleApiError(error, "adicionar campanhas");
-      } finally {
-        setIsSubmitting(false);
-      }
+    if (!newCampaignFiles) return;
+    setIsSubmitting(true);
+    try {
+      await addCampaign({ files: Array.from(newCampaignFiles) });
+      setNewCampaignFiles(null);
+      if (campaignFileRef.current) campaignFileRef.current.value = "";
+      toast({ title: `${newCampaignFiles.length} campanha(s) adicionada(s) com sucesso!` });
+    } catch (error) {
+      handleApiError(error, "adicionar campanhas");
+    } finally {
+      setIsSubmitting(false);
+      setCampaignsToAddCount(0);
     }
   };
 
@@ -153,7 +154,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       }
       setEditingTestimonial(null);
     } catch (error) {
-        handleApiError(error, id ? "atualizar depoimento" : "adicionar depoimento");
+        handleApiError(error, editingTestimonial.id ? "atualizar depoimento" : "adicionar depoimento");
     } finally {
       setIsSubmitting(false);
     }
@@ -199,10 +200,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   accept="image/*"
                   multiple
                   ref={campaignFileRef}
-                  onChange={(e) => setNewCampaignFiles(e.target.files)}
+                  onChange={(e) => {
+                    setNewCampaignFiles(e.target.files);
+                    setCampaignsToAddCount(e.target.files?.length || 0);
+                  }}
                   disabled={isSubmitting}
                 />
-                <Button onClick={handleAddCampaigns} disabled={!newCampaignFiles || newCampaignFiles.length === 0 || isSubmitting}>
+                <Button onClick={() => {
+                  if (newCampaignFiles && newCampaignFiles.length > 0) {
+                    setCampaignsToAddCount(newCampaignFiles.length);
+                  } else {
+                    setCampaignsToAddCount(0);
+                  }
+                }} disabled={!newCampaignFiles || newCampaignFiles.length === 0 || isSubmitting}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
                   Adicionar
                 </Button>
@@ -358,6 +368,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         </DialogContent>
       </Dialog>
       
+      {/* Add Campaign Confirmation Dialog */}
+      <AlertDialog open={campaignsToAddCount > 0} onOpenChange={(open) => !open && setCampaignsToAddCount(0)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar adição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja adicionar {campaignsToAddCount} imagem(ns) de campanha?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCampaignsToAddCount(0)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAddCampaigns}>Adicionar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete Campaign Confirmation Dialog */}
       <AlertDialog open={!!campaignToDelete} onOpenChange={(open) => !open && setCampaignToDelete(null)}>
         <AlertDialogContent>
