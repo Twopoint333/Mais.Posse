@@ -44,14 +44,14 @@ export const Testimonials = () => {
       author: 'Carlos Almeida',
       city: 'Posse',
       state: 'GO',
-      embedHtml: `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
+      embedHtml: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?igsh=MWhjdndmODJiZGw2dw==" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
     },
     {
       business: 'Hamburgueria do Chefe',
       author: 'Ana Pereira',
       city: 'Posse',
       state: 'GO',
-      embedHtml: `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
+      embedHtml: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?igsh=MWwzYTk4b3l0ZXBtdA==" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
     }
   ];
 
