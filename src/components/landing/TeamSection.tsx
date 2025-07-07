@@ -122,22 +122,22 @@ export const TeamSection = () => {
                     <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
                     <p className="text-[#1F2937] text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
                 </div>
-                <div className="relative">
+                <div>
                     {renderContent()}
+                    {teamMembers && teamMembers.length > 1 && (
+                        <div className="flex justify-center gap-2 mt-4">
+                          {Array.from({ length: count }).map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => api?.scrollTo(i)}
+                              className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
+                              aria-label={`Go to slide ${i + 1}`}
+                            />
+                          ))}
+                        </div>
+                    )}
                 </div>
             </div>
-             {teamMembers && teamMembers.length > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
-                  {Array.from({ length: count }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => api?.scrollTo(i)}
-                      className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
-                      aria-label={`Go to slide ${i + 1}`}
-                    />
-                  ))}
-                </div>
-            )}
         </div>
     </section>
   );
