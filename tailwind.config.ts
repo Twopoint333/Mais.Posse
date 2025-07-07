@@ -118,15 +118,15 @@ export default {
 					}
 				},
 				'pulse-cta': {
-					'0%, 100%': {
-						transform: 'scale(1)',
-						boxShadow: '0 0 0 0 rgba(200, 16, 46, 0.7)'
-					},
-					'50%': {
-						transform: 'scale(1.05)',
-						boxShadow: '0 0 0 10px rgba(200, 16, 46, 0)'
-					}
-				},
+          '0%, 100%': {
+            transform: 'scale(1)',
+            boxShadow: '0 0 0 0 hsla(var(--accent-cta), 0.7)'
+          },
+          '70%': {
+            transform: 'scale(1.03)',
+            boxShadow: '0 0 0 10px hsla(var(--accent-cta), 0)'
+          }
+        },
 				'rotate-y': {
 					'0%': {
 						transform: 'rotateY(90deg)',
@@ -154,7 +154,7 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'pulse-cta': 'pulse-cta 2s infinite',
+				'pulse-cta': 'pulse-cta 2.5s infinite',
 				'rotate-y': 'rotate-y 0.5s ease-out forwards',
         'bounce-horizontal': 'bounce-horizontal 1s infinite',
 			}
