@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle, PlayCircle, Instagram } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -13,8 +13,17 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useInView } from '@/hooks/useInView';
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
+// Extend window type to include instgrm
+declare global {
+  interface Window {
+    instgrm?: {
+      Embeds: {
+        process: () => void;
+      };
+    };
+  }
+}
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
@@ -36,6 +45,13 @@ export const Testimonials = () => {
       api.plugins().autoplay?.stop();
     }
   }, [inView, api]);
+
+  React.useEffect(() => {
+    // This effect triggers the Instagram script to render the embeds
+    if (window.instgrm) {
+      window.instgrm.Embeds.process();
+    }
+  }, []);
 
   React.useEffect(() => {
     if (!api) {
@@ -84,7 +100,6 @@ export const Testimonials = () => {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
     
-    // To ensure smooth looping on desktop, we duplicate slides if there are too few.
     let displayTestimonials = [...testimonials];
     while (displayTestimonials.length > 0 && displayTestimonials.length < 4) {
         displayTestimonials.push(...testimonials.map(t => ({...t, id: `${t.id}-${displayTestimonials.length}`})));
@@ -167,57 +182,15 @@ export const Testimonials = () => {
           <p className="text-center text-muted-foreground text-sm md:text-base mb-8 max-w-3xl mx-auto">
             Confira o que nossos parceiros estão dizendo sobre a experiência com o Mais Delivery.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <a href="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_web_copy_link&igsh=MWhjdndmODJiZGw2dw==" target="_blank" rel="noopener noreferrer" className="block group">
-                <Card className="overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
-                    <div className="relative">
-                        <img
-                            src="https://placehold.co/1280x720.png"
-                            alt="Depoimento em Vídeo de Parceiro"
-                            data-ai-hint="business owner interview"
-                            className="w-full h-auto object-cover aspect-video"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <PlayCircle className="h-16 w-16 text-white" />
-                        </div>
-                    </div>
-                    <CardHeader>
-                        <CardTitle>Parceiro Satisfeito</CardTitle>
-                        <CardDescription>Assista ao depoimento de um de nossos parceiros e veja os resultados.</CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                        <Button className="w-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-semibold">
-                            <Instagram className="mr-2 h-5 w-5" />
-                            Ver no Instagram
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </a>
-            <a href="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_web_copy_link&igsh=MWwzYTk4b3l0ZXBtdA==" target="_blank" rel="noopener noreferrer" className="block group">
-                <Card className="overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
-                    <div className="relative">
-                        <img
-                            src="https://placehold.co/1280x720.png"
-                            alt="Depoimento em Vídeo de Parceiro 2"
-                            data-ai-hint="restaurant owner speaking"
-                            className="w-full h-auto object-cover aspect-video"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <PlayCircle className="h-16 w-16 text-white" />
-                        </div>
-                    </div>
-                    <CardHeader>
-                        <CardTitle>Mais Vendas, Mais Sucesso</CardTitle>
-                        <CardDescription>Descubra como a parceria com o Mais Delivery pode transformar seu negócio.</CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                        <Button className="w-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-semibold">
-                            <Instagram className="mr-2 h-5 w-5" />
-                            Ver no Instagram
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </a>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
+            <div 
+              className="w-full max-w-[328px] mx-auto"
+              dangerouslySetInnerHTML={{ __html: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>` }}
+            />
+            <div 
+              className="w-full max-w-[328px] mx-auto"
+              dangerouslySetInnerHTML={{ __html: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>` }}
+            />
           </div>
         </div>
       </div>
