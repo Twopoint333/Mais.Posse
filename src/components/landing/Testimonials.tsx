@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle, Quote, PlayCircle } from 'lucide-react';
+import { Loader2, AlertTriangle, Quote } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -19,8 +19,6 @@ export const Testimonials = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   
-  const [activeVideoUrl, setActiveVideoUrl] = React.useState<string | null>(null);
-
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false })
   );
@@ -33,14 +31,6 @@ export const Testimonials = () => {
     const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
     return data?.publicUrl ?? '';
   };
-  
-  const videoTestimonials = React.useMemo(() => 
-    testimonials?.filter(t => t.video_url && t.thumbnail_url) ?? [], 
-  [testimonials]);
-  
-  const textTestimonials = React.useMemo(() => 
-    testimonials?.filter(t => !t.video_url) ?? [],
-  [testimonials]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -53,12 +43,12 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    if (!api || !textTestimonials?.length || textTestimonials.length === 0) return;
+    if (!api || !testimonials?.length || testimonials.length === 0) return;
   
     const onSelect = () => {
       if (!api) return;
       // The modulo operator is needed for the loop functionality
-      setCurrent(api.selectedScrollSnap() % textTestimonials.length);
+      setCurrent(api.selectedScrollSnap() % testimonials.length);
     };
   
     api.on("select", onSelect);
@@ -66,10 +56,10 @@ export const Testimonials = () => {
     return () => {
       api.off("select", onSelect);
     };
-  }, [api, textTestimonials]);
+  }, [api, testimonials]);
 
-  const renderTextTestimonials = () => {
-    if (isLoadingTestimonials && !testimonials) {
+  const renderContent = () => {
+    if (isLoadingTestimonials) {
       return (
         <div className="flex justify-center items-center h-40">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -92,13 +82,13 @@ export const Testimonials = () => {
       )
     }
     
-    if (!textTestimonials || textTestimonials.length === 0) {
-       return null;
+    if (!testimonials || testimonials.length === 0) {
+       return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
     
-    let displayTextTestimonials = [...textTestimonials];
-    while (displayTextTestimonials.length > 0 && displayTextTestimonials.length < 4) {
-        displayTextTestimonials.push(...textTestimonials.map(t => ({...t, id: `${t.id}-${displayTextTestimonials.length}`})));
+    let displayTestimonials = [...testimonials];
+    while (displayTestimonials.length > 0 && displayTestimonials.length < 4) {
+        displayTestimonials.push(...testimonials.map(t => ({...t, id: `${t.id}-${displayTestimonials.length}`})));
     }
 
     return (
@@ -110,7 +100,7 @@ export const Testimonials = () => {
             className="w-full"
         >
             <CarouselContent className="-ml-4">
-                {displayTextTestimonials.map((testimonial, index) => {
+                {displayTestimonials.map((testimonial, index) => {
                     const publicUrl = getPublicUrl(testimonial.logo_url);
 
                     return (
@@ -141,9 +131,9 @@ export const Testimonials = () => {
                 })}
             </CarouselContent>
         </Carousel>
-        {textTestimonials && textTestimonials.length > 1 && (
+        {testimonials && testimonials.length > 1 && (
             <div className="flex justify-center gap-2 mt-4">
-                {Array.from({ length: textTestimonials.length }).map((_, i) => (
+                {Array.from({ length: testimonials.length }).map((_, i) => (
                 <button
                     key={i}
                     onClick={() => api?.scrollTo(i)}
@@ -163,61 +153,7 @@ export const Testimonials = () => {
         <h2 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 text-primary">
           O que dizem nossos parceiros
         </h2>
-
-        {isLoadingTestimonials && !testimonials && (
-             <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )}
-
-        {videoTestimonials.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
-                {videoTestimonials.map((video) => {
-                    const videoUrl = getPublicUrl(video.video_url);
-                    const thumbnailUrl = getPublicUrl(video.thumbnail_url);
-                    const isActive = activeVideoUrl === videoUrl;
-
-                    return (
-                        <div key={video.id} className="rounded-lg shadow-lg overflow-hidden flex flex-col bg-white">
-                            <div className="relative aspect-[9/16] bg-black">
-                                {isActive ? (
-                                    <video
-                                        src={videoUrl}
-                                        controls
-                                        autoPlay
-                                        playsInline
-                                        className="w-full h-full object-cover"
-                                        onEnded={() => setActiveVideoUrl(null)}
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-full h-full cursor-pointer group"
-                                        onClick={() => setActiveVideoUrl(videoUrl)}
-                                    >
-                                        <img
-                                            src={thumbnailUrl}
-                                            alt={`Depoimento de ${video.business}`}
-                                            className="w-full h-full object-cover"
-                                            data-ai-hint="business person"
-                                        />
-                                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                                            <PlayCircle className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-4 border-t bg-white">
-                                <h3 className="font-bold text-lg text-primary">{video.business}</h3>
-                                <p className="text-sm text-muted-foreground">{video.author}</p>
-                                <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        )}
-        
-        {renderTextTestimonials()}
+        {renderContent()}
       </div>
     </section>
   );

@@ -20,7 +20,6 @@ interface AdminPanelProps {
 
 const getPublicUrl = (path: string | null | undefined) => {
   if (typeof path === 'string' && path.trim() !== '') {
-    // Robustly handle both old paths (with "public/") and new paths (without).
     const imagePath = path.replace(/^public\//, '');
     const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
     return data?.publicUrl ?? '';
@@ -39,11 +38,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
   // State for forms
   const [newCampaignFiles, setNewCampaignFiles] = useState<FileList | null>(null);
-  const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
-  const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File, video_file?: File, thumbnail_file?: File }) | null>(null);
+  const [newTeamMemberFiles, setNewTeamMemberFiles] = useState<FileList | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<MarketingCampaign | null>(null);
   const [campaignsToAddCount, setCampaignsToAddCount] = useState(0);
+  const [teamMembersToAddCount, setTeamMembersToAddCount] = useState(0);
 
   // Refs for file inputs
   const campaignFileRef = useRef<HTMLInputElement>(null);
@@ -103,19 +103,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
 
   // Handlers for Team Members
-  const handleAddTeamMember = async () => {
-    if (newTeamMemberFile) {
-      setIsSubmitting(true);
-      try {
-        await addTeamMember({ file: newTeamMemberFile });
-        setNewTeamMemberFile(null);
-        if (teamMemberFileRef.current) teamMemberFileRef.current.value = "";
-        toast({ title: "Membro da equipe adicionado com sucesso!" });
-      } catch (error) {
-        handleApiError(error, "adicionar membro da equipe");
-      } finally {
-        setIsSubmitting(false);
-      }
+  const handleAddTeamMembers = async () => {
+    if (!newTeamMemberFiles) return;
+    setIsSubmitting(true);
+    try {
+      await addTeamMember({ files: Array.from(newTeamMemberFiles) });
+      setNewTeamMemberFiles(null);
+      if (teamMemberFileRef.current) teamMemberFileRef.current.value = "";
+      toast({ title: `${newTeamMemberFiles.length} membro(s) da equipe adicionado(s) com sucesso!` });
+    } catch (error) {
+      handleApiError(error, "adicionar membros da equipe");
+    } finally {
+      setIsSubmitting(false);
+      setTeamMembersToAddCount(0);
     }
   };
 
@@ -126,7 +126,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
     setIsSubmitting(true);
     try {
-      const { id, created_at, logo_file, video_file, thumbnail_file, ...data } = editingTestimonial;
+      const { id, created_at, logo_file, ...data } = editingTestimonial;
 
       if (id) { // Update
         const originalTestimonial = testimonials?.find(t => t.id === id);
@@ -135,10 +135,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             id,
             logo_file,
             old_logo_path: logo_file ? originalTestimonial?.logo_url : undefined,
-            video_file,
-            old_video_path: video_file ? originalTestimonial?.video_url : undefined,
-            thumbnail_file,
-            old_thumbnail_path: thumbnail_file ? originalTestimonial?.thumbnail_url : undefined
         };
         await updateTestimonial(testimonialData);
         toast({ title: "Depoimento atualizado com sucesso!" });
@@ -151,8 +147,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               city: data.city,
               state: data.state,
               logo_file,
-              video_file,
-              thumbnail_file,
            });
           toast({ title: "Depoimento adicionado com sucesso!" });
         } else {
@@ -209,17 +203,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   ref={campaignFileRef}
                   onChange={(e) => {
                     setNewCampaignFiles(e.target.files);
-                    setCampaignsToAddCount(e.target.files?.length || 0);
                   }}
                   disabled={isSubmitting}
                 />
-                <Button onClick={() => {
-                  if (newCampaignFiles && newCampaignFiles.length > 0) {
-                    setCampaignsToAddCount(newCampaignFiles.length);
-                  } else {
-                    setCampaignsToAddCount(0);
-                  }
-                }} disabled={!newCampaignFiles || newCampaignFiles.length === 0 || isSubmitting}>
+                <Button onClick={() => setCampaignsToAddCount(newCampaignFiles?.length || 0)} disabled={!newCampaignFiles || newCampaignFiles.length === 0 || isSubmitting}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
                   Adicionar
                 </Button>
@@ -258,11 +245,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <Input
                   type="file"
                   accept="image/*"
+                  multiple
                   ref={teamMemberFileRef}
-                  onChange={(e) => setNewTeamMemberFile(e.target.files?.[0] || null)}
+                  onChange={(e) => setNewTeamMemberFiles(e.target.files)}
                   disabled={isSubmitting}
                 />
-                <Button onClick={handleAddTeamMember} disabled={!newTeamMemberFile || isSubmitting}>
+                <Button onClick={() => setTeamMembersToAddCount(newTeamMemberFiles?.length || 0)} disabled={!newTeamMemberFiles || newTeamMemberFiles.length === 0 || isSubmitting}>
                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
                     Adicionar
                 </Button>
@@ -315,7 +303,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <div className="flex-grow">
                                 <blockquote className="italic">"{testimonial.quote}"</blockquote>
                                 <p className="text-sm text-muted-foreground mt-2">- {testimonial.author}, {testimonial.business} ({testimonial.city}, {testimonial.state})</p>
-                                {testimonial.video_url && <p className="text-sm text-blue-500 mt-2">Possui vídeo</p>}
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="icon" onClick={() => openEditTestimonialDialog(testimonial)}>
@@ -365,18 +352,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <Input placeholder="Estado (UF)" value={editingTestimonial.state || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, state: e.target.value })} required className="w-24" />
               </div>
 
-               <div>
-                  <label className='text-sm font-medium'>Vídeo do Depoimento (Opcional)</label>
-                  <Input type="file" accept="video/*" onChange={(e) => setEditingTestimonial({ ...editingTestimonial, video_file: e.target.files?.[0] })} />
-                  {editingTestimonial.id && editingTestimonial.video_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter o vídeo atual: <a href={getPublicUrl(editingTestimonial.video_url)} target="_blank" rel="noopener noreferrer" className="underline">ver vídeo</a></p>}
-              </div>
-              <div>
-                  <label className='text-sm font-medium'>Thumbnail do Vídeo (Opcional)</label>
-                  <Input type="file" accept="image/*" onChange={(e) => setEditingTestimonial({ ...editingTestimonial, thumbnail_file: e.target.files?.[0] })} />
-                  {editingTestimonial.id && editingTestimonial.thumbnail_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter a thumbnail atual: <a href={getPublicUrl(editingTestimonial.thumbnail_url)} target="_blank" rel="noopener noreferrer" className="underline">ver imagem</a></p>}
-                  <p className='text-xs text-muted-foreground mt-1'>Recomendado se um vídeo for enviado. Proporção 9:16 (vertical).</p>
-              </div>
-
               <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)} disabled={isSubmitting}>Cancelar</Button>
                 <Button type="submit" disabled={isSubmitting}>
@@ -401,6 +376,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setCampaignsToAddCount(0)}>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleAddCampaigns}>Adicionar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Team Member Confirmation Dialog */}
+      <AlertDialog open={teamMembersToAddCount > 0} onOpenChange={(open) => !open && setTeamMembersToAddCount(0)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar adição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja adicionar {teamMembersToAddCount} membro(s) da equipe?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTeamMembersToAddCount(0)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAddTeamMembers}>Adicionar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

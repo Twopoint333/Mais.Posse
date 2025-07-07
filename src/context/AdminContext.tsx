@@ -6,23 +6,17 @@ import { Database } from '@/integrations/supabase/types';
 // Type aliases for convenience
 export type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
 type NewMarketingCampaign = { files: File[] };
-type TeamMember = Database['public']['Tables']['team_members']['Row'];
-type NewTeamMember = { file: File };
+export type TeamMember = Database['public']['Tables']['team_members']['Row'];
+type NewTeamMember = { files: File[] };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
 
-export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url' | 'video_url' | 'thumbnail_url'> & { 
+export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { 
   logo_file: File;
-  video_file?: File;
-  thumbnail_file?: File;
 };
 
 export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { 
   logo_file?: File; 
   old_logo_path?: string;
-  video_file?: File;
-  old_video_path?: string | null;
-  thumbnail_file?: File;
-  old_thumbnail_path?: string | null;
 };
 
 
@@ -147,9 +141,11 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     queryFn: () => fetcher('team_members'),
   });
   const addTeamMemberMutation = useMutation<unknown, Error, NewTeamMember>({
-    mutationFn: async ({ file }) => {
-        const imagePath = await uploadFile(file);
-        return inserter('team_members', { image_url: imagePath });
+    mutationFn: async ({ files }) => {
+        const uploadPromises = files.map(file => uploadFile(file));
+        const imagePaths = await Promise.all(uploadPromises);
+        const newMembers = imagePaths.map(image_url => ({ image_url }));
+        return inserter('team_members', newMembers);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team_members'] }),
   });
@@ -168,33 +164,23 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const addTestimonialMutation = useMutation<unknown, Error, NewTestimonial>({
     mutationFn: async (testimonial) => {
-        const { logo_file, video_file, thumbnail_file, ...dbData } = testimonial;
+        const { logo_file, ...dbData } = testimonial;
 
         const logoPath = await uploadFile(logo_file);
-        const videoPath = video_file ? await uploadFile(video_file) : null;
-        const thumbnailPath = thumbnail_file ? await uploadFile(thumbnail_file) : null;
         
-        return inserter('testimonials', { ...dbData, logo_url: logoPath, video_url: videoPath, thumbnail_url: thumbnailPath });
+        return inserter('testimonials', { ...dbData, logo_url: logoPath });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const updateTestimonialMutation = useMutation<unknown, Error, UpdateTestimonial>({
     mutationFn: async (testimonial) => {
-        const { logo_file, old_logo_path, video_file, old_video_path, thumbnail_file, old_thumbnail_path, ...dbData } = testimonial;
+        const { logo_file, old_logo_path, ...dbData } = testimonial;
         
         const dataToUpdate: Partial<Testimonial> & { id: string } = { ...dbData as Testimonial };
 
         if (logo_file) {
             dataToUpdate.logo_url = await uploadFile(logo_file);
             if (old_logo_path) await deleteFile(old_logo_path);
-        }
-        if (video_file) {
-            dataToUpdate.video_url = await uploadFile(video_file);
-            if (old_video_path) await deleteFile(old_video_path);
-        }
-        if (thumbnail_file) {
-            dataToUpdate.thumbnail_url = await uploadFile(thumbnail_file);
-            if (old_thumbnail_path) await deleteFile(old_thumbnail_path);
         }
         
         return updater('testimonials', dataToUpdate);
@@ -204,8 +190,6 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const deleteTestimonialMutation = useMutation<void, Error, Testimonial>({
     mutationFn: async (testimonial) => {
         await deleteFile(testimonial.logo_url);
-        await deleteFile(testimonial.video_url);
-        await deleteFile(testimonial.thumbnail_url);
         await deleter('testimonials', testimonial.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
