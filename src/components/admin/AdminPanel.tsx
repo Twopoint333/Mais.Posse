@@ -17,9 +17,11 @@ interface AdminPanelProps {
 }
 
 const getPublicUrl = (path: string | null | undefined) => {
-  if (!path) return '';
-  const { data } = supabase.storage.from('site_assets').getPublicUrl(path);
-  return data?.publicUrl ?? '';
+  if (typeof path === 'string' && path.trim() !== '') {
+    const { data } = supabase.storage.from('site_assets').getPublicUrl(path);
+    return data?.publicUrl ?? '';
+  }
+  return '';
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
