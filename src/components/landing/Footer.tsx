@@ -3,19 +3,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export const Footer = () => {
-  const [clickCount, setClickCount] = useState(0);
   const [adminLinkVisible, setAdminLinkVisible] = useState(false);
   
   const handleLogoClick = () => {
-    // Show admin link after 5 clicks on the logo
-    setClickCount(prev => {
-      const newCount = prev + 1;
-      if (newCount >= 5) {
-        setAdminLinkVisible(true);
-        return 0; // reset counter
-      }
-      return newCount;
-    });
+    // Show admin link on click
+    setAdminLinkVisible(true);
   };
 
   return (
@@ -33,7 +25,10 @@ export const Footer = () => {
                 <Link 
                   to="/admin" 
                   className="text-xs text-gray-400 hover:text-white transition-colors"
-                  onClick={() => setAdminLinkVisible(false)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAdminLinkVisible(false);
+                  }}
                 >
                   Área Administrativa
                 </Link>
