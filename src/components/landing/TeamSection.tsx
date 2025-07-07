@@ -48,13 +48,15 @@ export const TeamSection = () => {
       <div className="relative shadow-lg rounded-lg overflow-hidden">
         <div className="grid grid-cols-2 gap-4">
           {teamMembers.map((member, index) => {
-            const publicUrl = member.image_url 
-              ? supabase.storage.from('site_assets').getPublicUrl(member.image_url).data.publicUrl
-              : '';
+            let publicUrl = '';
+            if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
+              const { data } = supabase.storage.from('site_assets').getPublicUrl(member.image_url);
+              publicUrl = data?.publicUrl ?? '';
+            }
               
             return (
               <div key={member.id}>
-                <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />
+                {publicUrl && <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />}
               </div>
             );
           })}

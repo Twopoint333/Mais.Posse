@@ -20,31 +20,26 @@ export const MarketingCampaigns = () => {
       setIsLoading(true);
       setError(null);
       try {
-        // Busca os dados diretamente do Supabase
         const { data, error: supabaseError } = await supabase
           .from('marketing_campaigns')
           .select('*')
           .order('created_at', { ascending: false });
         
-        // Se o Supabase retornar um erro, lança ele para ser capturado
         if (supabaseError) {
           throw supabaseError;
         }
         
-        // Define os dados no estado
         setCampaigns(data || []);
       } catch (err) {
-        // Captura qualquer erro e o armazena no estado para exibição
         console.error("Error fetching campaigns directly:", err);
         setError(err);
       } finally {
-        // Garante que o loading seja desativado
         setIsLoading(false);
       }
     };
     
     getCampaigns();
-  }, []); // Executa apenas uma vez, quando o componente é montado
+  }, []);
 
   const renderContent = () => {
     if (isLoading) {
@@ -74,17 +69,21 @@ export const MarketingCampaigns = () => {
        <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {campaigns.map((campaign, index) => {
-            const publicUrl = campaign.image_url 
-              ? supabase.storage.from('site_assets').getPublicUrl(campaign.image_url).data.publicUrl 
-              : '';
+            let publicUrl = '';
+            if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
+              const { data } = supabase.storage.from('site_assets').getPublicUrl(campaign.image_url);
+              publicUrl = data?.publicUrl ?? '';
+            }
             
             return (
               <div key={campaign.id} className="p-1">
-                <img 
+                {publicUrl && (
+                  <img 
                     src={publicUrl} 
                     alt={`Campanha de Marketing ${index + 1}`} 
                     className="w-full h-full object-cover rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
                   />
+                )}
               </div>
             );
           })}

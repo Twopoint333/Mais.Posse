@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,8 @@ interface AdminPanelProps {
 
 const getPublicUrl = (path: string | null | undefined) => {
   if (!path) return '';
-  return supabase.storage.from('site_assets').getPublicUrl(path).data.publicUrl;
+  const { data } = supabase.storage.from('site_assets').getPublicUrl(path);
+  return data?.publicUrl ?? '';
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {

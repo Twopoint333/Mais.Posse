@@ -49,9 +49,11 @@ export const Testimonials = () => {
        <div ref={ref} className="relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {testimonials.map((testimonial, index) => {
-            const publicUrl = testimonial.logo_url
-              ? supabase.storage.from('site_assets').getPublicUrl(testimonial.logo_url).data.publicUrl
-              : '';
+            let publicUrl = '';
+            if (typeof testimonial.logo_url === 'string' && testimonial.logo_url.trim() !== '') {
+                const { data } = supabase.storage.from('site_assets').getPublicUrl(testimonial.logo_url);
+                publicUrl = data?.publicUrl ?? '';
+            }
 
             return (
               <div key={testimonial.id} className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 h-full transition-all duration-500 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`} style={{
@@ -60,7 +62,7 @@ export const Testimonials = () => {
                   <div className="flex justify-center mb-4">
                     <div className="bg-primary rounded-full p-2 flex items-center justify-center">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={publicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />
+                        {publicUrl && <AvatarImage src={publicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
                         <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
                       </Avatar>
                     </div>
