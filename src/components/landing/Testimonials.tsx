@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, Quote } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -55,7 +55,10 @@ export const Testimonials = () => {
 
   React.useEffect(() => {
     if (inView && window.instgrm) {
-      window.instgrm.Embeds.process();
+      // Small delay to ensure the DOM is ready for processing
+      setTimeout(() => {
+        window.instgrm?.Embeds.process();
+      }, 100);
     }
   }, [inView, videoTestimonials]);
 
@@ -70,7 +73,7 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    if (!api) {
+    if (!api || !testimonials) {
       return
     }
 
@@ -141,25 +144,25 @@ export const Testimonials = () => {
                     return (
                         <CarouselItem key={`${testimonial.id}-${index}`} className="pl-4 basis-full md:basis-1/2">
                           <div className="p-1 h-full">
-                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col h-full">
-                                <div className="flex justify-center mb-4">
-                                  <div className="bg-primary/10 rounded-full p-2 flex items-center justify-center">
-                                    <Avatar className="h-10 w-10">
-                                      {publicUrl && <AvatarImage src={publicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
-                                      <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden p-6 flex flex-col h-full relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
+                                <div className="flex items-center mb-4 relative">
+                                    <Avatar className="h-12 w-12 border-2 border-primary/10">
+                                        {publicUrl && <AvatarImage src={publicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
+                                        <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
                                     </Avatar>
-                                  </div>
+                                    <div className="ml-4">
+                                        <p className="font-bold text-foreground">{testimonial.author}</p>
+                                        <p className="text-sm text-muted-foreground">{testimonial.business}</p>
+                                    </div>
                                 </div>
-                                
-                                <blockquote className="mb-4 flex-grow">
-                                  <p className="text-muted-foreground italic mb-4 text-sm">"{testimonial.quote}"</p>
-                                  <footer className="text-xs">
-                                    <span className="font-bold text-foreground">{testimonial.author}, </span>
-                                    <span className="text-foreground">{testimonial.business} – </span>
-                                    <span className="text-primary font-medium">{testimonial.city}, {testimonial.state}</span>
-                                  </footer>
+                                <blockquote className="flex-grow relative">
+                                    <p className="text-foreground/80 text-sm italic">"{testimonial.quote}"</p>
                                 </blockquote>
-                              </div>
+                                <footer className="mt-4 text-xs text-primary font-medium relative text-right">
+                                    {testimonial.city}, {testimonial.state}
+                                </footer>
+                            </div>
                           </div>
                         </CarouselItem>
                     );
