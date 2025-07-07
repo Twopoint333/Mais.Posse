@@ -17,7 +17,7 @@ export const Testimonials = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
-  const autoplayPlugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true }));
+  const autoplayPlugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false }));
 
   useEffect(() => {
     if (!api) {
