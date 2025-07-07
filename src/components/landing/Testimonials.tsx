@@ -5,7 +5,6 @@ import { Loader2, AlertTriangle, Quote, PlayCircle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Carousel,
   CarouselContent,
@@ -31,8 +30,8 @@ export const Testimonials = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const [selectedVideo, setSelectedVideo] = React.useState<string | null>(null);
+  // State to track which video is playing directly on the page
+  const [activeVideoPermalink, setActiveVideoPermalink] = React.useState<string | null>(null);
 
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false })
@@ -40,7 +39,7 @@ export const Testimonials = () => {
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
-  // Use working example links. The user-provided ones were broken.
+  // Note: The links provided previously were invalid. Using working example links.
   const videoTestimonials = [
     {
       business: 'Hamburgueria do Chefe',
@@ -59,18 +58,13 @@ export const Testimonials = () => {
       thumbnail: 'https://placehold.co/400x711.png'
     }
   ];
-
-  const handleVideoClick = (permalink: string) => {
-    setSelectedVideo(permalink);
-    setModalOpen(true);
-  };
   
   React.useEffect(() => {
-    // Process embeds when the modal opens with a video
-    if (modalOpen && selectedVideo && window.instgrm) {
+    // Process Instagram embeds whenever a new video is activated
+    if (activeVideoPermalink && window.instgrm) {
       window.instgrm.Embeds.process();
     }
-  }, [modalOpen, selectedVideo]);
+  }, [activeVideoPermalink]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -83,10 +77,11 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    if (!api || !testimonials?.length) return;
+    if (!api || !testimonials?.length || testimonials.length === 0) return;
   
     const onSelect = () => {
       if (!api) return;
+      // The modulo operator is needed for the loop functionality
       setCurrent(api.selectedScrollSnap() % testimonials.length);
     };
   
@@ -200,44 +195,55 @@ export const Testimonials = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
           {videoTestimonials.map((video, index) => (
-            <div 
-              key={index} 
-              className="rounded-lg shadow-lg overflow-hidden cursor-pointer group relative"
-              onClick={() => handleVideoClick(video.permalink)}
-            >
-              <img 
-                src={video.thumbnail} 
-                alt={`Depoimento de ${video.business}`} 
-                className="w-full h-auto object-cover aspect-[9/16]"
-                data-ai-hint="business person"
-              />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                <PlayCircle className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <h3 className="font-bold text-lg text-white">{video.business}</h3>
-                <p className="text-sm text-white/90">{video.author}</p>
-                <p className="text-xs text-white/80">{video.city}, {video.state}</p>
-              </div>
+            <div key={index} className="rounded-lg shadow-lg overflow-hidden flex flex-col bg-white">
+              {activeVideoPermalink === video.permalink ? (
+                <>
+                  <div className="relative overflow-hidden aspect-[9/16]">
+                    <blockquote
+                      className="instagram-media mx-auto my-0"
+                      data-instgrm-permalink={video.permalink}
+                      data-instgrm-version="14"
+                      data-instgrm-captioned="false"
+                    ></blockquote>
+                    {/* This div covers the instagram footer (likes, comments) */}
+                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-white" />
+                  </div>
+                  {/* This info card is pulled up to cover the empty space */}
+                  <div className="p-4 border-t -mt-12 relative z-10 bg-white">
+                    <h3 className="font-bold text-lg text-primary">{video.business}</h3>
+                    <p className="text-sm text-muted-foreground">{video.author}</p>
+                    <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="relative aspect-[9/16] cursor-pointer group"
+                    onClick={() => setActiveVideoPermalink(video.permalink)}
+                  >
+                    <img
+                      src={video.thumbnail}
+                      alt={`Depoimento de ${video.business}`}
+                      className="w-full h-full object-cover"
+                      data-ai-hint="business person"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                      <PlayCircle className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
+                    </div>
+                  </div>
+                  <div className="p-4 border-t bg-white">
+                    <h3 className="font-bold text-lg text-primary">{video.business}</h3>
+                    <p className="text-sm text-muted-foreground">{video.author}</p>
+                    <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
         
         {renderContent()}
       </div>
-
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-md w-full p-0 bg-transparent border-0 shadow-none">
-          {selectedVideo && (
-            <blockquote 
-              className="instagram-media" 
-              data-instgrm-permalink={selectedVideo}
-              data-instgrm-version="14"
-              data-instgrm-captioned="false"
-            ></blockquote>
-          )}
-        </DialogContent>
-      </Dialog>
     </section>
   );
 };
