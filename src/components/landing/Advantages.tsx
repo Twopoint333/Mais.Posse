@@ -38,7 +38,7 @@ export const Advantages = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {advantages.map((advantage, index) => (
             <div 
               key={index} 
@@ -47,7 +47,7 @@ export const Advantages = () => {
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                 <Check className="w-5 h-5 text-accent-cta" />
               </div>
-              <span className="text-foreground text-base">{advantage}</span>
+              <span className="text-foreground text-sm">{advantage}</span>
             </div>
           ))}
         </div>
