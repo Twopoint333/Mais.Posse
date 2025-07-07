@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Loader2, AlertTriangle, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -8,12 +8,36 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
 
 export const TeamSection = () => {
   const { teamMembers, isLoadingTeam, isErrorTeam, errorTeam } = useAdmin();
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCount(api.scrollSnapList().length)
+    setCurrent(api.selectedScrollSnap())
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap())
+    })
+    
+    api.on("reInit", () => {
+      setCount(api.scrollSnapList().length)
+      setCurrent(api.selectedScrollSnap())
+    });
+
+  }, [api])
+
 
   const renderContent = () => {
     if (isLoadingTeam) {
@@ -49,6 +73,7 @@ export const TeamSection = () => {
 
     return (
       <Carousel
+        setApi={setApi}
         plugins={[
           Autoplay({
             delay: 4000,
@@ -102,14 +127,15 @@ export const TeamSection = () => {
                 </div>
             </div>
              {teamMembers && teamMembers.length > 1 && (
-                <div className="flex justify-center w-full mt-6">
-                    <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-2 text-primary text-sm">
-                            <span>Arraste para ver mais</span>
-                            <ArrowRight className="w-4 h-4 animate-bounce-horizontal"/>
-                        </div>
-                        <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
-                    </div>
+                <div className="flex justify-center gap-2 mt-4">
+                  {Array.from({ length: count }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => api?.scrollTo(i)}
+                      className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />
+                  ))}
                 </div>
             )}
         </div>

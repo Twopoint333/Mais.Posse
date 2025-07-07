@@ -1,6 +1,13 @@
 
-import React from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 export const Benefits = () => {
   const features = [{
@@ -16,6 +23,30 @@ export const Benefits = () => {
     title: "Autonomia para criar promoções exclusivas",
     description: "Crie ofertas personalizadas dentro da plataforma e impulsione suas vendas com campanhas sob seu controle."
   }];
+  
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+    setCount(api.scrollSnapList().length)
+    setCurrent(api.selectedScrollSnap())
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap())
+    })
+    
+    api.on("reInit", () => {
+      setCount(api.scrollSnapList().length)
+      setCurrent(api.selectedScrollSnap())
+    });
+
+  }, [api])
+
+
   return (
     <section id="beneficios" className="py-8 md:py-16 px-4 bg-gray-50 overflow-hidden">
       <div className="container mx-auto">
@@ -42,31 +73,43 @@ export const Benefits = () => {
           ))}
         </div>
 
-        {/* Mobile Horizontal Scroll */}
+        {/* Mobile Horizontal Scroll with Dots */}
         <div className="md:hidden">
-          <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex-shrink-0 w-4/5 bg-white rounded-xl shadow-md p-6">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Check className="w-6 h-6 text-accent-cta" />
-                </div>
-                <h3 className="text-lg font-bold text-primary mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-[#1F2937]">
-                  {feature.description}
-                </p>
-              </div>
+          <Carousel
+            setApi={setApi}
+            opts={{ align: "start", loop: true }}
+            plugins={[Autoplay({ delay: 5000, stopOnInteraction: true })]}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {features.map((feature, index) => (
+                <CarouselItem key={index} className="pl-4 basis-4/5">
+                  <div className="h-full p-1">
+                    <div className="flex flex-col h-full bg-white rounded-xl shadow-md p-6">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 flex-shrink-0">
+                        <Check className="w-6 h-6 text-accent-cta" />
+                      </div>
+                      <h3 className="text-lg font-bold text-primary mb-2">
+                        {feature.title}
+                      </h3>
+                      <p className="text-[#1F2937] flex-grow">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from({ length: count }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => api?.scrollTo(i)}
+                className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
             ))}
-          </div>
-          <div className="flex justify-center w-full mt-4">
-            <div className="flex flex-col items-center gap-1">
-                <div className="flex items-center gap-2 text-primary text-sm">
-                    <span>Arraste para ver mais</span>
-                    <ArrowRight className="w-4 h-4 animate-bounce-horizontal"/>
-                </div>
-                <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
-            </div>
           </div>
         </div>
       </div>
