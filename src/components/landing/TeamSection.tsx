@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -17,6 +17,7 @@ export const TeamSection = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
+  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
 
   useEffect(() => {
     if (!api) {
@@ -41,7 +42,7 @@ export const TeamSection = () => {
   const renderContent = () => {
     if (isLoadingTeam) {
       return (
-        <div className="flex justify-center items-center h-80 md:h-96">
+        <div className="flex justify-center items-center h-64 md:h-80">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       );
@@ -64,7 +65,7 @@ export const TeamSection = () => {
     
     if (!teamMembers || teamMembers.length === 0) {
       return (
-        <div className="flex items-center justify-center bg-muted rounded-lg h-80 md:h-96">
+        <div className="flex items-center justify-center bg-muted rounded-lg h-64 md:h-80">
             <p className="text-muted-foreground">Nenhuma foto da equipe para exibir.</p>
         </div>
       );
@@ -73,12 +74,7 @@ export const TeamSection = () => {
     return (
       <Carousel
         setApi={setApi}
-        plugins={[
-          Autoplay({
-            delay: 4000,
-            stopOnInteraction: true,
-          }),
-        ]}
+        plugins={[autoplay.current]}
         className="w-full"
         opts={{
           align: "start",
@@ -114,11 +110,11 @@ export const TeamSection = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 px-4 bg-white">
+    <section className="py-8 md:py-12 px-4 bg-white">
         <div className="container mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
                     <p className="text-muted-foreground text-base md:text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
                 </div>
                 <div className="relative">

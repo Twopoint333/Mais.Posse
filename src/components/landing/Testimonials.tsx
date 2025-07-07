@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -17,6 +17,7 @@ export const Testimonials = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
+  const autoplay = useRef(Autoplay({ delay: 6000, stopOnInteraction: true }));
 
   useEffect(() => {
     if (!api) {
@@ -69,7 +70,7 @@ export const Testimonials = () => {
        <div className="relative">
         <Carousel
             setApi={setApi}
-            plugins={[Autoplay({ delay: 6000, stopOnInteraction: true })]}
+            plugins={[autoplay.current]}
             opts={{ align: "start", loop: true }}
             className="w-full"
         >
@@ -85,19 +86,19 @@ export const Testimonials = () => {
                     return (
                         <CarouselItem key={testimonial.id} className="pl-4 md:basis-1/2">
                           <div className="p-1 h-full">
-                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 md:p-6 h-full flex flex-col">
+                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 flex flex-col">
                                 <div className="flex justify-center mb-4">
                                   <div className="bg-primary rounded-full p-2 flex items-center justify-center">
-                                    <Avatar className="h-12 w-12">
+                                    <Avatar className="h-10 w-10">
                                       {publicUrl && <AvatarImage src={publicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
                                       <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
                                     </Avatar>
                                   </div>
                                 </div>
                                 
-                                <blockquote className="mb-4 md:mb-6 flex-grow">
-                                  <p className="text-muted-foreground italic mb-4 text-sm md:text-base">"{testimonial.quote}"</p>
-                                  <footer className="text-xs md:text-sm">
+                                <blockquote className="mb-4 flex-grow">
+                                  <p className="text-muted-foreground italic mb-4 text-sm">"{testimonial.quote}"</p>
+                                  <footer className="text-xs">
                                     <span className="font-bold text-foreground">{testimonial.author}, </span>
                                     <span className="text-foreground">{testimonial.business} – </span>
                                     <span className="text-primary font-medium">{testimonial.city}, {testimonial.state}</span>
@@ -127,9 +128,9 @@ export const Testimonials = () => {
   }
 
   return (
-    <section id="depoimentos" className="scroll-m-20 py-12 md:py-16 px-4 bg-gray-50">
+    <section id="depoimentos" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-primary">
           O que dizem nossos parceiros
         </h2>
         

@@ -17,6 +17,7 @@ export const MarketingCampaigns = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
+  const autoplay = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
 
   React.useEffect(() => {
     if (!api) {
@@ -65,12 +66,7 @@ export const MarketingCampaigns = () => {
       <>
         <Carousel
           setApi={setApi}
-          plugins={[
-            Autoplay({
-              delay: 2000,
-              stopOnInteraction: true,
-            }),
-          ]}
+          plugins={[autoplay.current]}
           opts={{
             align: "start",
             loop: true,
@@ -91,11 +87,11 @@ export const MarketingCampaigns = () => {
                 <CarouselItem key={campaign.id} className="basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="p-1">
                     {publicUrl ? (
-                      <div className="overflow-hidden rounded-lg shadow-md">
+                      <div className="overflow-hidden rounded-lg shadow-md bg-muted/20">
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out scale-110 md:scale-100"
+                          className="w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out md:scale-100 scale-110"
                         />
                       </div>
                     ) : (
@@ -126,7 +122,7 @@ export const MarketingCampaigns = () => {
   };
 
   return (
-    <section className="py-8 md:py-12 px-4 bg-gray-50">
+    <section className="py-4 md:py-8 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM

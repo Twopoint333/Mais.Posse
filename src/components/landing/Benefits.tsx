@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Check } from 'lucide-react';
 import {
   Carousel,
@@ -26,6 +26,8 @@ export const Benefits = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
+  const autoplay = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+
 
   useEffect(() => {
     if (!api) {
@@ -47,25 +49,25 @@ export const Benefits = () => {
 
 
   return (
-    <section id="beneficios" className="scroll-m-20 py-12 md:py-16 px-4 bg-gray-50 overflow-hidden">
+    <section id="beneficios" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50 overflow-hidden">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-3">
           POR QUE SE CADASTRAR NO MAIS DELIVERY?
         </h2>
         
-        <p className="text-center text-muted-foreground mb-8 md:mb-12 max-w-3xl mx-auto text-base md:text-lg">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
+        <p className="text-center text-muted-foreground mb-8 md:mb-10 max-w-3xl mx-auto text-base md:text-lg">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
         
         {/* Desktop Grid */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-md p-6 transition-all duration-500 hover:shadow-lg hover:scale-[1.02] flex flex-col h-full">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Check className="w-6 h-6 text-accent-cta" />
+            <div key={index} className="bg-white rounded-xl shadow-md p-4 transition-all duration-500 hover:shadow-lg hover:scale-[1.02] flex flex-col h-full">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <Check className="w-5 h-5 text-accent-cta" />
               </div>
-              <h3 className="text-base md:text-lg font-bold text-primary mb-2">
+              <h3 className="text-base font-bold text-primary mb-2">
                 {feature.title}
               </h3>
-              <p className="text-muted-foreground text-sm md:text-base">
+              <p className="text-muted-foreground text-sm">
                 {feature.description}
               </p>
             </div>
@@ -77,7 +79,7 @@ export const Benefits = () => {
           <Carousel
             setApi={setApi}
             opts={{ align: "start", loop: true }}
-            plugins={[Autoplay({ delay: 5000, stopOnInteraction: true })]}
+            plugins={[autoplay.current]}
             className="w-full"
           >
             <CarouselContent className="-ml-4">
@@ -85,8 +87,8 @@ export const Benefits = () => {
                 <CarouselItem key={index} className="pl-4 basis-4/5">
                   <div className="h-full p-1">
                     <div className="flex flex-col h-full bg-white rounded-xl shadow-md p-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 flex-shrink-0">
-                        <Check className="w-6 h-6 text-accent-cta" />
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3 flex-shrink-0">
+                        <Check className="w-5 h-5 text-accent-cta" />
                       </div>
                       <h3 className="text-base font-bold text-primary mb-2">
                         {feature.title}
