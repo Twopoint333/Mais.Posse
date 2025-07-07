@@ -1,74 +1,43 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useInView } from '@/hooks/useInView';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAdmin } from '@/context/AdminContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
-
-type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row'];
 
 export const MarketingCampaigns = () => {
   const { ref, inView } = useInView({ threshold: 0.1 });
-  
-  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
-
-  useEffect(() => {
-    const getCampaigns = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, error: supabaseError } = await supabase
-          .from('marketing_campaigns')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (supabaseError) {
-          throw supabaseError;
-        }
-        
-        setCampaigns(data || []);
-      } catch (err) {
-        console.error("Error fetching campaigns directly:", err);
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    getCampaigns();
-  }, []);
+  const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoadingCampaigns) {
       return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
     }
 
-    if (error) {
+    if (isErrorCampaigns) {
       return (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Erro Crítico ao Carregar Campanhas</AlertTitle>
+          <AlertTitle>Erro ao Carregar Campanhas</AlertTitle>
           <AlertDescription>
-            Não foi possível buscar os dados do Supabase. Este é o erro detalhado:
+            Não foi possível buscar os dados. Verifique as permissões no Supabase.
             <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
-              {JSON.stringify(error, null, 2)}
+              {errorCampaigns?.message || JSON.stringify(errorCampaigns, null, 2)}
             </pre>
           </AlertDescription>
         </Alert>
       );
     }
     
-    if (!campaigns || campaigns.length === 0) {
+    if (!marketingCampaigns || marketingCampaigns.length === 0) {
       return <p className="text-center text-muted-foreground">Nenhuma campanha para exibir no momento.</p>;
     }
 
     return (
        <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {campaigns.map((campaign, index) => {
+          {marketingCampaigns.map((campaign, index) => {
             let publicUrl = '';
             if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
               // Robustly handle both old paths (with "public/") and new paths (without).
