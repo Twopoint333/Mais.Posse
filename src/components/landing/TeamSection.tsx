@@ -37,7 +37,7 @@ export const TeamSection = () => {
     }
 
     return (
-      <div className="columns-2 gap-4">
+      <div className="columns-2 md:columns-3 lg:columns-4 gap-4 max-w-6xl mx-auto">
         {teamMembers.map((member, index) => {
           let publicUrl = '';
           if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
@@ -52,7 +52,7 @@ export const TeamSection = () => {
                 key={member.id}
                 src={publicUrl}
                 alt={`Equipe Mais Delivery ${index + 1}`}
-                className="w-full h-auto rounded-lg shadow-md mb-4 break-inside-avoid hover:scale-105 transition-transform duration-300"
+                className="w-full h-auto rounded-xl shadow-lg mb-4 break-inside-avoid hover:scale-105 transition-transform duration-300 hover:shadow-2xl"
               />
             )
           );
@@ -64,20 +64,16 @@ export const TeamSection = () => {
   return (
     <section className="py-16 px-4 bg-white">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">
-              Uma Equipe Dedicada ao Seu Sucesso
-            </h2>
-            
-            <p className="text-[#1F2937] text-lg mb-6">
-              Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.
-            </p>
-          </div>
-          
-          {renderContent()}
-
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
+            Uma Equipe Dedicada ao Seu Sucesso
+          </h2>
+          <p className="text-[#1F2937] text-lg mb-12">
+            Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.
+          </p>
         </div>
+        
+        {renderContent()}
       </div>
     </section>
   );
