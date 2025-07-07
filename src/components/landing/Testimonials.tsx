@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, PlayCircle, Instagram } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -13,13 +13,17 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useInView } from '@/hooks/useInView';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
-  const [count, setCount] = React.useState(0)
-  const autoplayPlugin = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false }));
+  
+  const autoplayPlugin = React.useRef(
+    Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false })
+  );
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
@@ -38,26 +42,19 @@ export const Testimonials = () => {
       return
     }
 
-    setCount(api.scrollSnapList().length)
-    setCurrent(api.selectedScrollSnap())
-
+    // Use testimonials.length for the dots count, not the duplicated slide count
     const onSelect = () => {
-      setCurrent(api.selectedScrollSnap())
+      if (!api || !testimonials) return;
+      setCurrent(api.selectedScrollSnap() % testimonials.length)
+      autoplayPlugin.current.reset()
     }
 
     api.on("select", onSelect)
-
-    const onReInit = () => {
-        setCount(api.scrollSnapList().length);
-        setCurrent(api.selectedScrollSnap());
-    };
-    api.on("reInit", onReInit);
-
+    
     return () => {
       api.off("select", onSelect)
-      api.off("reInit", onReInit)
     }
-  }, [api]);
+  }, [api, testimonials]);
 
   const renderContent = () => {
     if (isLoadingTestimonials) {
@@ -89,7 +86,7 @@ export const Testimonials = () => {
     
     // To ensure smooth looping on desktop, we duplicate slides if there are too few.
     let displayTestimonials = [...testimonials];
-    while (displayTestimonials.length < 4 && testimonials.length > 0) {
+    while (displayTestimonials.length > 0 && displayTestimonials.length < 4) {
         displayTestimonials.push(...testimonials.map(t => ({...t, id: `${t.id}-${displayTestimonials.length}`})));
     }
 
@@ -140,7 +137,7 @@ export const Testimonials = () => {
         </Carousel>
         {testimonials && testimonials.length > 1 && (
             <div className="flex justify-center gap-2 mt-4">
-                {Array.from({ length: count }).map((_, i) => (
+                {Array.from({ length: testimonials.length }).map((_, i) => (
                 <button
                     key={i}
                     onClick={() => api?.scrollTo(i)}
@@ -163,6 +160,66 @@ export const Testimonials = () => {
         
         {renderContent()}
 
+        <div className="mt-16">
+          <h3 className="text-xl md:text-2xl font-bold text-center mb-4 text-primary">
+            Veja na prática
+          </h3>
+          <p className="text-center text-muted-foreground text-sm md:text-base mb-8 max-w-3xl mx-auto">
+            Confira o que nossos parceiros estão dizendo sobre a experiência com o Mais Delivery.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <a href="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_web_copy_link&igsh=MWhjdndmODJiZGw2dw==" target="_blank" rel="noopener noreferrer" className="block group">
+                <Card className="overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
+                    <div className="relative">
+                        <img
+                            src="https://placehold.co/1280x720.png"
+                            alt="Depoimento em Vídeo de Parceiro"
+                            data-ai-hint="business owner interview"
+                            className="w-full h-auto object-cover aspect-video"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <PlayCircle className="h-16 w-16 text-white" />
+                        </div>
+                    </div>
+                    <CardHeader>
+                        <CardTitle>Parceiro Satisfeito</CardTitle>
+                        <CardDescription>Assista ao depoimento de um de nossos parceiros e veja os resultados.</CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                        <Button className="w-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-semibold">
+                            <Instagram className="mr-2 h-5 w-5" />
+                            Ver no Instagram
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </a>
+            <a href="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_web_copy_link&igsh=MWwzYTk4b3l0ZXBtdA==" target="_blank" rel="noopener noreferrer" className="block group">
+                <Card className="overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
+                    <div className="relative">
+                        <img
+                            src="https://placehold.co/1280x720.png"
+                            alt="Depoimento em Vídeo de Parceiro 2"
+                            data-ai-hint="restaurant owner speaking"
+                            className="w-full h-auto object-cover aspect-video"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <PlayCircle className="h-16 w-16 text-white" />
+                        </div>
+                    </div>
+                    <CardHeader>
+                        <CardTitle>Mais Vendas, Mais Sucesso</CardTitle>
+                        <CardDescription>Descubra como a parceria com o Mais Delivery pode transformar seu negócio.</CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                        <Button className="w-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-semibold">
+                            <Instagram className="mr-2 h-5 w-5" />
+                            Ver no Instagram
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   );
