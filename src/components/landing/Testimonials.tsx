@@ -33,9 +33,16 @@ export const Testimonials = () => {
   const textTestimonials = React.useMemo(() => testimonials?.filter(t => !t.video_url) || [], [testimonials]);
   const videoTestimonials = React.useMemo(() => testimonials?.filter(t => !!t.video_url) || [], [testimonials]);
 
-  const getPublicUrl = (path: string | null | undefined) => {
-    if (!path) return '';
-    const imagePath = path.replace(/^public\//, '');
+  const getPublicUrl = (pathOrUrl: string | null | undefined) => {
+    if (!pathOrUrl) return '';
+
+    // If it's already a full URL, return it directly.
+    if (pathOrUrl.startsWith('http')) {
+      return pathOrUrl;
+    }
+
+    // Otherwise, assume it's a path and build the public URL.
+    const imagePath = pathOrUrl.replace(/^public\//, '');
     const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
     return data?.publicUrl ?? '';
   };
