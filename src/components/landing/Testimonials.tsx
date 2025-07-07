@@ -42,14 +42,14 @@ export const Testimonials = () => {
       author: 'Ana Pereira',
       city: 'Posse',
       state: 'GO',
-      permalink: 'https://www.instagram.com/reel/DK-TV6bNqBb/?igsh=MWwzYTk4b3l0ZXBtdA==',
+      permalink: 'https://www.instagram.com/reel/C85v-47p9-d/',
     },
     {
       business: 'Pizzaria Sabor Divino',
       author: 'Carlos Almeida',
       city: 'Posse',
       state: 'GO',
-      permalink: 'https://www.instagram.com/reel/DJ9a8D9yqoD/?igsh=MWhjdndmODJiZGw2dw==',
+      permalink: 'https://www.instagram.com/reel/C82p1_go7se/',
     }
   ];
 
@@ -58,7 +58,7 @@ export const Testimonials = () => {
     if (inView && window.instgrm) {
       window.instgrm.Embeds.process();
     }
-  }, [inView]);
+  }, [inView, videoTestimonials]); // Add videoTestimonials to dependency array to re-process if links change
 
   React.useEffect(() => {
     if (!api) return;
@@ -71,21 +71,31 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    if (!api || !testimonials || testimonials.length === 0) {
-      return
+    if (!api) return;
+    if (!testimonials || testimonials.length === 0) {
+      // If there are no testimonials, we can't do anything with the API.
+      // This also prevents a crash if the testimonials array is empty.
+      const onSelect = () => {
+        if (!api) return;
+        setCurrent(api.selectedScrollSnap());
+      };
+      api.on("select", onSelect);
+      return () => {
+        api.off("select", onSelect);
+      };
     }
-
+  
     const onSelect = () => {
-      if (!api || !testimonials || testimonials.length === 0) return;
-      setCurrent(api.selectedScrollSnap() % testimonials.length)
-      autoplayPlugin.current.reset()
-    }
-
-    api.on("select", onSelect)
-    
+      if (!api) return;
+      setCurrent(api.selectedScrollSnap() % testimonials.length);
+      autoplayPlugin.current.reset();
+    };
+  
+    api.on("select", onSelect);
+  
     return () => {
-      api.off("select", onSelect)
-    }
+      api.off("select", onSelect);
+    };
   }, [api, testimonials]);
 
   const renderContent = () => {
