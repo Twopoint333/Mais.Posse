@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, PlayCircle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useInView } from '@/hooks/useInView';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 
 // Extend window type to include instgrm
 declare global {
@@ -29,12 +31,26 @@ export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
+  const [selectedVideo, setSelectedVideo] = React.useState<string | null>(null);
   
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false })
   );
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
+
+  const videoTestimonials = [
+    {
+      url: "https://www.instagram.com/reel/DJ9a8D9yqoD/",
+      thumbnail: "https://placehold.co/300x533.png",
+      embedHtml: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>`
+    },
+    {
+      url: "https://www.instagram.com/reel/DK-TV6bNqBb/",
+      thumbnail: "https://placehold.co/300x533.png",
+      embedHtml: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>`
+    }
+  ];
 
   React.useEffect(() => {
     if (!api) return;
@@ -47,11 +63,11 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    // This effect triggers the Instagram script to render the embeds
-    if (window.instgrm) {
+    // This effect triggers the Instagram script to render the embeds inside the modal
+    if (selectedVideo && window.instgrm) {
       window.instgrm.Embeds.process();
     }
-  }, []);
+  }, [selectedVideo]);
 
   React.useEffect(() => {
     if (!api) {
@@ -183,17 +199,28 @@ export const Testimonials = () => {
             Confira o que nossos parceiros estão dizendo sobre a experiência com o Mais Delivery.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
-            <div 
-              className="w-full max-w-[328px] mx-auto"
-              dangerouslySetInnerHTML={{ __html: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>` }}
-            />
-            <div 
-              className="w-full max-w-[328px] mx-auto"
-              dangerouslySetInnerHTML={{ __html: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>` }}
-            />
+            {videoTestimonials.map((video, index) => (
+              <div key={index} data-ai-hint="video testimonial" className="relative rounded-lg overflow-hidden shadow-lg group cursor-pointer transition-transform hover:scale-105" onClick={() => setSelectedVideo(video.url)}>
+                <img src={video.thumbnail} alt={`Depoimento em vídeo ${index + 1}`} className="w-full h-auto object-cover" />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <PlayCircle className="h-20 w-20 text-white opacity-80 group-hover:opacity-100 transition-opacity transform group-hover:scale-110" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
+      <Dialog open={!!selectedVideo} onOpenChange={(isOpen) => !isOpen && setSelectedVideo(null)}>
+        <DialogContent className="bg-transparent border-none shadow-none p-0 max-w-fit overflow-hidden">
+          {selectedVideo && (
+            <div
+              className="[&>div]:mx-auto" // Center the blockquote inside
+              dangerouslySetInnerHTML={{ __html: videoTestimonials.find(v => v.url === selectedVideo)?.embedHtml || '' }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
