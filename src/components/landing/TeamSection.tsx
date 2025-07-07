@@ -17,7 +17,7 @@ export const TeamSection = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
-  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
+  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true }));
 
   useEffect(() => {
     if (!api) {
@@ -72,40 +72,54 @@ export const TeamSection = () => {
     }
 
     return (
-      <Carousel
-        setApi={setApi}
-        plugins={[autoplay.current]}
-        className="w-full"
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-      >
-        <CarouselContent>
-          {teamMembers.map((member, index) => {
-            let publicUrl = '';
-            if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
-              const imagePath = member.image_url.replace(/^public\//, '');
-              const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
-              publicUrl = data?.publicUrl ?? '';
-            }
-            
-            return (
-              publicUrl && (
-                <CarouselItem key={member.id}>
-                  <div className="overflow-hidden rounded-lg shadow-md">
-                    <img
-                        src={publicUrl}
-                        alt={`Equipe Mais Delivery ${index + 1}`}
-                        className="h-64 sm:h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                  </div>
-                </CarouselItem>
-              )
-            );
-          })}
-        </CarouselContent>
-      </Carousel>
+      <div className="relative">
+        <Carousel
+          setApi={setApi}
+          plugins={[autoplay.current]}
+          className="w-full"
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+        >
+          <CarouselContent>
+            {teamMembers.map((member, index) => {
+              let publicUrl = '';
+              if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
+                const imagePath = member.image_url.replace(/^public\//, '');
+                const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
+                publicUrl = data?.publicUrl ?? '';
+              }
+              
+              return (
+                publicUrl && (
+                  <CarouselItem key={member.id}>
+                    <div className="overflow-hidden rounded-lg shadow-md">
+                      <img
+                          src={publicUrl}
+                          alt={`Equipe Mais Delivery ${index + 1}`}
+                          className="h-64 sm:h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                    </div>
+                  </CarouselItem>
+                )
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
+        {teamMembers && teamMembers.length > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {Array.from({ length: count }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => api?.scrollTo(i)}
+                  className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+        )}
+      </div>
     );
   }
 
@@ -114,24 +128,10 @@ export const TeamSection = () => {
         <div className="container mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
-                    <p className="text-muted-foreground text-base md:text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
+                    <h2 className="text-xl md:text-3xl font-bold mb-4 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
+                    <p className="text-muted-foreground text-sm md:text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
                 </div>
-                <div className="relative">
-                    {renderContent()}
-                    {teamMembers && teamMembers.length > 1 && (
-                        <div className="flex justify-center gap-2 mt-4">
-                          {Array.from({ length: count }).map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => api?.scrollTo(i)}
-                              className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
-                              aria-label={`Go to slide ${i + 1}`}
-                            />
-                          ))}
-                        </div>
-                    )}
-                </div>
+                {renderContent()}
             </div>
         </div>
     </section>

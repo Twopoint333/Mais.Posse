@@ -17,7 +17,7 @@ export const Testimonials = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
-  const autoplay = useRef(Autoplay({ delay: 6000, stopOnInteraction: true }));
+  const autoplay = useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true }));
 
   useEffect(() => {
     if (!api) {
@@ -86,7 +86,7 @@ export const Testimonials = () => {
                     return (
                         <CarouselItem key={testimonial.id} className="pl-4 md:basis-1/2">
                           <div className="p-1 h-full">
-                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 flex flex-col">
+                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 flex flex-col h-full">
                                 <div className="flex justify-center mb-4">
                                   <div className="bg-primary rounded-full p-2 flex items-center justify-center">
                                     <Avatar className="h-10 w-10">
@@ -130,7 +130,7 @@ export const Testimonials = () => {
   return (
     <section id="depoimentos" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-primary">
+        <h2 className="text-xl md:text-3xl font-bold text-center mb-10 text-primary">
           O que dizem nossos parceiros
         </h2>
         

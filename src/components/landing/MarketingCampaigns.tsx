@@ -17,7 +17,7 @@ export const MarketingCampaigns = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
-  const autoplay = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
+  const autoplay = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: false, stopOnMouseEnter: true }));
 
   React.useEffect(() => {
     if (!api) {
