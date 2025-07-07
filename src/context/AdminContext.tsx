@@ -57,18 +57,20 @@ const BUCKET_NAME = 'site_assets';
 // Returns the path of the uploaded file
 const uploadFile = async (file: File): Promise<string> => {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    const path = `public/${Date.now()}-${sanitizedFileName}`;
+    // The path no longer contains the "public/" prefix, which was causing issues.
+    const path = `${Date.now()}-${sanitizedFileName}`;
     const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, file);
     if (error) throw error;
     return path;
 };
 
 // Deletes a file by its path
-const deleteFile = async (path: string) => {
+const deleteFile = async (path: string | null) => {
     if (!path) return;
     const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
     if (error && error.message !== 'The resource was not found') {
-        throw error;
+        // Log the error but don't throw, to allow DB record deletion even if file deletion fails
+        console.error("Failed to delete file from storage:", error);
     }
 };
 
