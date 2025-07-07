@@ -109,7 +109,7 @@ export const Testimonials = () => {
             <CarouselContent className="-ml-4">
                 {displayTestimonials.map((testimonial, index) => {
                     const logoPublicUrl = getPublicUrl(testimonial.logo_url);
-                    const hasVideo = testimonial.video_url && testimonial.thumbnail_url;
+                    const hasVideo = !!testimonial.video_url;
 
                     return (
                         <CarouselItem key={`${testimonial.id}-${index}`} className="pl-4 basis-full md:basis-1/2">
@@ -131,10 +131,11 @@ export const Testimonials = () => {
                                     ) : (
                                       <>
                                         <img
-                                          src={testimonial.thumbnail_url ?? 'https://placehold.co/1600x900/000000/FFFFFF?text=Video'}
+                                          src={testimonial.thumbnail_url || 'https://placehold.co/1600x900.png'}
                                           alt={`Thumbnail for ${testimonial.business} testimonial`}
                                           className="h-full w-full object-cover"
                                           loading="lazy"
+                                          data-ai-hint="video testimonial"
                                         />
                                         <div 
                                           className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
