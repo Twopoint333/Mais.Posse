@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -33,11 +32,15 @@ export const TeamSection = () => {
     }
     
     if (!teamMembers || teamMembers.length === 0) {
-      return <p className="text-center text-muted-foreground">Nenhuma foto da equipe para exibir no momento.</p>;
+      return (
+        <div className="flex items-center justify-center bg-muted rounded-lg aspect-video">
+            <p className="text-muted-foreground">Nenhuma foto da equipe para exibir.</p>
+        </div>
+      );
     }
 
     return (
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-4 max-w-6xl mx-auto">
+      <div className="columns-2 md:columns-3 gap-4">
         {teamMembers.map((member, index) => {
           let publicUrl = '';
           if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
@@ -52,7 +55,7 @@ export const TeamSection = () => {
                 key={member.id}
                 src={publicUrl}
                 alt={`Equipe Mais Delivery ${index + 1}`}
-                className="w-full h-auto rounded-xl shadow-lg mb-4 break-inside-avoid hover:scale-105 transition-transform duration-300 hover:shadow-2xl"
+                className="w-full h-auto rounded-lg shadow-md mb-4 break-inside-avoid hover:scale-105 transition-transform duration-300"
               />
             )
           );
@@ -64,16 +67,19 @@ export const TeamSection = () => {
   return (
     <section className="py-16 px-4 bg-white">
       <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
-            Uma Equipe Dedicada ao Seu Sucesso
-          </h2>
-          <p className="text-[#1F2937] text-lg mb-12">
-            Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.
-          </p>
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div className="text-left">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
+                    Uma Equipe Dedicada ao Seu Sucesso
+                </h2>
+                <p className="text-[#1F2937] text-lg mb-8">
+                    Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.
+                </p>
+            </div>
+            <div>
+                {renderContent()}
+            </div>
         </div>
-        
-        {renderContent()}
       </div>
     </section>
   );
