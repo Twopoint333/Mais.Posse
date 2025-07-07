@@ -3,32 +3,37 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { LogIn, ArrowLeft } from 'lucide-react';
+import { LogIn, ArrowLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
-interface AdminLoginProps {
-  onLoginSuccess: () => void;
-}
-
-const ADMIN_PASSWORD = 'admin'; // Simple hardcoded password
-
-const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
+const AdminLogin: React.FC = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setError('');
+    setError('');
+    setIsLoading(true);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      setError('Credenciais inválidas. Verifique seu email e senha.');
+    } else {
       toast({
         title: 'Login bem-sucedido!',
         description: 'Bem-vindo ao painel administrativo.',
       });
-      onLoginSuccess();
-    } else {
-      setError('Senha incorreta. Tente novamente.');
+      // A mudança de estado no componente Admin.tsx fará o redirecionamento
     }
+    setIsLoading(false);
   };
 
   return (
@@ -37,26 +42,37 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
             <LogIn className="w-6 h-6" />
-            Acesso Restrito
+            Acesso Administrativo
           </CardTitle>
           <CardDescription>
-            Por favor, insira a senha para acessar o painel administrativo.
+            Use suas credenciais de acesso. Se for o primeiro acesso, crie um usuário na seção 'Authentication' do seu projeto Supabase.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
             <Input
               type="password"
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={error ? 'border-destructive' : ''}
+              required
+              disabled={isLoading}
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
-              Entrar
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </CardFooter>
         </form>
