@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
-import { useAdmin, Testimonial, MarketingCampaign } from '@/context/AdminContext';
+import { useAdmin, Testimonial, MarketingCampaign, UpdateTestimonial } from '@/context/AdminContext';
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,7 +40,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   // State for forms
   const [newCampaignFiles, setNewCampaignFiles] = useState<FileList | null>(null);
   const [newTeamMemberFile, setNewTeamMemberFile] = useState<File | null>(null);
-  const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File, video_file?: File, thumbnail_file?: File }) | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<MarketingCampaign | null>(null);
   const [campaignsToAddCount, setCampaignsToAddCount] = useState(0);
@@ -126,16 +126,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
     setIsSubmitting(true);
     try {
-      const { id, created_at, logo_file, ...data } = editingTestimonial;
+      const { id, created_at, logo_file, video_file, thumbnail_file, ...data } = editingTestimonial;
 
       if (id) { // Update
         const originalTestimonial = testimonials?.find(t => t.id === id);
-        await updateTestimonial({ 
+        const testimonialData: UpdateTestimonial = { 
             ...data, 
             id,
             logo_file,
-            old_logo_path: logo_file ? originalTestimonial?.logo_url : undefined 
-        });
+            old_logo_path: logo_file ? originalTestimonial?.logo_url : undefined,
+            video_file,
+            old_video_path: video_file ? originalTestimonial?.video_url : undefined,
+            thumbnail_file,
+            old_thumbnail_path: thumbnail_file ? originalTestimonial?.thumbnail_url : undefined
+        };
+        await updateTestimonial(testimonialData);
         toast({ title: "Depoimento atualizado com sucesso!" });
       } else { // Insert
         if (logo_file && data.quote && data.author && data.business && data.city && data.state) {
@@ -145,11 +150,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               business: data.business,
               city: data.city,
               state: data.state,
-              logo_file: logo_file,
+              logo_file,
+              video_file,
+              thumbnail_file,
            });
           toast({ title: "Depoimento adicionado com sucesso!" });
         } else {
-            toast({ variant: "destructive", title: "Todos os campos e o logo são obrigatórios." });
+            toast({ variant: "destructive", title: "Todos os campos de texto e o logo são obrigatórios." });
         }
       }
       setEditingTestimonial(null);
@@ -308,6 +315,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <div className="flex-grow">
                                 <blockquote className="italic">"{testimonial.quote}"</blockquote>
                                 <p className="text-sm text-muted-foreground mt-2">- {testimonial.author}, {testimonial.business} ({testimonial.city}, {testimonial.state})</p>
+                                {testimonial.video_url && <p className="text-sm text-blue-500 mt-2">Possui vídeo</p>}
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="icon" onClick={() => openEditTestimonialDialog(testimonial)}>
@@ -335,7 +343,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
       {/* Testimonial Dialog */}
       <Dialog open={!!editingTestimonial} onOpenChange={(open) => !open && setEditingTestimonial(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingTestimonial?.id ? 'Editar' : 'Adicionar'} Depoimento</DialogTitle>
             <DialogDescription>
@@ -346,7 +354,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
              <form onSubmit={handleSaveTestimonial} className="space-y-4">
               <div>
                 <label className='text-sm font-medium'>Logo</label>
-                <Input type="file" accept='image/*' ref={testimonialLogoRef} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, logo_file: e.target.files?.[0] || undefined })} required={!editingTestimonial.id} />
+                <Input type="file" accept='image/*' ref={testimonialLogoRef} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, logo_file: e.target.files?.[0] })} required={!editingTestimonial.id} />
                 {editingTestimonial.id && editingTestimonial.logo_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter o logo atual: <a href={getPublicUrl(editingTestimonial.logo_url)} target="_blank" rel="noopener noreferrer" className="underline">ver imagem</a></p>}
               </div>
               <Textarea placeholder="Citação do depoimento" value={editingTestimonial.quote || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })} required rows={4}/>
@@ -356,6 +364,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 <Input placeholder="Cidade" value={editingTestimonial.city || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, city: e.target.value })} required className="flex-grow" />
                 <Input placeholder="Estado (UF)" value={editingTestimonial.state || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, state: e.target.value })} required className="w-24" />
               </div>
+
+               <div>
+                  <label className='text-sm font-medium'>Vídeo do Depoimento (Opcional)</label>
+                  <Input type="file" accept="video/*" onChange={(e) => setEditingTestimonial({ ...editingTestimonial, video_file: e.target.files?.[0] })} />
+                  {editingTestimonial.id && editingTestimonial.video_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter o vídeo atual: <a href={getPublicUrl(editingTestimonial.video_url)} target="_blank" rel="noopener noreferrer" className="underline">ver vídeo</a></p>}
+              </div>
+              <div>
+                  <label className='text-sm font-medium'>Thumbnail do Vídeo (Opcional)</label>
+                  <Input type="file" accept="image/*" onChange={(e) => setEditingTestimonial({ ...editingTestimonial, thumbnail_file: e.target.files?.[0] })} />
+                  {editingTestimonial.id && editingTestimonial.thumbnail_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter a thumbnail atual: <a href={getPublicUrl(editingTestimonial.thumbnail_url)} target="_blank" rel="noopener noreferrer" className="underline">ver imagem</a></p>}
+                  <p className='text-xs text-muted-foreground mt-1'>Recomendado se um vídeo for enviado. Proporção 9:16 (vertical).</p>
+              </div>
+
               <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)} disabled={isSubmitting}>Cancelar</Button>
                 <Button type="submit" disabled={isSubmitting}>

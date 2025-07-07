@@ -14,24 +14,12 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { useInView } from '@/hooks/useInView';
 
-// Extend window type to include instgrm
-declare global {
-  interface Window {
-    instgrm?: {
-      Embeds: {
-        process: () => void;
-      };
-    };
-  }
-}
-
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   
-  // State to track which video is playing directly on the page
-  const [activeVideoPermalink, setActiveVideoPermalink] = React.useState<string | null>(null);
+  const [activeVideoUrl, setActiveVideoUrl] = React.useState<string | null>(null);
 
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false })
@@ -39,32 +27,20 @@ export const Testimonials = () => {
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
-  // Note: The links provided previously were invalid. Using working example links.
-  const videoTestimonials = [
-    {
-      business: 'Hamburgueria do Chefe',
-      author: 'Ana Pereira',
-      city: 'Posse',
-      state: 'GO',
-      permalink: 'https://www.instagram.com/reel/C85v-47p9-d/',
-      thumbnail: 'https://placehold.co/400x711.png'
-    },
-    {
-      business: 'Pizzaria Sabor Divino',
-      author: 'Carlos Almeida',
-      city: 'Posse',
-      state: 'GO',
-      permalink: 'https://www.instagram.com/reel/C82p1_go7se/',
-      thumbnail: 'https://placehold.co/400x711.png'
-    }
-  ];
+  const getPublicUrl = (path: string | null | undefined) => {
+    if (!path) return '';
+    const imagePath = path.replace(/^public\//, '');
+    const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
+    return data?.publicUrl ?? '';
+  };
   
-  React.useEffect(() => {
-    // Process Instagram embeds whenever a new video is activated
-    if (activeVideoPermalink && window.instgrm) {
-      window.instgrm.Embeds.process();
-    }
-  }, [activeVideoPermalink]);
+  const videoTestimonials = React.useMemo(() => 
+    testimonials?.filter(t => t.video_url && t.thumbnail_url) ?? [], 
+  [testimonials]);
+  
+  const textTestimonials = React.useMemo(() => 
+    testimonials?.filter(t => !t.video_url) ?? [],
+  [testimonials]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -77,12 +53,12 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    if (!api || !testimonials?.length || testimonials.length === 0) return;
+    if (!api || !textTestimonials?.length || textTestimonials.length === 0) return;
   
     const onSelect = () => {
       if (!api) return;
       // The modulo operator is needed for the loop functionality
-      setCurrent(api.selectedScrollSnap() % testimonials.length);
+      setCurrent(api.selectedScrollSnap() % textTestimonials.length);
     };
   
     api.on("select", onSelect);
@@ -90,10 +66,10 @@ export const Testimonials = () => {
     return () => {
       api.off("select", onSelect);
     };
-  }, [api, testimonials]);
+  }, [api, textTestimonials]);
 
-  const renderContent = () => {
-    if (isLoadingTestimonials) {
+  const renderTextTestimonials = () => {
+    if (isLoadingTestimonials && !testimonials) {
       return (
         <div className="flex justify-center items-center h-40">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -116,13 +92,13 @@ export const Testimonials = () => {
       )
     }
     
-    if (!testimonials || testimonials.length === 0) {
-       return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
+    if (!textTestimonials || textTestimonials.length === 0) {
+       return null;
     }
     
-    let displayTestimonials = [...testimonials];
-    while (displayTestimonials.length > 0 && displayTestimonials.length < 4) {
-        displayTestimonials.push(...testimonials.map(t => ({...t, id: `${t.id}-${displayTestimonials.length}`})));
+    let displayTextTestimonials = [...textTestimonials];
+    while (displayTextTestimonials.length > 0 && displayTextTestimonials.length < 4) {
+        displayTextTestimonials.push(...textTestimonials.map(t => ({...t, id: `${t.id}-${displayTextTestimonials.length}`})));
     }
 
     return (
@@ -134,13 +110,8 @@ export const Testimonials = () => {
             className="w-full"
         >
             <CarouselContent className="-ml-4">
-                {displayTestimonials.map((testimonial, index) => {
-                    let publicUrl = '';
-                    if (typeof testimonial.logo_url === 'string' && testimonial.logo_url.trim() !== '') {
-                        const logoPath = testimonial.logo_url.replace(/^public\//, '');
-                        const { data } = supabase.storage.from('site_assets').getPublicUrl(logoPath);
-                        publicUrl = data?.publicUrl ?? '';
-                    }
+                {displayTextTestimonials.map((testimonial, index) => {
+                    const publicUrl = getPublicUrl(testimonial.logo_url);
 
                     return (
                         <CarouselItem key={`${testimonial.id}-${index}`} className="pl-4 basis-full md:basis-1/2">
@@ -170,9 +141,9 @@ export const Testimonials = () => {
                 })}
             </CarouselContent>
         </Carousel>
-        {testimonials && testimonials.length > 1 && (
+        {textTestimonials && textTestimonials.length > 1 && (
             <div className="flex justify-center gap-2 mt-4">
-                {Array.from({ length: testimonials.length }).map((_, i) => (
+                {Array.from({ length: textTestimonials.length }).map((_, i) => (
                 <button
                     key={i}
                     onClick={() => api?.scrollTo(i)}
@@ -193,56 +164,60 @@ export const Testimonials = () => {
           O que dizem nossos parceiros
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
-          {videoTestimonials.map((video, index) => (
-            <div key={index} className="rounded-lg shadow-lg overflow-hidden flex flex-col bg-white">
-              {activeVideoPermalink === video.permalink ? (
-                <>
-                  <div className="relative overflow-hidden aspect-[9/16]">
-                    <blockquote
-                      className="instagram-media mx-auto my-0"
-                      data-instgrm-permalink={video.permalink}
-                      data-instgrm-version="14"
-                      data-instgrm-captioned="false"
-                    ></blockquote>
-                    {/* This div covers the instagram footer (likes, comments) */}
-                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-white" />
-                  </div>
-                  {/* This info card is pulled up to cover the empty space */}
-                  <div className="p-4 border-t -mt-12 relative z-10 bg-white">
-                    <h3 className="font-bold text-lg text-primary">{video.business}</h3>
-                    <p className="text-sm text-muted-foreground">{video.author}</p>
-                    <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div
-                    className="relative aspect-[9/16] cursor-pointer group"
-                    onClick={() => setActiveVideoPermalink(video.permalink)}
-                  >
-                    <img
-                      src={video.thumbnail}
-                      alt={`Depoimento de ${video.business}`}
-                      className="w-full h-full object-cover"
-                      data-ai-hint="business person"
-                    />
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                      <PlayCircle className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
-                    </div>
-                  </div>
-                  <div className="p-4 border-t bg-white">
-                    <h3 className="font-bold text-lg text-primary">{video.business}</h3>
-                    <p className="text-sm text-muted-foreground">{video.author}</p>
-                    <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
-                  </div>
-                </>
-              )}
+        {isLoadingTestimonials && !testimonials && (
+             <div className="flex justify-center items-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ))}
-        </div>
+        )}
+
+        {videoTestimonials.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
+                {videoTestimonials.map((video) => {
+                    const videoUrl = getPublicUrl(video.video_url);
+                    const thumbnailUrl = getPublicUrl(video.thumbnail_url);
+                    const isActive = activeVideoUrl === videoUrl;
+
+                    return (
+                        <div key={video.id} className="rounded-lg shadow-lg overflow-hidden flex flex-col bg-white">
+                            <div className="relative aspect-[9/16] bg-black">
+                                {isActive ? (
+                                    <video
+                                        src={videoUrl}
+                                        controls
+                                        autoPlay
+                                        playsInline
+                                        className="w-full h-full object-cover"
+                                        onEnded={() => setActiveVideoUrl(null)}
+                                    />
+                                ) : (
+                                    <div
+                                        className="w-full h-full cursor-pointer group"
+                                        onClick={() => setActiveVideoUrl(videoUrl)}
+                                    >
+                                        <img
+                                            src={thumbnailUrl}
+                                            alt={`Depoimento de ${video.business}`}
+                                            className="w-full h-full object-cover"
+                                            data-ai-hint="business person"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                                            <PlayCircle className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4 border-t bg-white">
+                                <h3 className="font-bold text-lg text-primary">{video.business}</h3>
+                                <p className="text-sm text-muted-foreground">{video.author}</p>
+                                <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        )}
         
-        {renderContent()}
+        {renderTextTestimonials()}
       </div>
     </section>
   );

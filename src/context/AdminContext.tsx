@@ -9,9 +9,22 @@ type NewMarketingCampaign = { files: File[] };
 type TeamMember = Database['public']['Tables']['team_members']['Row'];
 type NewTeamMember = { file: File };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
-export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { logo_file: File };
-// Note: logo_url and old_logo_path will be paths, not full URLs
-export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { logo_file?: File; old_logo_path?: string };
+
+export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url' | 'video_url' | 'thumbnail_url'> & { 
+  logo_file: File;
+  video_file?: File;
+  thumbnail_file?: File;
+};
+
+export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { 
+  logo_file?: File; 
+  old_logo_path?: string;
+  video_file?: File;
+  old_video_path?: string | null;
+  thumbnail_file?: File;
+  old_thumbnail_path?: string | null;
+};
+
 
 // Context type definition
 interface AdminContextType {
@@ -65,7 +78,7 @@ const uploadFile = async (file: File): Promise<string> => {
 };
 
 // Deletes a file by its path
-const deleteFile = async (path: string | null) => {
+const deleteFile = async (path: string | null | undefined) => {
     if (!path) return;
     // Robustly handle old paths that might still include "public/"
     const imagePath = path.replace(/^public\//, '');
@@ -155,25 +168,35 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const addTestimonialMutation = useMutation<unknown, Error, NewTestimonial>({
     mutationFn: async (testimonial) => {
-        const logoPath = await uploadFile(testimonial.logo_file);
-        const { logo_file, ...dbData } = testimonial;
-        return inserter('testimonials', { ...dbData, logo_url: logoPath });
+        const { logo_file, video_file, thumbnail_file, ...dbData } = testimonial;
+
+        const logoPath = await uploadFile(logo_file);
+        const videoPath = video_file ? await uploadFile(video_file) : null;
+        const thumbnailPath = thumbnail_file ? await uploadFile(thumbnail_file) : null;
+        
+        return inserter('testimonials', { ...dbData, logo_url: logoPath, video_url: videoPath, thumbnail_url: thumbnailPath });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const updateTestimonialMutation = useMutation<unknown, Error, UpdateTestimonial>({
     mutationFn: async (testimonial) => {
-        const { logo_file, old_logo_path, ...dbData } = testimonial;
-        let newLogoPath: string | undefined = undefined;
+        const { logo_file, old_logo_path, video_file, old_video_path, thumbnail_file, old_thumbnail_path, ...dbData } = testimonial;
+        
+        const dataToUpdate: Partial<Testimonial> & { id: string } = { ...dbData as Testimonial };
 
         if (logo_file) {
-            newLogoPath = await uploadFile(logo_file);
-            if (old_logo_path) {
-                await deleteFile(old_logo_path);
-            }
+            dataToUpdate.logo_url = await uploadFile(logo_file);
+            if (old_logo_path) await deleteFile(old_logo_path);
+        }
+        if (video_file) {
+            dataToUpdate.video_url = await uploadFile(video_file);
+            if (old_video_path) await deleteFile(old_video_path);
+        }
+        if (thumbnail_file) {
+            dataToUpdate.thumbnail_url = await uploadFile(thumbnail_file);
+            if (old_thumbnail_path) await deleteFile(old_thumbnail_path);
         }
         
-        const dataToUpdate = newLogoPath ? { ...dbData, logo_url: newLogoPath } : dbData;
         return updater('testimonials', dataToUpdate);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
@@ -181,6 +204,8 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const deleteTestimonialMutation = useMutation<void, Error, Testimonial>({
     mutationFn: async (testimonial) => {
         await deleteFile(testimonial.logo_url);
+        await deleteFile(testimonial.video_url);
+        await deleteFile(testimonial.thumbnail_url);
         await deleter('testimonials', testimonial.id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),

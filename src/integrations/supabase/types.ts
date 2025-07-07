@@ -53,6 +53,8 @@ export type Database = {
           state: string
           logo_url: string
           created_at: string
+          video_url: string | null
+          thumbnail_url: string | null
         }
         Insert: {
           id?: string
@@ -63,6 +65,8 @@ export type Database = {
           state: string
           logo_url: string
           created_at?: string
+          video_url?: string | null
+          thumbnail_url?: string | null
         }
         Update: {
           id?: string
@@ -73,6 +77,8 @@ export type Database = {
           state?: string
           logo_url?: string
           created_at?: string
+          video_url?: string | null
+          thumbnail_url?: string | null
         }
       }
     }
