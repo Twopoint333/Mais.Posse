@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, 'use-client';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from '@/context/AdminContext';
@@ -14,11 +14,11 @@ import Autoplay from "embla-carousel-autoplay";
 
 export const MarketingCampaigns = () => {
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
-  const [count, setCount] = useState(0)
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [current, setCurrent] = React.useState(0)
+  const [count, setCount] = React.useState(0)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!api) {
       return
     }
@@ -88,14 +88,14 @@ export const MarketingCampaigns = () => {
               }
               
               return (
-                <CarouselItem key={campaign.id} className="basis-4/5 sm:basis-1/2 md:basis-1/3">
+                <CarouselItem key={campaign.id} className="basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="p-1">
                     {publicUrl ? (
                       <div className="overflow-hidden rounded-lg shadow-md">
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-cover rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out hover:scale-105"
+                          className="w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out scale-110 md:scale-100 md:hover:scale-105"
                         />
                       </div>
                     ) : (
