@@ -17,7 +17,7 @@ export const Testimonials = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
-  const autoplayPlugin = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: true }));
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false }));
 
   React.useEffect(() => {
     if (!api) {
@@ -43,12 +43,6 @@ export const Testimonials = () => {
       api.off("select", onSelect)
       api.off("reInit", onReInit)
     }
-  }, [api]);
-
-  const handleDotClick = React.useCallback((index: number) => {
-    if (!api) return;
-    api.scrollTo(index);
-    api.plugins().autoplay?.reset();
   }, [api]);
 
   const renderContent = () => {
@@ -129,7 +123,7 @@ export const Testimonials = () => {
                 {Array.from({ length: count }).map((_, i) => (
                 <button
                     key={i}
-                    onClick={() => handleDotClick(i)}
+                    onClick={() => api?.scrollTo(i)}
                     className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
                     aria-label={`Go to slide ${i + 1}`}
                 />
