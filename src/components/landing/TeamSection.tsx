@@ -50,7 +50,7 @@ export const TeamSection = () => {
               
             return (
               <div key={member.id}>
-                {publicUrl && <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md h-auto w-full object-cover hover:scale-105 transition-transform duration-300" />}
+                {publicUrl && <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md w-full aspect-square object-cover hover:scale-105 transition-transform duration-300" />}
               </div>
             );
           })}
