@@ -23,7 +23,7 @@ CREATE TABLE public.team_members (
     created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
--- Tabela para Depoimentos
+-- Tabela para Depoimentos (com campos para vídeo)
 CREATE TABLE public.testimonials (
     id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     quote text NOT NULL,
@@ -32,7 +32,9 @@ CREATE TABLE public.testimonials (
     city text NOT NULL,
     state character varying(2) NOT NULL,
     logo_url text NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    video_url text, -- URL para o vídeo no Supabase Storage
+    thumbnail_url text -- URL para a miniatura do vídeo
 );
 
 -- 2. Configuração do Storage (Armazenamento de Arquivos)
