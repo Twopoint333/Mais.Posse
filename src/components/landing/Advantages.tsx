@@ -38,16 +38,16 @@ export const Advantages = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {advantages.map((advantage, index) => (
             <div 
               key={index} 
-              className="flex items-center gap-3 bg-white rounded-full px-3 py-2 md:px-4 md:py-3 shadow-sm transition-all duration-500"
+              className="flex items-start gap-4 bg-white rounded-lg p-4 shadow-sm border"
             >
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Check className="w-4 h-4 text-accent-cta" />
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                <Check className="w-5 h-5 text-accent-cta" />
               </div>
-              <span className="text-foreground text-sm">{advantage}</span>
+              <span className="text-foreground text-base">{advantage}</span>
             </div>
           ))}
         </div>
