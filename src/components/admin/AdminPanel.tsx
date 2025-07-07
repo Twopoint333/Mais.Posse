@@ -18,7 +18,9 @@ interface AdminPanelProps {
 
 const getPublicUrl = (path: string | null | undefined) => {
   if (typeof path === 'string' && path.trim() !== '') {
-    const { data } = supabase.storage.from('site_assets').getPublicUrl(path);
+    // Robustly handle both old paths (with "public/") and new paths (without).
+    const imagePath = path.replace(/^public\//, '');
+    const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
     return data?.publicUrl ?? '';
   }
   return '';

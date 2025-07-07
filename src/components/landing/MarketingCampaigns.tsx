@@ -69,12 +69,11 @@ export const MarketingCampaigns = () => {
        <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {campaigns.map((campaign, index) => {
-            // Log para depuração
-            console.log("Valor de campaign.image_url:", campaign.image_url);
-
             let publicUrl = '';
             if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
-              const { data } = supabase.storage.from('site_assets').getPublicUrl(campaign.image_url);
+              // Robustly handle both old paths (with "public/") and new paths (without).
+              const imagePath = campaign.image_url.replace(/^public\//, '');
+              const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
               publicUrl = data?.publicUrl ?? '';
             }
             

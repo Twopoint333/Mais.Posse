@@ -51,7 +51,9 @@ export const Testimonials = () => {
           {testimonials.map((testimonial, index) => {
             let publicUrl = '';
             if (typeof testimonial.logo_url === 'string' && testimonial.logo_url.trim() !== '') {
-                const { data } = supabase.storage.from('site_assets').getPublicUrl(testimonial.logo_url);
+                // Robustly handle both old paths (with "public/") and new paths (without).
+                const logoPath = testimonial.logo_url.replace(/^public\//, '');
+                const { data } = supabase.storage.from('site_assets').getPublicUrl(logoPath);
                 publicUrl = data?.publicUrl ?? '';
             }
 

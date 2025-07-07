@@ -50,7 +50,9 @@ export const TeamSection = () => {
           {teamMembers.map((member, index) => {
             let publicUrl = '';
             if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
-              const { data } = supabase.storage.from('site_assets').getPublicUrl(member.image_url);
+              // Robustly handle both old paths (with "public/") and new paths (without).
+              const imagePath = member.image_url.replace(/^public\//, '');
+              const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
               publicUrl = data?.publicUrl ?? '';
             }
               
