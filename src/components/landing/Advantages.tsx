@@ -26,14 +26,22 @@ export const Advantages = () => {
         
         <div className="max-w-3xl mx-auto space-y-4">
           {advantages.map((advantage, index) => (
-            <div 
-              key={index} 
-              className="flex items-start gap-4 bg-white rounded-lg p-4 shadow-sm border"
+            <div
+              key={index}
+              className="relative rounded-lg p-[2px] bg-transparent overflow-hidden"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                <Check className="w-5 h-5 text-accent-cta" />
+              <div
+                className="absolute inset-[-1000%] animate-border-spin"
+                style={{
+                  backgroundImage: `conic-gradient(from 180deg at 50% 50%, hsl(var(--primary)) 0deg, hsl(var(--accent-cta)) 180deg, hsl(var(--primary)) 360deg)`,
+                }}
+              />
+              <div className="relative flex items-start gap-4 bg-white rounded-[6px] p-4 h-full">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                  <Check className="w-5 h-5 text-accent-cta" />
+                </div>
+                <span className="text-foreground text-base">{advantage}</span>
               </div>
-              <span className="text-foreground text-base">{advantage}</span>
             </div>
           ))}
         </div>

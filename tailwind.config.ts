@@ -87,6 +87,10 @@ export default {
 						height: '0'
 					}
 				},
+        'border-spin': {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
+        },
 				'fade-in': {
 					'0%': {
 						opacity: '0',
@@ -151,6 +155,7 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+        'border-spin': 'border-spin 4s linear infinite',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
