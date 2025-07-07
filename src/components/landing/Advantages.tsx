@@ -1,6 +1,5 @@
 import React from 'react';
 import { Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export const Advantages = () => {
   const advantages = [
@@ -24,7 +23,7 @@ export const Advantages = () => {
           Mais do que uma plataforma — uma solução completa para o seu negócio crescer
         </p>
         
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           {advantages.map((advantage, index) => (
             <div
               key={index}
