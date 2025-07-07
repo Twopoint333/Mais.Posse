@@ -37,24 +37,26 @@ export const TeamSection = () => {
     }
 
     return (
-      <div className="relative shadow-lg rounded-lg overflow-hidden">
-        <div className="grid grid-cols-2 gap-4">
-          {teamMembers.map((member, index) => {
-            let publicUrl = '';
-            if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
-              // Robustly handle both old paths (with "public/") and new paths (without).
-              const imagePath = member.image_url.replace(/^public\//, '');
-              const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
-              publicUrl = data?.publicUrl ?? '';
-            }
-              
-            return (
-              <div key={member.id}>
-                {publicUrl && <img src={publicUrl} alt={`Equipe Mais Delivery ${index + 1}`} className="rounded-lg shadow-md w-full h-auto hover:scale-105 transition-transform duration-300" />}
-              </div>
-            );
-          })}
-        </div>
+      <div className="columns-2 gap-4">
+        {teamMembers.map((member, index) => {
+          let publicUrl = '';
+          if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
+            const imagePath = member.image_url.replace(/^public\//, '');
+            const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
+            publicUrl = data?.publicUrl ?? '';
+          }
+            
+          return (
+            publicUrl && (
+              <img
+                key={member.id}
+                src={publicUrl}
+                alt={`Equipe Mais Delivery ${index + 1}`}
+                className="w-full h-auto rounded-lg shadow-md mb-4 break-inside-avoid hover:scale-105 transition-transform duration-300"
+              />
+            )
+          );
+        })}
       </div>
     );
   }
@@ -62,7 +64,7 @@ export const TeamSection = () => {
   return (
     <section className="py-16 px-4 bg-white">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">
               Uma Equipe Dedicada ao Seu Sucesso
