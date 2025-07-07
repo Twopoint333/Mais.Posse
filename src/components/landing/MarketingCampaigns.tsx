@@ -17,7 +17,7 @@ export const MarketingCampaigns = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
-  const autoplayPlugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: false, stopOnMouseEnter: false }));
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: false }));
 
   React.useEffect(() => {
     if (!api) {
@@ -33,10 +33,22 @@ export const MarketingCampaigns = () => {
 
     api.on("select", onSelect)
     
+    api.on("reInit", () => {
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap())
+    })
+
     return () => {
       api.off("select", onSelect)
+      api.off("reInit", () => {})
     }
   }, [api])
+
+  const handleDotClick = React.useCallback((index: number) => {
+    if (!api) return;
+    api.scrollTo(index);
+    api.plugins().autoplay?.reset();
+  }, [api]);
 
   const renderContent = () => {
     if (isLoadingCampaigns) {
@@ -110,7 +122,7 @@ export const MarketingCampaigns = () => {
             {Array.from({ length: count }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => api?.scrollTo(i)}
+                onClick={() => handleDotClick(i)}
                 className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
                 aria-label={`Go to slide ${i + 1}`}
               />

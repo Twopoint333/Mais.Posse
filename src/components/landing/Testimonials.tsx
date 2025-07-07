@@ -17,7 +17,7 @@ export const Testimonials = () => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
-  const autoplayPlugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false }));
+  const autoplayPlugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true }));
 
   useEffect(() => {
     if (!api) {
@@ -33,9 +33,21 @@ export const Testimonials = () => {
 
     api.on("select", onSelect)
 
+    api.on("reInit", () => {
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap())
+    })
+
     return () => {
       api.off("select", onSelect)
+      api.off("reInit", () => {})
     }
+  }, [api]);
+
+  const handleDotClick = React.useCallback((index: number) => {
+    if (!api) return;
+    api.scrollTo(index);
+    api.plugins().autoplay?.reset();
   }, [api]);
 
   const renderContent = () => {
@@ -84,7 +96,7 @@ export const Testimonials = () => {
                     }
 
                     return (
-                        <CarouselItem key={testimonial.id} className="pl-4 md:basis-1/2">
+                        <CarouselItem key={testimonial.id} className="pl-4 basis-full md:basis-1/2">
                           <div className="p-1 h-full">
                             <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 flex flex-col h-full">
                                 <div className="flex justify-center mb-4">
@@ -116,7 +128,7 @@ export const Testimonials = () => {
                 {Array.from({ length: count }).map((_, i) => (
                 <button
                     key={i}
-                    onClick={() => api?.scrollTo(i)}
+                    onClick={() => handleDotClick(i)}
                     className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
                     aria-label={`Go to slide ${i + 1}`}
                 />
