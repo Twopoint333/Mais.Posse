@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -95,11 +94,11 @@ export const MarketingCampaigns = () => {
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-cover rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out hover:scale-105"
+                          className="w-full object-cover rounded-lg aspect-[4/5] transition-transform duration-300 ease-in-out hover:scale-105"
                         />
                       </div>
                     ) : (
-                      <div className="w-full bg-muted rounded-lg aspect-[9/16] flex items-center justify-center">
+                      <div className="w-full bg-muted rounded-lg aspect-[4/5] flex items-center justify-center">
                         <p className="text-sm text-muted-foreground">Imagem indisponível</p>
                       </div>
                     )}
@@ -126,13 +125,13 @@ export const MarketingCampaigns = () => {
   };
 
   return (
-    <section className="py-16 px-4 bg-gray-50">
+    <section className="py-12 md:py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM
         </h2>
         
-        <p className="text-center text-lg text-[#1F2937] mb-12 max-w-3xl mx-auto">
+        <p className="text-center text-muted-foreground text-base md:text-lg mb-8 md:mb-12 max-w-3xl mx-auto">
           Impulsione sua marca com ações estratégicas de marketing cooperado para conquistar mais clientes!
         </p>
         

@@ -14,7 +14,7 @@ export const Hero = () => {
   return (
     <section 
       id="hero" 
-      className="scroll-m-20 relative min-h-[90vh] flex items-center justify-center px-4 py-16 md:py-24 bg-primary"
+      className="scroll-m-20 relative min-h-[80vh] flex items-center justify-center px-4 py-20 md:py-24 bg-primary"
       data-ai-hint="delivery food"
     >
       <img
@@ -25,11 +25,11 @@ export const Hero = () => {
       />
       
       <div className="container mx-auto relative z-10 text-center">
-        <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 transform translate-y-0 opacity-100 transition-all duration-700 delay-300">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6 transform translate-y-0 opacity-100 transition-all duration-700 delay-300">
           Evolua com o Mais Delivery e aumente suas vendas
         </h1>
         
-        <p className="text-lg md:text-xl text-white mb-8 max-w-2xl mx-auto transform translate-y-0 opacity-100 transition-all duration-700 delay-500">
+        <p className="text-base md:text-xl text-white mb-8 max-w-2xl mx-auto transform translate-y-0 opacity-100 transition-all duration-700 delay-500">
           O Mais Delivery já transformou negócios em mais de 300 cidades — o próximo pode ser o seu.
         </p>
         
@@ -63,7 +63,7 @@ export const Hero = () => {
           ].map((item, index) => (
             <li 
               key={index} 
-              className="bg-white/10 backdrop-blur-sm text-white py-3 px-4 rounded-lg font-medium transform transition-all duration-500" 
+              className="bg-white/10 backdrop-blur-sm text-white py-3 px-4 rounded-lg font-medium transform transition-all duration-500 text-sm" 
               style={{
                 animationDelay: `${300 + index * 100}ms`
               }}

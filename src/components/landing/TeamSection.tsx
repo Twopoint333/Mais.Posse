@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -80,7 +79,7 @@ export const TeamSection = () => {
             stopOnInteraction: true,
           }),
         ]}
-        className="relative w-full"
+        className="w-full"
         opts={{
           align: "start",
           loop: true,
@@ -102,7 +101,7 @@ export const TeamSection = () => {
                     <img
                         src={publicUrl}
                         alt={`Equipe Mais Delivery ${index + 1}`}
-                        className="h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
+                        className="h-64 sm:h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
                     />
                   </div>
                 </CarouselItem>
@@ -115,14 +114,14 @@ export const TeamSection = () => {
   }
 
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="py-12 md:py-16 px-4 bg-white">
         <div className="container mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">Uma Equipe Dedicada ao Seu Sucesso</h2>
-                    <p className="text-[#1F2937] text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
+                    <p className="text-muted-foreground text-base md:text-lg mb-6">Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.</p>
                 </div>
-                <div>
+                <div className="relative">
                     {renderContent()}
                     {teamMembers && teamMembers.length > 1 && (
                         <div className="flex justify-center gap-2 mt-4">

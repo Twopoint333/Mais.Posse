@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import {
@@ -48,13 +47,13 @@ export const Benefits = () => {
 
 
   return (
-    <section id="beneficios" className="scroll-m-20 py-8 md:py-16 px-4 bg-gray-50 overflow-hidden">
+    <section id="beneficios" className="scroll-m-20 py-12 md:py-16 px-4 bg-gray-50 overflow-hidden">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-3">
           POR QUE SE CADASTRAR NO MAIS DELIVERY?
         </h2>
         
-        <p className="text-center text-[#1F2937] mb-12 max-w-3xl mx-auto">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
+        <p className="text-center text-muted-foreground mb-8 md:mb-12 max-w-3xl mx-auto text-base md:text-lg">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
         
         {/* Desktop Grid */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -63,10 +62,10 @@ export const Benefits = () => {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Check className="w-6 h-6 text-accent-cta" />
               </div>
-              <h3 className="text-lg font-bold text-primary mb-2">
+              <h3 className="text-base md:text-lg font-bold text-primary mb-2">
                 {feature.title}
               </h3>
-              <p className="text-[#1F2937]">
+              <p className="text-muted-foreground text-sm md:text-base">
                 {feature.description}
               </p>
             </div>
@@ -85,14 +84,14 @@ export const Benefits = () => {
               {features.map((feature, index) => (
                 <CarouselItem key={index} className="pl-4 basis-4/5">
                   <div className="h-full p-1">
-                    <div className="flex flex-col h-full bg-white rounded-xl shadow-md p-6">
+                    <div className="flex flex-col h-full bg-white rounded-xl shadow-md p-4">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 flex-shrink-0">
                         <Check className="w-6 h-6 text-accent-cta" />
                       </div>
-                      <h3 className="text-lg font-bold text-primary mb-2">
+                      <h3 className="text-base font-bold text-primary mb-2">
                         {feature.title}
                       </h3>
-                      <p className="text-[#1F2937] flex-grow">
+                      <p className="text-muted-foreground text-sm flex-grow">
                         {feature.description}
                       </p>
                     </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { MessageSquare, TrendingUp, Timer } from 'lucide-react';
@@ -22,7 +21,7 @@ export const HowItWorks = () => {
   }];
   
   return (
-    <section id="como-funciona" className="scroll-m-20 py-16 px-4 bg-white">
+    <section id="como-funciona" className="scroll-m-20 py-12 md:py-16 px-4 bg-white">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
           Somos muito mais do que um aplicativo de delivery
@@ -32,16 +31,16 @@ export const HowItWorks = () => {
           {features.map((feature, index) => (
             <HoverCard key={index}>
               <HoverCardTrigger asChild>
-                <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center h-full transition-all duration-500 cursor-pointer hover:shadow-xl hover:scale-[1.02]">
+                <div className="bg-white rounded-2xl shadow-md p-4 md:p-6 flex flex-col items-center text-center h-full transition-all duration-500 cursor-pointer hover:shadow-xl hover:scale-[1.02]">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     {feature.icon}
                   </div>
                   
-                  <h3 className="text-xl font-bold text-primary mb-3">
+                  <h3 className="text-lg md:text-xl font-bold text-primary mb-3">
                     {feature.title}
                   </h3>
                   
-                  <p className="text-[#1F2937]">
+                  <p className="text-muted-foreground text-sm md:text-base">
                     {feature.description}
                   </p>
                 </div>
@@ -49,7 +48,7 @@ export const HowItWorks = () => {
               <HoverCardContent className="w-80 p-4">
                 <div>
                   <h4 className="text-lg font-bold mb-2 text-primary">{feature.title}</h4>
-                  <p className="text-[#1F2937]">{feature.expandedDescription}</p>
+                  <p className="text-muted-foreground">{feature.expandedDescription}</p>
                 </div>
               </HoverCardContent>
             </HoverCard>

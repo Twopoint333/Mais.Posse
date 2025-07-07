@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { useInView } from '@/hooks/useInView';
@@ -18,18 +17,18 @@ export const Advantages = () => {
   }, [inView]);
 
   return (
-    <section id="vantagens" className="scroll-m-20 py-16 px-4 bg-gray-50">
+    <section id="vantagens" className="scroll-m-20 py-12 md:py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-3 text-primary">Vender mais é só o começo. Veja o que mais você ganha</h2>
         
-        <p className="text-center text-[#1F2937] mb-8 max-w-3xl mx-auto">
+        <p className="text-center text-muted-foreground text-base md:text-lg mb-8 max-w-3xl mx-auto">
           Mais do que uma plataforma — uma solução completa para o seu negócio crescer
         </p>
 
         <div className="max-w-3xl mx-auto mb-12" ref={ref}>
-          <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg">
+          <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
             <iframe 
-              className="w-full h-64 md:h-96 rounded-lg" 
+              className="w-full h-full rounded-lg" 
               src={videoUrl}
               title="YouTube video player" 
               frameBorder="0" 
@@ -43,12 +42,12 @@ export const Advantages = () => {
           {advantages.map((advantage, index) => (
             <div 
               key={index} 
-              className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-sm transition-all duration-500"
+              className="flex items-center gap-3 bg-white rounded-full px-3 py-2 md:px-4 md:py-3 shadow-sm transition-all duration-500"
             >
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <Check className="w-4 h-4 text-accent-cta" />
               </div>
-              <span className="text-[#1F2937]">{advantage}</span>
+              <span className="text-foreground text-sm">{advantage}</span>
             </div>
           ))}
         </div>
