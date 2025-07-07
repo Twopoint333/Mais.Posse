@@ -137,12 +137,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         });
         toast({ title: "Depoimento atualizado com sucesso!" });
       } else { // Insert
-        if (logo_file && data.quote && data.author && data.business && data.location) {
+        if (logo_file && data.quote && data.author && data.business && data.city && data.state) {
           await addTestimonial({ 
               quote: data.quote,
               author: data.author,
               business: data.business,
-              location: data.location,
+              city: data.city,
+              state: data.state,
               logo_file: logo_file,
            });
           toast({ title: "Depoimento adicionado com sucesso!" });
@@ -160,7 +161,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   
   const openNewTestimonialDialog = () => {
     setEditingTestimonial({
-        quote: '', author: '', business: '', location: ''
+        quote: '', author: '', business: '', city: '', state: ''
     })
   }
   
@@ -296,7 +297,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <img src={getPublicUrl(testimonial.logo_url)} alt={testimonial.business} className="w-16 h-16 object-contain rounded-full border" />
                                 <div className="flex-grow">
                                 <blockquote className="italic">"{testimonial.quote}"</blockquote>
-                                <p className="text-sm text-muted-foreground mt-2">- {testimonial.author}, {testimonial.business} ({testimonial.location})</p>
+                                <p className="text-sm text-muted-foreground mt-2">- {testimonial.author}, {testimonial.business} ({testimonial.city}, {testimonial.state})</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="icon" onClick={() => openEditTestimonialDialog(testimonial)}>
@@ -341,7 +342,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               <Textarea placeholder="Citação do depoimento" value={editingTestimonial.quote || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })} required rows={4}/>
               <Input placeholder="Autor" value={editingTestimonial.author || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, author: e.target.value })} required />
               <Input placeholder="Negócio" value={editingTestimonial.business || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, business: e.target.value })} required />
-              <Input placeholder="Localização (Cidade/Estado)" value={editingTestimonial.location || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, location: e.target.value })} required />
+              <div className="flex gap-4">
+                <Input placeholder="Cidade" value={editingTestimonial.city || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, city: e.target.value })} required className="flex-grow" />
+                <Input placeholder="Estado (UF)" value={editingTestimonial.state || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, state: e.target.value })} required className="w-24" />
+              </div>
               <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)} disabled={isSubmitting}>Cancelar</Button>
                 <Button type="submit" disabled={isSubmitting}>

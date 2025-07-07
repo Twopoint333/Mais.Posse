@@ -49,7 +49,8 @@ export type Database = {
           quote: string
           author: string
           business: string
-          location: string
+          city: string
+          state: string
           logo_url: string
           created_at: string
         }
@@ -58,7 +59,8 @@ export type Database = {
           quote: string
           author: string
           business: string
-          location: string
+          city: string
+          state: string
           logo_url: string
           created_at?: string
         }
@@ -67,7 +69,8 @@ export type Database = {
           quote?: string
           author?: string
           business?: string
-          location?: string
+          city?: string
+          state?: string
           logo_url?: string
           created_at?: string
         }

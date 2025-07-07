@@ -65,7 +65,7 @@ export const Testimonials = () => {
                     <footer className="text-sm">
                       <span className="font-bold text-[#1F2937]">{testimonial.author}, </span>
                       <span className="text-[#1F2937]">{testimonial.business} – </span>
-                      <span className="text-primary font-medium">{testimonial.location}</span>
+                      <span className="text-primary font-medium">{testimonial.city}, {testimonial.state}</span>
                     </footer>
                   </blockquote>
                 </div>
