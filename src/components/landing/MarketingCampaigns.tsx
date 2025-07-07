@@ -4,6 +4,13 @@ import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from '@/context/AdminContext';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export const MarketingCampaigns = () => {
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
@@ -33,31 +40,44 @@ export const MarketingCampaigns = () => {
     }
 
     return (
-       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <Carousel
+        opts={{
+          align: "start",
+          loop: marketingCampaigns.length > 1,
+        }}
+        className="w-full"
+      >
+        <CarouselContent>
           {marketingCampaigns.map((campaign, index) => {
             let publicUrl = '';
             if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
-              // Robustly handle both old paths (with "public/") and new paths (without).
               const imagePath = campaign.image_url.replace(/^public\//, '');
               const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
               publicUrl = data?.publicUrl ?? '';
             }
             
             return (
-              <div key={campaign.id} className="p-1">
-                {publicUrl && (
-                  <img 
-                    src={publicUrl} 
-                    alt={`Campanha de Marketing ${index + 1}`} 
-                    className="w-full h-full object-cover rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-                  />
-                )}
-              </div>
+              <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
+                <div className="p-1">
+                  {publicUrl ? (
+                    <img 
+                      src={publicUrl} 
+                      alt={`Campanha de Marketing ${index + 1}`} 
+                      className="w-full object-cover rounded-lg shadow-md aspect-[9/16]"
+                    />
+                  ) : (
+                    <div className="w-full bg-muted rounded-lg aspect-[9/16] flex items-center justify-center">
+                      <p className="text-sm text-muted-foreground">Imagem indisponível</p>
+                    </div>
+                  )}
+                </div>
+              </CarouselItem>
             );
           })}
-        </div>
-      </div>
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex" />
+        <CarouselNext className="hidden sm:flex" />
+      </Carousel>
     );
   };
 
