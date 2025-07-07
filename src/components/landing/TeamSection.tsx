@@ -1,16 +1,8 @@
 import React from 'react';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, MoveRight } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Card, CardContent } from '@/components/ui/card';
 
 export const TeamSection = () => {
   const { teamMembers, isLoadingTeam, isErrorTeam, errorTeam } = useAdmin();
@@ -41,58 +33,42 @@ export const TeamSection = () => {
     
     if (!teamMembers || teamMembers.length === 0) {
       return (
-        <div className="flex items-center justify-center bg-muted rounded-lg aspect-video">
+        <div className="flex items-center justify-center bg-muted rounded-lg aspect-video h-full">
             <p className="text-muted-foreground">Nenhuma foto da equipe para exibir.</p>
         </div>
       );
     }
 
     return (
-      <Carousel
-        opts={{
-          align: "start",
-          loop: teamMembers.length > 5,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-4">
-          {teamMembers.map((member, index) => {
-            let publicUrl = '';
-            if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
-              const imagePath = member.image_url.replace(/^public\//, '');
-              const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
-              publicUrl = data?.publicUrl ?? '';
-            }
-            
-            return (
-              publicUrl && (
-                <CarouselItem key={member.id} className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                  <div className="p-1">
-                      <Card className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                          <CardContent className="p-0">
-                              <img
-                                  src={publicUrl}
-                                  alt={`Equipe Mais Delivery ${index + 1}`}
-                                  className="w-full h-full object-cover aspect-square transition-transform duration-300 hover:scale-105"
-                               />
-                          </CardContent>
-                      </Card>
-                  </div>
-                </CarouselItem>
-              )
-            );
-          })}
-        </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex" />
-        <CarouselNext className="hidden sm:flex" />
-      </Carousel>
+      <div className="columns-2 sm:columns-3 gap-4 space-y-4">
+        {teamMembers.map((member, index) => {
+          let publicUrl = '';
+          if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
+            const imagePath = member.image_url.replace(/^public\//, '');
+            const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
+            publicUrl = data?.publicUrl ?? '';
+          }
+          
+          return (
+            publicUrl && (
+              <div key={member.id} className="break-inside-avoid">
+                <img
+                    src={publicUrl}
+                    alt={`Equipe Mais Delivery ${index + 1}`}
+                    className="w-full h-auto object-contain rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                />
+              </div>
+            )
+          );
+        })}
+      </div>
     );
   }
 
   return (
     <section className="py-16 px-4 bg-white">
-      <div className="container mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-12">
+      <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
+        <div className="text-center md:text-left">
             <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
                 Uma Equipe Dedicada ao Seu Sucesso
             </h2>
@@ -100,7 +76,16 @@ export const TeamSection = () => {
                 Por trás da nossa tecnologia existe uma equipe completa de profissionais dedicados a garantir o sucesso do seu negócio. Nossa central de monitoramento funciona das 7:30 às 00:00, todos os dias, garantindo que cada pedido seja entregue com excelência.
             </p>
         </div>
-        {renderContent()}
+        <div className="relative">
+            <div className="max-h-[400px] overflow-y-auto pr-4 -mr-4">
+                {renderContent()}
+            </div>
+            {teamMembers && teamMembers.length > 0 && (
+              <p className="text-sm text-right text-muted-foreground mt-4 flex items-center justify-end gap-2">
+                Arraste para ver mais <MoveRight className="w-4 h-4" />
+              </p>
+            )}
+        </div>
       </div>
     </section>
   );
