@@ -1,5 +1,5 @@
 
-import React, 'use-client';
+import React from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from '@/context/AdminContext';
@@ -95,7 +95,7 @@ export const MarketingCampaigns = () => {
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out scale-110 md:scale-100 md:hover:scale-105"
+                          className="w-full object-cover object-center rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out scale-110 md:scale-100"
                         />
                       </div>
                     ) : (
@@ -128,7 +128,7 @@ export const MarketingCampaigns = () => {
   return (
     <section className="py-8 md:py-12 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-4 text-primary">
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM
         </h2>
         
