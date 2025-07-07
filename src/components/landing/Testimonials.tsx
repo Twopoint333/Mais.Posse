@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle, Quote, PlayCircle } from 'lucide-react';
-import { useAdmin } from '@/context/AdminContext';
+import { useAdmin, Testimonial } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -13,12 +13,16 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useInView } from '@/hooks/useInView';
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
-  const [playingVideoId, setPlayingVideoId] = React.useState<string | null>(null);
+  const [videoInModal, setVideoInModal] = React.useState<Testimonial | null>(null);
 
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true })
@@ -39,14 +43,14 @@ export const Testimonials = () => {
   React.useEffect(() => {
     if (!api) return;
 
-    if (playingVideoId) {
+    if (videoInModal) {
       api.plugins().autoplay?.stop();
     } else if (inView && textTestimonials.length > 0) {
       api.plugins().autoplay?.play();
     } else {
       api.plugins().autoplay?.stop();
     }
-  }, [inView, api, playingVideoId, textTestimonials.length]);
+  }, [inView, api, videoInModal, textTestimonials.length]);
 
   React.useEffect(() => {
     if (!api || !textTestimonials?.length) return;
@@ -65,8 +69,10 @@ export const Testimonials = () => {
     };
   }, [api, textTestimonials.length]);
 
-  const handlePlayClick = (testimonialId: string) => {
-    setPlayingVideoId(testimonialId);
+  const handleVideoClick = (testimonial: Testimonial) => {
+    if (testimonial.video_url) {
+        setVideoInModal(testimonial);
+    }
   };
 
   const renderContent = () => {
@@ -170,18 +176,6 @@ export const Testimonials = () => {
                   return (
                     <div key={testimonial.id} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                       <div className="relative aspect-video w-full bg-slate-900">
-                        {playingVideoId === testimonial.id ? (
-                          <video
-                            src={testimonial.video_url ?? ''}
-                            controls
-                            autoPlay
-                            className="h-full w-full object-cover"
-                            onEnded={() => setPlayingVideoId(null)}
-                            onPause={() => setPlayingVideoId(null)}
-                          >
-                            Seu navegador não suporta a tag de vídeo.
-                          </video>
-                        ) : (
                           <>
                             <img
                               src={getPublicUrl(testimonial.thumbnail_url) || 'https://placehold.co/1600x900.png'}
@@ -192,12 +186,11 @@ export const Testimonials = () => {
                             />
                             <div 
                               className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
-                              onClick={() => handlePlayClick(testimonial.id)}
+                              onClick={() => handleVideoClick(testimonial)}
                             >
                               <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
                             </div>
                           </>
-                        )}
                       </div>
                       <div className="p-6 flex flex-col flex-grow relative">
                         <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
@@ -224,6 +217,24 @@ export const Testimonials = () => {
               </div>
           </div>
         )}
+
+        <Dialog open={!!videoInModal} onOpenChange={(isOpen) => !isOpen && setVideoInModal(null)}>
+            <DialogContent className="p-0 border-0 max-w-4xl w-full bg-transparent shadow-none">
+                {videoInModal && videoInModal.video_url && (
+                <div className="aspect-video">
+                    <video
+                        src={videoInModal.video_url}
+                        controls
+                        autoPlay
+                        className="h-full w-full object-contain rounded-lg"
+                        onEnded={() => setVideoInModal(null)}
+                    >
+                    Seu navegador não suporta a tag de vídeo.
+                    </video>
+                </div>
+                )}
+            </DialogContent>
+        </Dialog>
       </>
     );
   }
