@@ -44,6 +44,7 @@ export const Testimonials = () => {
       author: 'Carlos Almeida',
       city: 'Posse',
       state: 'GO',
+      permalink: 'https://www.instagram.com/reel/DJ9a8D9yqoD/?igsh=MWhjdndmODJiZGw2dw==',
       embedHtml: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DJ9a8D9yqoD/?igsh=MWhjdndmODJiZGw2dw==" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
     },
     {
@@ -51,6 +52,7 @@ export const Testimonials = () => {
       author: 'Ana Pereira',
       city: 'Posse',
       state: 'GO',
+      permalink: 'https://www.instagram.com/reel/DK-TV6bNqBb/?igsh=MWwzYTk4b3l0ZXBtdA==',
       embedHtml: `<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DK-TV6bNqBb/?igsh=MWwzYTk4b3l0ZXBtdA==" data-instgrm-version="14" style="background:#FFF; border:0; margin:0; max-width:540px; min-width:326px; padding:0; width:100%;"></blockquote>`
     }
   ];
@@ -189,31 +191,4 @@ export const Testimonials = () => {
   return (
     <section ref={inViewRef} id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-8 text-primary">
-          O que dizem nossos parceiros
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto items-start mb-16">
-          {videoTestimonials.map((video, index) => (
-            <Card key={index} className="w-full overflow-hidden shadow-lg rounded-xl flex flex-col h-full">
-              <div className="flex-grow relative">
-                <div
-                  dangerouslySetInnerHTML={{ __html: video.embedHtml }}
-                />
-                <div className="absolute bottom-0 left-0 w-full h-[48px] bg-card" />
-              </div>
-              <div className="p-3 bg-white border-t">
-                <p className="font-bold text-sm text-primary truncate">{video.business}</p>
-                <p className="text-xs font-medium text-foreground">{video.author}</p>
-                <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
-        
-        {renderContent()}
-
-      </div>
-    </section>
-  );
-};
+        <h2 className="text-xl md:text-2
