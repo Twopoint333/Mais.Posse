@@ -91,11 +91,11 @@ export const MarketingCampaigns = () => {
                 <CarouselItem key={campaign.id} className="basis-4/5 sm:basis-1/2 md:basis-1/3">
                   <div className="p-1">
                     {publicUrl ? (
-                      <div className="overflow-hidden rounded-lg shadow-md bg-muted/20">
+                      <div className="overflow-hidden rounded-lg shadow-md">
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-contain rounded-lg aspect-video transition-transform duration-300 ease-in-out hover:scale-105"
+                          className="w-full object-cover rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out hover:scale-105"
                         />
                       </div>
                     ) : (
