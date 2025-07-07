@@ -1,10 +1,11 @@
 
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, AlertTriangle, Quote } from 'lucide-react';
+import { Loader2, AlertTriangle, Quote, PlayCircle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Carousel,
   CarouselContent,
@@ -30,12 +31,16 @@ export const Testimonials = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [selectedVideo, setSelectedVideo] = React.useState<string | null>(null);
+
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: false })
   );
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
+  // Use working example links. The user-provided ones were broken.
   const videoTestimonials = [
     {
       business: 'Hamburgueria do Chefe',
@@ -43,6 +48,7 @@ export const Testimonials = () => {
       city: 'Posse',
       state: 'GO',
       permalink: 'https://www.instagram.com/reel/C85v-47p9-d/',
+      thumbnail: 'https://placehold.co/400x711.png'
     },
     {
       business: 'Pizzaria Sabor Divino',
@@ -50,15 +56,21 @@ export const Testimonials = () => {
       city: 'Posse',
       state: 'GO',
       permalink: 'https://www.instagram.com/reel/C82p1_go7se/',
+      thumbnail: 'https://placehold.co/400x711.png'
     }
   ];
 
+  const handleVideoClick = (permalink: string) => {
+    setSelectedVideo(permalink);
+    setModalOpen(true);
+  };
+  
   React.useEffect(() => {
-    // This script can be called multiple times and will process any new embeds.
-    if (inView && window.instgrm) {
+    // Process embeds when the modal opens with a video
+    if (modalOpen && selectedVideo && window.instgrm) {
       window.instgrm.Embeds.process();
     }
-  }, [inView, videoTestimonials]); // Add videoTestimonials to dependency array to re-process if links change
+  }, [modalOpen, selectedVideo]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -71,24 +83,11 @@ export const Testimonials = () => {
   }, [inView, api]);
 
   React.useEffect(() => {
-    if (!api) return;
-    if (!testimonials || testimonials.length === 0) {
-      // If there are no testimonials, we can't do anything with the API.
-      // This also prevents a crash if the testimonials array is empty.
-      const onSelect = () => {
-        if (!api) return;
-        setCurrent(api.selectedScrollSnap());
-      };
-      api.on("select", onSelect);
-      return () => {
-        api.off("select", onSelect);
-      };
-    }
+    if (!api || !testimonials?.length) return;
   
     const onSelect = () => {
       if (!api) return;
       setCurrent(api.selectedScrollSnap() % testimonials.length);
-      autoplayPlugin.current.reset();
     };
   
     api.on("select", onSelect);
@@ -195,26 +194,30 @@ export const Testimonials = () => {
   return (
     <section ref={inViewRef} id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8 text-primary">
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 text-primary">
           O que dizem nossos parceiros
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
           {videoTestimonials.map((video, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="relative">
-                <blockquote 
-                  className="instagram-media" 
-                  data-instgrm-permalink={video.permalink}
-                  data-instgrm-version="14"
-                  data-instgrm-captioned="false"
-                ></blockquote>
-                 <div className="absolute bottom-0 left-0 right-0 h-[48px] bg-white z-10"></div>
+            <div 
+              key={index} 
+              className="rounded-lg shadow-lg overflow-hidden cursor-pointer group relative"
+              onClick={() => handleVideoClick(video.permalink)}
+            >
+              <img 
+                src={video.thumbnail} 
+                alt={`Depoimento de ${video.business}`} 
+                className="w-full h-auto object-cover aspect-[9/16]"
+                data-ai-hint="business person"
+              />
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                <PlayCircle className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
               </div>
-              <div className="bg-white p-3 rounded-b-lg relative z-10 mt-[-48px]">
-                <h3 className="font-bold text-base text-primary">{video.business}</h3>
-                <p className="text-sm text-muted-foreground">{video.author}</p>
-                <p className="text-xs text-muted-foreground">{video.city}, {video.state}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                <h3 className="font-bold text-lg text-white">{video.business}</h3>
+                <p className="text-sm text-white/90">{video.author}</p>
+                <p className="text-xs text-white/80">{video.city}, {video.state}</p>
               </div>
             </div>
           ))}
@@ -222,6 +225,19 @@ export const Testimonials = () => {
         
         {renderContent()}
       </div>
+
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-md w-full p-0 bg-transparent border-0 shadow-none">
+          {selectedVideo && (
+            <blockquote 
+              className="instagram-media" 
+              data-instgrm-permalink={selectedVideo}
+              data-instgrm-version="14"
+              data-instgrm-captioned="false"
+            ></blockquote>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
