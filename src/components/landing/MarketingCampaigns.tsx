@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from '@/context/AdminContext';
@@ -8,11 +8,34 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
 export const MarketingCampaigns = () => {
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCount(api.scrollSnapList().length)
+    setCurrent(api.selectedScrollSnap())
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap())
+    })
+    
+    api.on("reInit", () => {
+      setCount(api.scrollSnapList().length)
+      setCurrent(api.selectedScrollSnap())
+    });
+
+  }, [api])
 
   const renderContent = () => {
     if (isLoadingCampaigns) {
@@ -39,51 +62,66 @@ export const MarketingCampaigns = () => {
     }
 
     return (
-      <Carousel
-        plugins={[
-          Autoplay({
-            delay: 2000,
-            stopOnInteraction: true,
-          }),
-        ]}
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent>
-          {marketingCampaigns.map((campaign, index) => {
-            let publicUrl = '';
-            if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
-              // Robustly handle both old paths (with "public/") and new paths (without).
-              const imagePath = campaign.image_url.replace(/^public\//, '');
-              const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
-              publicUrl = data?.publicUrl ?? '';
-            }
-            
-            return (
-              <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-1">
-                  {publicUrl ? (
-                    <div className="overflow-hidden rounded-lg shadow-md">
-                      <img 
-                        src={publicUrl} 
-                        alt={`Campanha de Marketing ${index + 1}`} 
-                        className="w-full object-cover rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out hover:scale-105"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full bg-muted rounded-lg aspect-[9/16] flex items-center justify-center">
-                      <p className="text-sm text-muted-foreground">Imagem indisponível</p>
-                    </div>
-                  )}
-                </div>
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-      </Carousel>
+      <>
+        <Carousel
+          setApi={setApi}
+          plugins={[
+            Autoplay({
+              delay: 2000,
+              stopOnInteraction: true,
+            }),
+          ]}
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            {marketingCampaigns.map((campaign, index) => {
+              let publicUrl = '';
+              if (typeof campaign.image_url === 'string' && campaign.image_url.trim() !== '') {
+                // Robustly handle both old paths (with "public/") and new paths (without).
+                const imagePath = campaign.image_url.replace(/^public\//, '');
+                const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
+                publicUrl = data?.publicUrl ?? '';
+              }
+              
+              return (
+                <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    {publicUrl ? (
+                      <div className="overflow-hidden rounded-lg shadow-md">
+                        <img 
+                          src={publicUrl} 
+                          alt={`Campanha de Marketing ${index + 1}`} 
+                          className="w-full object-cover rounded-lg aspect-[9/16] transition-transform duration-300 ease-in-out hover:scale-105"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full bg-muted rounded-lg aspect-[9/16] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">Imagem indisponível</p>
+                      </div>
+                    )}
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
+        {marketingCampaigns && marketingCampaigns.length > 1 && (
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from({ length: count }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => api?.scrollTo(i)}
+                className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </>
     );
   };
 
