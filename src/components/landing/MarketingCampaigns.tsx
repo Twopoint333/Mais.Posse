@@ -17,7 +17,7 @@ export const MarketingCampaigns = () => {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
-  const autoplayPlugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: false }));
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
 
   React.useEffect(() => {
     if (!api) {
@@ -33,14 +33,15 @@ export const MarketingCampaigns = () => {
 
     api.on("select", onSelect)
     
-    api.on("reInit", () => {
-        setCount(api.scrollSnapList().length)
-        setCurrent(api.selectedScrollSnap())
-    })
+    const onReInit = () => {
+        setCount(api.scrollSnapList().length);
+        setCurrent(api.selectedScrollSnap());
+    };
+    api.on("reInit", onReInit);
 
     return () => {
       api.off("select", onSelect)
-      api.off("reInit", () => {})
+      api.off("reInit", onReInit)
     }
   }, [api])
 
@@ -134,7 +135,7 @@ export const MarketingCampaigns = () => {
   };
 
   return (
-    <section className="py-4 md:py-8 px-4 bg-gray-50">
+    <section className="py-4 md:py-6 px-4 bg-gray-50">
       <div className="container mx-auto">
         <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM

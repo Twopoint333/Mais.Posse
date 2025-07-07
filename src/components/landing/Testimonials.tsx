@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -14,12 +14,12 @@ import Autoplay from "embla-carousel-autoplay";
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
-  const [count, setCount] = useState(0)
-  const autoplayPlugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true }));
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [current, setCurrent] = React.useState(0)
+  const [count, setCount] = React.useState(0)
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: true }));
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!api) {
       return
     }
@@ -33,14 +33,15 @@ export const Testimonials = () => {
 
     api.on("select", onSelect)
 
-    api.on("reInit", () => {
-        setCount(api.scrollSnapList().length)
-        setCurrent(api.selectedScrollSnap())
-    })
+    const onReInit = () => {
+        setCount(api.scrollSnapList().length);
+        setCurrent(api.selectedScrollSnap());
+    };
+    api.on("reInit", onReInit);
 
     return () => {
       api.off("select", onSelect)
-      api.off("reInit", () => {})
+      api.off("reInit", onReInit)
     }
   }, [api]);
 
@@ -98,7 +99,7 @@ export const Testimonials = () => {
                     return (
                         <CarouselItem key={testimonial.id} className="pl-4 basis-full md:basis-1/2">
                           <div className="p-1 h-full">
-                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 flex flex-col h-full">
+                            <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-3 flex flex-col h-full">
                                 <div className="flex justify-center mb-4">
                                   <div className="bg-primary rounded-full p-2 flex items-center justify-center">
                                     <Avatar className="h-10 w-10">
@@ -140,9 +141,9 @@ export const Testimonials = () => {
   }
 
   return (
-    <section id="depoimentos" className="scroll-m-20 py-8 md:py-12 px-4 bg-gray-50">
+    <section id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-10 text-primary">
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-6 text-primary">
           O que dizem nossos parceiros
         </h2>
         
