@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -87,18 +88,18 @@ export const MarketingCampaigns = () => {
               }
               
               return (
-                <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={campaign.id} className="basis-4/5 sm:basis-1/2 md:basis-1/3">
                   <div className="p-1">
                     {publicUrl ? (
-                      <div className="overflow-hidden rounded-lg shadow-md">
+                      <div className="overflow-hidden rounded-lg shadow-md bg-muted/20">
                         <img 
                           src={publicUrl} 
                           alt={`Campanha de Marketing ${index + 1}`} 
-                          className="w-full object-cover rounded-lg aspect-[4/5] transition-transform duration-300 ease-in-out hover:scale-105"
+                          className="w-full object-contain rounded-lg aspect-video transition-transform duration-300 ease-in-out hover:scale-105"
                         />
                       </div>
                     ) : (
-                      <div className="w-full bg-muted rounded-lg aspect-[4/5] flex items-center justify-center">
+                      <div className="w-full bg-muted rounded-lg aspect-video flex items-center justify-center">
                         <p className="text-sm text-muted-foreground">Imagem indisponível</p>
                       </div>
                     )}
@@ -125,13 +126,13 @@ export const MarketingCampaigns = () => {
   };
 
   return (
-    <section className="py-12 md:py-16 px-4 bg-gray-50">
+    <section className="py-8 md:py-12 px-4 bg-gray-50">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-primary">
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-4 text-primary">
           CAMPANHAS DE MARKETING QUE FUNCIONAM
         </h2>
         
-        <p className="text-center text-muted-foreground text-base md:text-lg mb-8 md:mb-12 max-w-3xl mx-auto">
+        <p className="text-center text-muted-foreground text-sm md:text-base mb-6 md:mb-8 max-w-3xl mx-auto">
           Impulsione sua marca com ações estratégicas de marketing cooperado para conquistar mais clientes!
         </p>
         
