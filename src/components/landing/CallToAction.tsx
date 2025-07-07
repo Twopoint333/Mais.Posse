@@ -13,8 +13,7 @@ export const CallToAction = () => {
   return (
     <section id="cta" className="scroll-m-20 py-16 px-4 bg-primary text-white overflow-hidden">
       <div className="container mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-center md:text-left">
+        <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">
               Pronto para impulsionar suas vendas?
             </h2>
@@ -23,21 +22,12 @@ export const CallToAction = () => {
             </p>
             <Button 
               size="lg" 
-              className="w-full md:w-auto text-lg bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground font-bold shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-cta"
+              className="w-full sm:w-auto text-lg bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground font-bold shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-cta"
               onClick={handlePartnerClick}
             >
               Quero ser parceiro <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
-          <div className="hidden md:flex justify-center items-center">
-            <img 
-              src="https://placehold.co/400x400.png"
-              data-ai-hint="delivery app"
-              alt="Aplicativo Mais Delivery em um smartphone" 
-              className="rounded-lg shadow-2xl transform transition-transform duration-500 hover:scale-105"
-            />
-          </div>
-        </div>
       </div>
     </section>
   );
