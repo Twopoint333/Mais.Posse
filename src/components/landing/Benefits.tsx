@@ -25,24 +25,22 @@ export const Benefits = () => {
         
         <p className="text-center text-[#1F2937] mb-12 max-w-3xl mx-auto">O Mais Delivery é uma startup de marketplace que está transformando o cenário do delivery no Brasil. Presente em mais de 300 cidades, geramos oportunidades, impulsionamos pequenos negócios e movimentamos a economia local — tudo com tecnologia acessível e impacto real.</p>
         
-        <div className="md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-8">
-          <div className="flex gap-6 overflow-x-auto pb-4 md:contents">
-            {features.map((feature, index) => (
-              <div key={index} className="flex-shrink-0 w-4/5 sm:w-3/5 md:w-full bg-white rounded-xl shadow-md p-6 transition-all duration-500 hover:shadow-lg hover:scale-[1.02]">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Check className="w-6 h-6 text-accent-cta" />
-                </div>
-                
-                <h3 className="text-lg font-bold text-primary mb-2">
-                  {feature.title}
-                </h3>
-                
-                <p className="text-[#1F2937]">
-                  {feature.description}
-                </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-md p-6 transition-all duration-500 hover:shadow-lg hover:scale-[1.02]">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Check className="w-6 h-6 text-accent-cta" />
               </div>
-            ))}
-          </div>
+              
+              <h3 className="text-lg font-bold text-primary mb-2">
+                {feature.title}
+              </h3>
+              
+              <p className="text-[#1F2937]">
+                {feature.description}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
