@@ -196,10 +196,12 @@ export const Testimonials = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto items-start mb-16">
           {videoTestimonials.map((video, index) => (
             <Card key={index} className="w-full overflow-hidden shadow-lg rounded-xl flex flex-col h-full">
-              <div 
-                className="flex-grow"
-                dangerouslySetInnerHTML={{ __html: video.embedHtml }}
-              />
+              <div className="flex-grow relative">
+                <div
+                  dangerouslySetInnerHTML={{ __html: video.embedHtml }}
+                />
+                <div className="absolute bottom-0 left-0 w-full h-[48px] bg-card" />
+              </div>
               <div className="p-3 bg-white border-t">
                 <p className="font-bold text-sm text-primary truncate">{video.business}</p>
                 <p className="text-xs font-medium text-foreground">{video.author}</p>
