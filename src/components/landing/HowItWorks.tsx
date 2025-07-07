@@ -1,17 +1,9 @@
 
 import React from 'react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { useInView } from '@/hooks/useInView';
 import { MessageSquare, TrendingUp, Timer } from 'lucide-react';
 
 export const HowItWorks = () => {
-  const {
-    ref,
-    inView
-  } = useInView({
-    threshold: 0.1
-  });
-  
   const features = [{
     icon: <MessageSquare className="w-10 h-10 text-accent-cta" />,
     title: "Gestão Delivery",
@@ -29,18 +21,18 @@ export const HowItWorks = () => {
     expandedDescription: "Você recebe tudo pronto para produzir e entregar. Agilize seu processo e aumente a satisfação dos clientes com nosso sistema automatizado."
   }];
   
-  return <section id="como-funciona" className="py-16 px-4 bg-white">
+  return (
+    <section id="como-funciona" className="py-16 px-4 bg-white">
       <div className="container mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-primary">
           Somos muito mais do que um aplicativo de delivery
         </h2>
         
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          {features.map((feature, index) => <HoverCard key={index}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          {features.map((feature, index) => (
+            <HoverCard key={index}>
               <HoverCardTrigger asChild>
-                <div className={`bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center h-full transition-all duration-500 cursor-pointer hover:shadow-xl hover:scale-[1.02] ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{
-              transitionDelay: `${index * 100}ms`
-            }}>
+                <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center h-full transition-all duration-500 cursor-pointer hover:shadow-xl hover:scale-[1.02]">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     {feature.icon}
                   </div>
@@ -60,8 +52,10 @@ export const HowItWorks = () => {
                   <p className="text-[#1F2937]">{feature.expandedDescription}</p>
                 </div>
               </HoverCardContent>
-            </HoverCard>)}
+            </HoverCard>
+          ))}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useInView } from '@/hooks/useInView';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -8,13 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
 
 export const Testimonials = () => {
-  const {
-    ref,
-    inView
-  } = useInView({
-    threshold: 0.1
-  });
-  
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
 
   const renderContent = () => {
@@ -46,7 +38,7 @@ export const Testimonials = () => {
     }
     
     return (
-       <div ref={ref} className="relative">
+       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {testimonials.map((testimonial, index) => {
             let publicUrl = '';
@@ -58,9 +50,7 @@ export const Testimonials = () => {
             }
 
             return (
-              <div key={testimonial.id} className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 h-full transition-all duration-500 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`} style={{
-                  transitionDelay: `${index * 150}ms`
-                }}>
+              <div key={testimonial.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 h-full">
                   <div className="flex justify-center mb-4">
                     <div className="bg-primary rounded-full p-2 flex items-center justify-center">
                       <Avatar className="h-12 w-12">

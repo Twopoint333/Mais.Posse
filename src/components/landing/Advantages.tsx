@@ -1,11 +1,8 @@
 
 import React from 'react';
-import { useInView } from '@/hooks/useInView';
 import { Check } from 'lucide-react';
 
 export const Advantages = () => {
-  const { ref, inView } = useInView({ threshold: 0.1 });
-  
   const advantages = ["Catálogo do estabelecimento dentro da plataforma", "Equipe de Monitoramento (07:30–00:00)", "Suporte Técnico Online", "Equipe de Marketing", "Treinamento passo a passo", "Equipe de Entregadores", "Consultor de Suporte Local", "Campanhas, Cupons, Promoções e Parcerias", "Flexibilidade na Entrega (própria ou Mais Delivery)"];
   
   return (
@@ -23,15 +20,14 @@ export const Advantages = () => {
           </div>
         </div>
         
-        <div ref={ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {advantages.map((advantage, index) => (
             <div 
               key={index} 
-              className={`flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-sm transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`} 
-              style={{ transitionDelay: `${index * 100}ms` }}
+              className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-sm transition-all duration-500"
             >
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Check className={`w-4 h-4 text-accent-cta ${inView ? 'animate-pulse' : ''}`} />
+                <Check className="w-4 h-4 text-accent-cta" />
               </div>
               <span className="text-[#1F2937]">{advantage}</span>
             </div>

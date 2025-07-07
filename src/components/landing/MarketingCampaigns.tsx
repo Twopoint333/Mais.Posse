@@ -1,13 +1,11 @@
 
 import React from 'react';
-import { useInView } from '@/hooks/useInView';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from '@/context/AdminContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export const MarketingCampaigns = () => {
-  const { ref, inView } = useInView({ threshold: 0.1 });
   const { marketingCampaigns, isLoadingCampaigns, isErrorCampaigns, errorCampaigns } = useAdmin();
 
   const renderContent = () => {
@@ -35,7 +33,7 @@ export const MarketingCampaigns = () => {
     }
 
     return (
-       <div ref={ref} className={`transition-all duration-500 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {marketingCampaigns.map((campaign, index) => {
             let publicUrl = '';

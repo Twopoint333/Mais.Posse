@@ -15,24 +15,10 @@ import { Footer } from '@/components/landing/Footer';
 
 const Index = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [headerVisible, setHeaderVisible] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Determine if we're scrolled at all
-      setIsScrolled(currentScrollY > 10);
-      
-      // Determine header visibility based on scroll direction
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setHeaderVisible(false);
-      } else {
-        setHeaderVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
+      setIsScrolled(window.scrollY > 10);
     };
 
     // Add viewport meta tag for proper mobile rendering
@@ -46,11 +32,11 @@ const Index = () => {
       window.removeEventListener('scroll', handleScroll);
       document.head.removeChild(meta);
     };
-  }, [lastScrollY]);
+  }, []);
 
   return (
     <div className="relative bg-white overflow-x-hidden">
-      <Header isScrolled={isScrolled} visible={headerVisible} />
+      <Header isScrolled={isScrolled} visible={true} />
       <Hero />
       <Benefits />
       <HowItWorks />

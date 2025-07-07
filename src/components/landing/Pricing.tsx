@@ -1,11 +1,8 @@
 
 import React from 'react';
-import { useInView } from '@/hooks/useInView';
 import { Check } from 'lucide-react';
 
 export const Pricing = () => {
-  const { ref, inView } = useInView({ threshold: 0.1 });
-  
   const pricingOptions = [
     {
       title: "Taxa Única de Adesão",
@@ -34,17 +31,11 @@ export const Pricing = () => {
           Preços Transparentes
         </h2>
         
-        <div 
-          ref={ref}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {pricingOptions.map((option, index) => (
             <div 
               key={index}
-              className={`rounded-xl overflow-hidden shadow-lg transition-all duration-500 ${
-                inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              }`}
-              style={{ transitionDelay: `${index * 150}ms` }}
+              className="rounded-xl overflow-hidden shadow-lg"
             >
               <div className={`bg-gradient-to-br from-primary to-accent-cta py-6 px-8 text-white`}>
                 <h3 className="text-xl font-bold">{option.title}</h3>

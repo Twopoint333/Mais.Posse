@@ -1,12 +1,9 @@
+
 import React from 'react';
-import { useInView } from '@/hooks/useInView';
 import { Truck, ShoppingBag } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
 import entregadorImg from '../../entregador.jpg';
 
 export const DeliveryOptions = () => {
-  const { ref, inView } = useInView({ threshold: 0.1 });
-  
   const deliveryOptions = [
     {
       icon: <Truck className="w-12 h-12 text-accent-cta" />,
@@ -32,14 +29,11 @@ export const DeliveryOptions = () => {
         </p>
         
         <div className="flex flex-col md:flex-row gap-8 items-center">
-          <div 
-            ref={ref}
-            className="w-full md:w-1/2 mb-8 md:mb-0"
-          >
+          <div className="w-full md:w-1/2 mb-8 md:mb-0">
             <img 
               src={entregadorImg}
               alt="Entregador Mais Delivery" 
-              className={`w-full h-auto rounded-lg shadow-lg transition-all duration-800 ${inView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
+              className="w-full h-auto rounded-lg shadow-lg"
             />
           </div>
           
@@ -47,14 +41,7 @@ export const DeliveryOptions = () => {
             {deliveryOptions.map((option, index) => (
               <div 
                 key={index}
-                className={`bg-white rounded-xl shadow-md p-6 transition-all duration-800 ${
-                  inView 
-                    ? 'opacity-100 translate-x-0' 
-                    : 'opacity-0 translate-x-10'
-                }`}
-                style={{ 
-                  transitionDelay: `${index * 200}ms`
-                }}
+                className="bg-white rounded-xl shadow-md p-6"
               >
                 <div className="flex items-center mb-4">
                   <div className="p-2 bg-primary/10 rounded-full mr-4">
