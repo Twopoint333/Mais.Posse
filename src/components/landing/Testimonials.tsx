@@ -91,11 +91,6 @@ export const Testimonials = () => {
     if (!testimonials || testimonials.length === 0) {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
-    
-    let displayTextTestimonials = [...textTestimonials];
-    while (displayTextTestimonials.length > 0 && displayTextTestimonials.length < 4) {
-        displayTextTestimonials.push(...textTestimonials.map(t => ({...t, id: `${t.id}-${displayTextTestimonials.length}-${Math.random()}`})));
-    }
 
     return (
        <>
@@ -160,14 +155,14 @@ export const Testimonials = () => {
             <Carousel
                 setApi={setTextApi}
                 plugins={[autoplayPluginText.current]}
-                opts={{ align: "start", loop: displayTextTestimonials.length > 1 }}
+                opts={{ align: "start", loop: true }}
                 className="w-full"
             >
                 <CarouselContent className="-ml-4 md:items-stretch">
-                    {displayTextTestimonials.map((testimonial, index) => {
+                    {textTestimonials.map((testimonial) => {
                         const logoPublicUrl = getPublicUrl(testimonial.logo_url);
                         return (
-                            <CarouselItem key={`${testimonial.id}-${index}`} className="pl-4 basis-full md:basis-1/2">
+                            <CarouselItem key={testimonial.id} className="pl-4 basis-full md:basis-1/2 lg:basis-1/3">
                               <div className="p-1 h-full">
                                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
