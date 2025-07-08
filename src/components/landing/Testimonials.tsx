@@ -20,14 +20,19 @@ import {
 
 // Bulletproof getPublicUrl function
 const getPublicUrl = (pathOrUrl: string | null | undefined): string => {
+  // Check for invalid inputs first.
   if (!pathOrUrl || typeof pathOrUrl !== 'string' || pathOrUrl.trim() === '') {
     return '';
   }
+  // If it's already a full URL, return it directly.
   if (pathOrUrl.startsWith('http')) {
     return pathOrUrl;
   }
+  // Clean up the path, removing the legacy "public/" prefix if it exists.
   const imagePath = pathOrUrl.replace(/^public\//, '');
   if (!imagePath) return '';
+  
+  // Get the public URL from Supabase storage.
   const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
   return data?.publicUrl ?? '';
 };
@@ -44,7 +49,7 @@ export const Testimonials = () => {
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
-  // Filter and validate testimonials. This is the first line of defense.
+  // Filter and validate testimonials robustly.
   const videoTestimonials = React.useMemo(() =>
     testimonials?.filter((t): t is Testimonial =>
       !!(t && t.id && t.video_url && t.quote && t.author && t.business)
@@ -57,8 +62,7 @@ export const Testimonials = () => {
     ) || [],
   [testimonials]);
 
-  // Simplified and safer effect to control autoplay.
-  // This directly uses the plugin ref, as correctly suggested.
+  // Safer effect to control autoplay using the direct plugin reference.
   React.useEffect(() => {
     const autoplay = autoplayPluginText.current;
     if (!autoplay) return;
@@ -79,7 +83,7 @@ export const Testimonials = () => {
     textApi.on("select", onSelect);
     textApi.on("reInit", onSelect);
 
-    // Initial state
+    // Set initial state
     onSelect(textApi);
 
     return () => {
@@ -115,7 +119,7 @@ export const Testimonials = () => {
       )
     }
 
-    if (!testimonials || (videoTestimonials.length === 0 && textTestimonials.length === 0)) {
+    if (videoTestimonials.length === 0 && textTestimonials.length === 0) {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
 
@@ -128,9 +132,6 @@ export const Testimonials = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {videoTestimonials.map((testimonial) => {
-                // Second line of defense: ensure testimonial is not null/undefined inside the map
-                if (!testimonial) return null;
-
                 const { id, business, author, quote, city, state, thumbnail_url, logo_url } = testimonial;
                 const logoPublicUrl = getPublicUrl(logo_url);
                 const thumbnailPublicUrl = getPublicUrl(thumbnail_url);
@@ -193,8 +194,6 @@ export const Testimonials = () => {
             >
                 <CarouselContent className="-ml-4">
                     {textTestimonials.map((testimonial) => {
-                        if (!testimonial) return null;
-
                         const { id, business, author, quote, city, state, logo_url } = testimonial;
                         const logoPublicUrl = getPublicUrl(logo_url);
                         return (
