@@ -11,14 +11,15 @@ type NewTeamMember = { files: File[] };
 export type Testimonial = Database['public']['Tables']['testimonials']['Row'];
 
 export type NewTestimonial = Omit<Database['public']['Tables']['testimonials']['Insert'], 'id' | 'created_at' | 'logo_url'> & { 
-  logo_file: File;
+  logo_file?: File;
   video_url?: string | null;
   thumbnail_url?: string | null;
 };
 
 export type UpdateTestimonial = Database['public']['Tables']['testimonials']['Update'] & { 
   logo_file?: File; 
-  old_logo_path?: string;
+  old_logo_path?: string | null;
+  remove_logo?: boolean;
 };
 
 
@@ -167,20 +168,23 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const addTestimonialMutation = useMutation<unknown, Error, NewTestimonial>({
     mutationFn: async (testimonial) => {
         const { logo_file, ...dbData } = testimonial;
-
-        const logoPath = await uploadFile(logo_file);
-        
+        let logoPath: string | null = null;
+        if (logo_file) {
+          logoPath = await uploadFile(logo_file);
+        }
         return inserter('testimonials', { ...dbData, logo_url: logoPath });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonials'] }),
   });
   const updateTestimonialMutation = useMutation<unknown, Error, UpdateTestimonial>({
     mutationFn: async (testimonial) => {
-        const { logo_file, old_logo_path, ...dbData } = testimonial;
-        
+        const { logo_file, old_logo_path, remove_logo, ...dbData } = testimonial;
         const dataToUpdate: Partial<Testimonial> & { id: string } = { ...dbData as Testimonial };
 
-        if (logo_file) {
+        if (remove_logo) {
+            dataToUpdate.logo_url = null;
+            if (old_logo_path) await deleteFile(old_logo_path);
+        } else if (logo_file) {
             dataToUpdate.logo_url = await uploadFile(logo_file);
             if (old_logo_path) await deleteFile(old_logo_path);
         }

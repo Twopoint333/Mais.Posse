@@ -3,12 +3,14 @@ import React, { useState, useRef } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, PlusCircle, Trash2, Edit, Loader2 } from 'lucide-react';
-import { useAdmin, Testimonial, MarketingCampaign, UpdateTestimonial } from '@/context/AdminContext';
+import { useAdmin, Testimonial, MarketingCampaign, UpdateTestimonial, NewTestimonial } from '@/context/AdminContext';
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +42,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [newCampaignFiles, setNewCampaignFiles] = useState<FileList | null>(null);
   const [newTeamMemberFiles, setNewTeamMemberFiles] = useState<FileList | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<(Partial<Testimonial> & { logo_file?: File }) | null>(null);
+  const [isRemovingLogo, setIsRemovingLogo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<MarketingCampaign | null>(null);
   const [campaignsToAddCount, setCampaignsToAddCount] = useState(0);
@@ -134,13 +137,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             ...data, 
             id,
             logo_file,
-            old_logo_path: logo_file ? originalTestimonial?.logo_url : undefined,
+            old_logo_path: originalTestimonial?.logo_url,
+            remove_logo: isRemovingLogo,
         };
         await updateTestimonial(testimonialData);
         toast({ title: "Depoimento atualizado com sucesso!" });
       } else { // Insert
-        if (logo_file && data.quote && data.author && data.business && data.city && data.state) {
-          await addTestimonial({ 
+        if (data.quote && data.author && data.business && data.city && data.state) {
+          const newTestimonialData: NewTestimonial = {
               quote: data.quote,
               author: data.author,
               business: data.business,
@@ -149,13 +153,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               logo_file,
               video_url: data.video_url,
               thumbnail_url: data.thumbnail_url,
-           });
+          };
+          await addTestimonial(newTestimonialData);
           toast({ title: "Depoimento adicionado com sucesso!" });
         } else {
-            toast({ variant: "destructive", title: "Todos os campos de texto e o logo são obrigatórios." });
+            toast({ variant: "destructive", title: "Os campos de texto principais são obrigatórios." });
         }
       }
       setEditingTestimonial(null);
+      setIsRemovingLogo(false);
     } catch (error) {
         handleApiError(error, editingTestimonial.id ? "atualizar depoimento" : "adicionar depoimento");
     } finally {
@@ -164,14 +170,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
   
   const openNewTestimonialDialog = () => {
+    setIsRemovingLogo(false);
     setEditingTestimonial({
         quote: '', author: '', business: '', city: '', state: '', video_url: '', thumbnail_url: ''
     })
   }
   
   const openEditTestimonialDialog = (testimonial: Testimonial) => {
+      setIsRemovingLogo(false);
       setEditingTestimonial({ ...testimonial });
   }
+
+  const handleCloseDialog = (open: boolean) => {
+    if (!open) {
+      setEditingTestimonial(null);
+      setIsRemovingLogo(false);
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -301,7 +316,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                     <div className="space-y-4">
                         {testimonials?.map(testimonial => (
                             <Card key={testimonial.id} className="flex items-start gap-4 p-4">
-                                <img src={getPublicUrl(testimonial.logo_url)} alt={testimonial.business} className="w-16 h-16 object-contain rounded-full border" />
+                                {testimonial.logo_url ? (
+                                    <img src={getPublicUrl(testimonial.logo_url)} alt={testimonial.business} className="w-16 h-16 object-contain rounded-full border" />
+                                ): (
+                                    <div className="w-16 h-16 rounded-full border bg-muted flex items-center justify-center text-muted-foreground text-xs">Sem Logo</div>
+                                )}
                                 <div className="flex-grow">
                                 <blockquote className="italic">"{testimonial.quote}"</blockquote>
                                 <p className="text-sm text-muted-foreground mt-2">- {testimonial.author}, {testimonial.business} ({testimonial.city}, {testimonial.state})</p>
@@ -331,41 +350,74 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       </Tabs>
 
       {/* Testimonial Dialog */}
-      <Dialog open={!!editingTestimonial} onOpenChange={(open) => !open && setEditingTestimonial(null)}>
+      <Dialog open={!!editingTestimonial} onOpenChange={handleCloseDialog}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingTestimonial?.id ? 'Editar' : 'Adicionar'} Depoimento</DialogTitle>
             <DialogDescription>
-              Preencha as informações do depoimento. Para editar, apenas o logo não é obrigatório.
+              Preencha as informações do depoimento.
             </DialogDescription>
           </DialogHeader>
           {editingTestimonial && (
              <form onSubmit={handleSaveTestimonial} className="space-y-4">
-              <div>
-                <label className='text-sm font-medium'>Logo</label>
-                <Input type="file" accept='image/*' ref={testimonialLogoRef} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, logo_file: e.target.files?.[0] })} required={!editingTestimonial.id} />
-                {editingTestimonial.id && editingTestimonial.logo_url && <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter o logo atual: <a href={getPublicUrl(editingTestimonial.logo_url)} target="_blank" rel="noopener noreferrer" className="underline">ver imagem</a></p>}
+              <div className="space-y-2">
+                <Label htmlFor="logo">Logo (Opcional)</Label>
+                <Input id="logo" type="file" accept='image/*' ref={testimonialLogoRef} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, logo_file: e.target.files?.[0] })} disabled={isRemovingLogo}/>
+                {editingTestimonial.id && editingTestimonial.logo_url && (
+                  <>
+                    <p className='text-xs text-muted-foreground mt-1'>Deixe em branco para manter o logo atual: <a href={getPublicUrl(editingTestimonial.logo_url)} target="_blank" rel="noopener noreferrer" className="underline">ver imagem</a></p>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="remove-logo" checked={isRemovingLogo} onCheckedChange={(checked) => setIsRemovingLogo(Boolean(checked))} />
+                        <Label htmlFor="remove-logo" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Remover logo atual
+                        </Label>
+                    </div>
+                  </>
+                )}
               </div>
-              <Textarea placeholder="Citação do depoimento" value={editingTestimonial.quote || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })} required rows={4}/>
-              <Input placeholder="Autor" value={editingTestimonial.author || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, author: e.target.value })} required />
-              <Input placeholder="Negócio" value={editingTestimonial.business || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, business: e.target.value })} required />
+              <div className="space-y-2">
+                <Label htmlFor="quote">Citação do depoimento</Label>
+                <Textarea id="quote" placeholder="Citação do depoimento" value={editingTestimonial.quote || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })} required rows={4}/>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="author">Autor</Label>
+                <Input id="author" placeholder="Autor" value={editingTestimonial.author || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, author: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="business">Negócio</Label>
+                <Input id="business" placeholder="Negócio" value={editingTestimonial.business || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, business: e.target.value })} required />
+              </div>
               <div className="flex gap-4">
-                <Input placeholder="Cidade" value={editingTestimonial.city || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, city: e.target.value })} required className="flex-grow" />
-                <Input placeholder="Estado (UF)" value={editingTestimonial.state || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, state: e.target.value })} required className="w-24" />
+                <div className="space-y-2 flex-grow">
+                  <Label htmlFor="city">Cidade</Label>
+                  <Input id="city" placeholder="Cidade" value={editingTestimonial.city || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, city: e.target.value })} required />
+                </div>
+                <div className="space-y-2 w-24">
+                  <Label htmlFor="state">Estado (UF)</Label>
+                  <Input id="state" placeholder="UF" value={editingTestimonial.state || ''} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, state: e.target.value })} required />
+                </div>
               </div>
-              <Input
-                placeholder="URL do Vídeo (Opcional)"
-                value={editingTestimonial.video_url || ''}
-                onChange={(e) => setEditingTestimonial({ ...editingTestimonial, video_url: e.target.value || null })}
-              />
-              <Input
-                placeholder="URL da Thumbnail (Opcional)"
-                value={editingTestimonial.thumbnail_url || ''}
-                onChange={(e) => setEditingTestimonial({ ...editingTestimonial, thumbnail_url: e.target.value || null })}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="video_url">URL do Vídeo (Opcional)</Label>
+                <Input
+                  id="video_url"
+                  placeholder="https://..."
+                  value={editingTestimonial.video_url || ''}
+                  onChange={(e) => setEditingTestimonial({ ...editingTestimonial, video_url: e.target.value || null })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="thumbnail_url">URL da Thumbnail (Opcional)</Label>
+                <Input
+                  id="thumbnail_url"
+                  placeholder="https://..."
+                  value={editingTestimonial.thumbnail_url || ''}
+                  onChange={(e) => setEditingTestimonial({ ...editingTestimonial, thumbnail_url: e.target.value || null })}
+                />
+              </div>
 
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)} disabled={isSubmitting}>Cancelar</Button>
+                <Button type="button" variant="ghost" onClick={() => handleCloseDialog(false)} disabled={isSubmitting}>Cancelar</Button>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Salvar

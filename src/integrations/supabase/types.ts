@@ -51,7 +51,7 @@ export type Database = {
           business: string
           city: string
           state: string
-          logo_url: string
+          logo_url: string | null
           created_at: string
           video_url: string | null
           thumbnail_url: string | null
@@ -63,7 +63,7 @@ export type Database = {
           business: string
           city: string
           state: string
-          logo_url: string
+          logo_url?: string | null
           created_at?: string
           video_url?: string | null
           thumbnail_url?: string | null
@@ -75,7 +75,7 @@ export type Database = {
           business?: string
           city?: string
           state?: string
-          logo_url?: string
+          logo_url?: string | null
           created_at?: string
           video_url?: string | null
           thumbnail_url?: string | null
