@@ -20,19 +20,15 @@ import {
 
 // Bulletproof getPublicUrl function
 const getPublicUrl = (pathOrUrl: string | null | undefined): string => {
-  // Check for invalid inputs first.
   if (!pathOrUrl || typeof pathOrUrl !== 'string' || pathOrUrl.trim() === '') {
     return '';
   }
-  // If it's already a full URL, return it directly.
   if (pathOrUrl.startsWith('http')) {
     return pathOrUrl;
   }
-  // Clean up the path, removing the legacy "public/" prefix if it exists.
   const imagePath = pathOrUrl.replace(/^public\//, '');
   if (!imagePath) return '';
   
-  // Get the public URL from Supabase storage.
   const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
   return data?.publicUrl ?? '';
 };
@@ -40,11 +36,10 @@ const getPublicUrl = (pathOrUrl: string | null | undefined): string => {
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
-  const [textApi, setTextApi] = React.useState<CarouselApi>()
-  const [currentText, setCurrentText] = React.useState(0)
+  const [textApi, setTextApi] = React.useState<CarouselApi | undefined>();
+  const [currentText, setCurrentText] = React.useState(0);
   const [videoInModal, setVideoInModal] = React.useState<Testimonial | null>(null);
 
-  // Initialize autoplay plugin ref. It's stable across re-renders.
   const autoplayPluginText = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true }));
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
@@ -53,26 +48,26 @@ export const Testimonials = () => {
   const videoTestimonials = React.useMemo(() =>
     testimonials?.filter((t): t is Testimonial =>
       !!(t && t.id && t.video_url && t.quote && t.author && t.business)
-    ) || [],
+    ) ?? [],
   [testimonials]);
 
   const textTestimonials = React.useMemo(() =>
     testimonials?.filter((t): t is Testimonial =>
       !!(t && t.id && !t.video_url && t.quote && t.author && t.business)
-    ) || [],
+    ) ?? [],
   [testimonials]);
 
-  // Safer effect to control autoplay using the direct plugin reference.
+  // Safer effect to control autoplay
   React.useEffect(() => {
     const autoplay = autoplayPluginText.current;
-    if (!autoplay) return;
+    if (!autoplay || !textApi) return;
 
     if (inView && !videoInModal) {
       autoplay.play();
     } else {
       autoplay.stop();
     }
-  }, [inView, videoInModal]);
+  }, [inView, videoInModal, textApi]);
 
 
   React.useEffect(() => {
@@ -83,7 +78,6 @@ export const Testimonials = () => {
     textApi.on("select", onSelect);
     textApi.on("reInit", onSelect);
 
-    // Set initial state
     onSelect(textApi);
 
     return () => {
@@ -112,14 +106,14 @@ export const Testimonials = () => {
           <AlertDescription>
              Não foi possível buscar os dados. Verifique as permissões no Supabase.
             <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
-              {errorTestimonials?.message || "Ocorreu um erro desconhecido."}
+              {errorTestimonials?.message ?? "Ocorreu um erro desconhecido."}
             </pre>
           </AlertDescription>
         </Alert>
       )
     }
 
-    if (videoTestimonials.length === 0 && textTestimonials.length === 0) {
+    if (!testimonials || (videoTestimonials.length === 0 && textTestimonials.length === 0)) {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
 
@@ -142,7 +136,7 @@ export const Testimonials = () => {
                       <div className="relative aspect-video w-full bg-slate-900">
                           <img
                             src={thumbnailPublicUrl || 'https://placehold.co/1600x900.png'}
-                            alt={`Thumbnail para ${business || 'parceiro'}`}
+                            alt={`Thumbnail para ${business ?? 'parceiro'}`}
                             className="h-full w-full object-cover"
                             loading="lazy"
                             data-ai-hint="video testimonial"
@@ -158,16 +152,16 @@ export const Testimonials = () => {
                         <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                         <div className="flex items-center mb-4 relative">
                             <Avatar className="h-12 w-12 border-2 border-primary/10">
-                                {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business || ''} Logo`} className="object-contain" />}
+                                {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business ?? ''} Logo`} className="object-contain" />}
                                 <AvatarFallback>{(business?.charAt(0) ?? 'P').toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div className="ml-4">
-                                <p className="font-bold text-foreground">{author || 'Parceiro'}</p>
-                                <p className="text-sm text-muted-foreground">{business || 'Mais Delivery'}</p>
+                                <p className="font-bold text-foreground">{author ?? 'Parceiro'}</p>
+                                <p className="text-sm text-muted-foreground">{business ?? 'Mais Delivery'}</p>
                             </div>
                         </div>
                         <blockquote className="flex-grow relative">
-                            <p className="text-foreground/80 text-sm italic">"{quote || 'Depoimento incrível!'}"</p>
+                            <p className="text-foreground/80 text-sm italic">"{quote ?? 'Depoimento incrível!'}"</p>
                         </blockquote>
                         <footer className="mt-4 text-xs text-primary font-medium relative text-right">
                             {city}{state ? `, ${state}` : ''}
@@ -203,16 +197,16 @@ export const Testimonials = () => {
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                     <div className="flex items-center mb-4 relative">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
-                                            {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business || ''} Logo`} className="object-contain" />}
+                                            {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business ?? ''} Logo`} className="object-contain" />}
                                             <AvatarFallback>{(business?.charAt(0) ?? 'P').toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         <div className="ml-4">
-                                            <p className="font-bold text-foreground">{author || 'Parceiro'}</p>
-                                            <p className="text-sm text-muted-foreground">{business || 'Mais Delivery'}</p>
+                                            <p className="font-bold text-foreground">{author ?? 'Parceiro'}</p>
+                                            <p className="text-sm text-muted-foreground">{business ?? 'Mais Delivery'}</p>
                                         </div>
                                     </div>
                                     <blockquote className="flex-grow relative my-4">
-                                        <p className="text-foreground/80 text-sm italic">"{quote || 'Depoimento incrível!'}"</p>
+                                        <p className="text-foreground/80 text-sm italic">"{quote ?? 'Depoimento incrível!'}"</p>
                                     </blockquote>
                                     <footer className="mt-auto text-xs text-primary font-medium relative text-right">
                                         {city}{state ? `, ${state}` : ''}
@@ -224,13 +218,13 @@ export const Testimonials = () => {
                     })}
                 </CarouselContent>
             </Carousel>
-            {textTestimonials.length > 1 && (
+            {textTestimonials.length > 1 && textApi && (
                 <div className="flex justify-center gap-2 mt-4">
-                    {Array.from({ length: textTestimonials.length }).map((_, i) => (
+                    {Array.from({ length: textApi.scrollSnapList().length }).map((_, i) => (
                     <button
                         key={i}
                         onClick={() => textApi?.scrollTo(i)}
-                        className={`h-2 w-2 rounded-full transition-colors ${i === (currentText % textTestimonials.length) ? 'bg-primary' : 'bg-primary/20'}`}
+                        className={`h-2 w-2 rounded-full transition-colors ${i === currentText ? 'bg-primary' : 'bg-primary/20'}`}
                         aria-label={`Go to slide ${i + 1}`}
                     />
                     ))}
