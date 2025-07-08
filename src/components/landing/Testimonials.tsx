@@ -28,8 +28,14 @@ export const Testimonials = () => {
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
-  const textTestimonials = React.useMemo(() => testimonials?.filter(t => t && !t.video_url) || [], [testimonials]);
-  const videoTestimonials = React.useMemo(() => testimonials?.filter(t => t && !!t.video_url) || [], [testimonials]);
+  const videoTestimonials = React.useMemo(() => testimonials?.filter(t => {
+    return t && !!t.video_url && t.quote && t.author && t.business;
+  }) || [], [testimonials]);
+  
+  const textTestimonials = React.useMemo(() => testimonials?.filter(t => {
+    return t && !t.video_url && t.quote && t.author && t.business;
+  }) || [], [testimonials]);
+  
 
   const getPublicUrl = (pathOrUrl: string | null | undefined) => {
     if (!pathOrUrl) return '';
@@ -91,7 +97,7 @@ export const Testimonials = () => {
       )
     }
     
-    if (!testimonials || testimonials.length === 0) {
+    if ((!videoTestimonials || videoTestimonials.length === 0) && (!textTestimonials || textTestimonials.length === 0)) {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
 
@@ -104,7 +110,6 @@ export const Testimonials = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {videoTestimonials.map((testimonial) => {
-                if (!testimonial) return null;
                 const { id, business, author, quote, city, state, thumbnail_url, logo_url } = testimonial;
                 const logoPublicUrl = getPublicUrl(logo_url);
                 return (
@@ -113,7 +118,7 @@ export const Testimonials = () => {
                       <div className="relative aspect-video w-full bg-slate-900">
                           <img
                             src={getPublicUrl(thumbnail_url) || 'https://placehold.co/1600x900.png'}
-                            alt={`Thumbnail for ${business || 'testimonial'}`}
+                            alt={`Thumbnail for ${business}`}
                             className="h-full w-full object-cover"
                             loading="lazy"
                             data-ai-hint="video testimonial"
@@ -129,19 +134,19 @@ export const Testimonials = () => {
                         <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                         <div className="flex items-center mb-4 relative">
                             <Avatar className="h-12 w-12 border-2 border-primary/10">
-                                {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business || ''} Logo`} className="object-contain" />}
-                                <AvatarFallback>{business ? String(business).charAt(0) : ''}</AvatarFallback>
+                                {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business} Logo`} className="object-contain" />}
+                                <AvatarFallback>{String(business).charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="ml-4">
-                                <p className="font-bold text-foreground">{author || ''}</p>
-                                <p className="text-sm text-muted-foreground">{business || ''}</p>
+                                <p className="font-bold text-foreground">{author}</p>
+                                <p className="text-sm text-muted-foreground">{business}</p>
                             </div>
                         </div>
                         <blockquote className="flex-grow relative">
-                            <p className="text-foreground/80 text-sm italic">"{quote || ''}"</p>
+                            <p className="text-foreground/80 text-sm italic">"{quote}"</p>
                         </blockquote>
                         <footer className="mt-4 text-xs text-primary font-medium relative text-right">
-                            {city || ''}{state ? `, ${state}` : ''}
+                            {city}{state ? `, ${state}` : ''}
                         </footer>
                       </div>
                     </div>
@@ -165,7 +170,6 @@ export const Testimonials = () => {
             >
                 <CarouselContent className="-ml-4 md:items-stretch">
                     {textTestimonials.map((testimonial) => {
-                        if (!testimonial) return null;
                         const { id, business, author, quote, city, state, logo_url } = testimonial;
                         const logoPublicUrl = getPublicUrl(logo_url);
                         return (
@@ -175,19 +179,19 @@ export const Testimonials = () => {
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                     <div className="flex items-center mb-4 relative">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
-                                            {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business || ''} Logo`} className="object-contain" />}
-                                            <AvatarFallback>{business ? String(business).charAt(0) : ''}</AvatarFallback>
+                                            {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business} Logo`} className="object-contain" />}
+                                            <AvatarFallback>{String(business).charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div className="ml-4">
-                                            <p className="font-bold text-foreground">{author || ''}</p>
-                                            <p className="text-sm text-muted-foreground">{business || ''}</p>
+                                            <p className="font-bold text-foreground">{author}</p>
+                                            <p className="text-sm text-muted-foreground">{business}</p>
                                         </div>
                                     </div>
                                     <blockquote className="flex-grow relative my-4">
-                                        <p className="text-foreground/80 text-sm italic">"{quote || ''}"</p>
+                                        <p className="text-foreground/80 text-sm italic">"{quote}"</p>
                                     </blockquote>
                                     <footer className="mt-auto text-xs text-primary font-medium relative text-right">
-                                        {city || ''}{state ? `, ${state}` : ''}
+                                        {city}{state ? `, ${state}` : ''}
                                     </footer>
                                 </div>
                               </div>
