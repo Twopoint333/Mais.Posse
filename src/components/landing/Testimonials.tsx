@@ -53,12 +53,15 @@ export const Testimonials = () => {
 
   React.useEffect(() => {
     if (!textApi || !textTestimonials?.length) return;
-    const onSelect = () => setCurrentText(textApi.selectedScrollSnap());
+    const onSelect = () => {
+      if (!textApi) return;
+      setCurrentText(textApi.selectedScrollSnap())
+    }
     textApi.on("select", onSelect);
     textApi.on("reInit", onSelect);
     return () => {
-      textApi.off("select", onSelect);
-      textApi.off("reInit", onSelect);
+      textApi?.off("select", onSelect);
+      textApi?.off("reInit", onSelect);
     };
   }, [textApi, textTestimonials.length]);
 
@@ -125,7 +128,7 @@ export const Testimonials = () => {
                         <div className="flex items-center mb-4 relative">
                             <Avatar className="h-12 w-12 border-2 border-primary/10">
                                 {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
-                                <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
+                                <AvatarFallback>{testimonial.business?.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="ml-4">
                                 <p className="font-bold text-foreground">{testimonial.author}</p>
@@ -155,7 +158,7 @@ export const Testimonials = () => {
             <Carousel
                 setApi={setTextApi}
                 plugins={[autoplayPluginText.current]}
-                opts={{ align: "start", loop: true }}
+                opts={{ align: "start", loop: textTestimonials.length > 3 }}
                 className="w-full"
             >
                 <CarouselContent className="-ml-4 md:items-stretch">
@@ -169,7 +172,7 @@ export const Testimonials = () => {
                                     <div className="flex items-center mb-4 relative">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
                                             {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
-                                            <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
+                                            <AvatarFallback>{testimonial.business?.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div className="ml-4">
                                             <p className="font-bold text-foreground">{testimonial.author}</p>
