@@ -20,13 +20,14 @@ import {
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials, errorTestimonials } = useAdmin();
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(0)
+  const [textApi, setTextApi] = React.useState<CarouselApi>()
+  const [videoApi, setVideoApi] = React.useState<CarouselApi>()
+  const [currentText, setCurrentText] = React.useState(0)
+  const [currentVideo, setCurrentVideo] = React.useState(0)
   const [videoInModal, setVideoInModal] = React.useState<Testimonial | null>(null);
 
-  const autoplayPlugin = React.useRef(
-    Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true })
-  );
+  const autoplayPluginText = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true }));
+  const autoplayPluginVideo = React.useRef(Autoplay({ delay: 8000, stopOnInteraction: true, stopOnMouseEnter: true }));
 
   const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
 
@@ -35,46 +36,48 @@ export const Testimonials = () => {
 
   const getPublicUrl = (pathOrUrl: string | null | undefined) => {
     if (!pathOrUrl) return '';
-
-    // If it's already a full URL, return it directly.
-    if (pathOrUrl.startsWith('http')) {
-      return pathOrUrl;
-    }
-
-    // Otherwise, assume it's a path and build the public URL.
+    if (pathOrUrl.startsWith('http')) return pathOrUrl;
     const imagePath = pathOrUrl.replace(/^public\//, '');
     const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
     return data?.publicUrl ?? '';
   };
 
   React.useEffect(() => {
-    if (!api) return;
-
-    if (videoInModal) {
-      api.plugins().autoplay?.stop();
-    } else if (inView && textTestimonials.length > 0) {
-      api.plugins().autoplay?.play();
-    } else {
-      api.plugins().autoplay?.stop();
+    if (!inView) {
+      textApi?.plugins().autoplay?.stop();
+      videoApi?.plugins().autoplay?.stop();
+      return;
     }
-  }, [inView, api, videoInModal, textTestimonials.length]);
+    if (videoInModal) {
+      textApi?.plugins().autoplay?.stop();
+      videoApi?.plugins().autoplay?.stop();
+    } else {
+      if (textTestimonials.length > 1) textApi?.plugins().autoplay?.play();
+      if (videoTestimonials.length > 1) videoApi?.plugins().autoplay?.play();
+    }
+  }, [inView, textApi, videoApi, videoInModal, textTestimonials.length, videoTestimonials.length]);
 
   React.useEffect(() => {
-    if (!api || !textTestimonials?.length) return;
-  
-    const onSelect = () => {
-      if (!api) return;
-      setCurrent(api.selectedScrollSnap());
-    };
-  
-    api.on("select", onSelect);
-    api.on("reInit", onSelect);
-  
+    if (!textApi || !textTestimonials?.length) return;
+    const onSelect = () => setCurrentText(textApi.selectedScrollSnap());
+    textApi.on("select", onSelect);
+    textApi.on("reInit", onSelect);
     return () => {
-      api.off("select", onSelect);
-      api.off("reInit", onSelect);
+      textApi.off("select", onSelect);
+      textApi.off("reInit", onSelect);
     };
-  }, [api, textTestimonials.length]);
+  }, [textApi, textTestimonials.length]);
+
+  React.useEffect(() => {
+    if (!videoApi || !videoTestimonials?.length) return;
+    const onSelect = () => setCurrentVideo(videoApi.selectedScrollSnap());
+    videoApi.on("select", onSelect);
+    videoApi.on("reInit", onSelect);
+    return () => {
+      videoApi.off("select", onSelect);
+      videoApi.off("reInit", onSelect);
+    };
+  }, [videoApi, videoTestimonials.length]);
 
   const handleVideoClick = (testimonial: Testimonial) => {
     if (testimonial.video_url) {
@@ -84,11 +87,7 @@ export const Testimonials = () => {
 
   const renderContent = () => {
     if (isLoadingTestimonials) {
-      return (
-        <div className="flex justify-center items-center h-40">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      );
+      return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
     }
   
     if (isErrorTestimonials) {
@@ -120,8 +119,8 @@ export const Testimonials = () => {
         {textTestimonials.length > 0 && (
           <div className="relative">
             <Carousel
-                setApi={setApi}
-                plugins={[autoplayPlugin.current]}
+                setApi={setTextApi}
+                plugins={[autoplayPluginText.current]}
                 opts={{ align: "start", loop: displayTextTestimonials.length > 1 }}
                 className="w-full"
             >
@@ -161,8 +160,8 @@ export const Testimonials = () => {
                     {Array.from({ length: textTestimonials.length }).map((_, i) => (
                     <button
                         key={i}
-                        onClick={() => api?.scrollTo(i)}
-                        className={`h-2 w-2 rounded-full transition-colors ${i === (current % textTestimonials.length) ? 'bg-primary' : 'bg-primary/20'}`}
+                        onClick={() => textApi?.scrollTo(i)}
+                        className={`h-2 w-2 rounded-full transition-colors ${i === (currentText % textTestimonials.length) ? 'bg-primary' : 'bg-primary/20'}`}
                         aria-label={`Go to slide ${i + 1}`}
                     />
                     ))}
@@ -176,52 +175,74 @@ export const Testimonials = () => {
             <h3 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 text-primary">
               Veja também em vídeo
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-              {videoTestimonials.map((testimonial) => {
-                  const logoPublicUrl = getPublicUrl(testimonial.logo_url);
-
-                  return (
-                    <div key={testimonial.id} className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                      <div className="relative aspect-video w-full bg-slate-900">
-                          <>
-                            <img
-                              src={getPublicUrl(testimonial.thumbnail_url) || 'https://placehold.co/1600x900.png'}
-                              alt={`Thumbnail for ${testimonial.business} testimonial`}
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                              data-ai-hint="video testimonial"
-                            />
-                            <div 
-                              className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
-                              onClick={() => handleVideoClick(testimonial)}
-                            >
-                              <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
+            <div className="relative">
+              <Carousel
+                setApi={setVideoApi}
+                plugins={[autoplayPluginVideo.current]}
+                opts={{ align: "start", loop: videoTestimonials.length > 1 }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-4 md:items-stretch">
+                  {videoTestimonials.map((testimonial) => {
+                    const logoPublicUrl = getPublicUrl(testimonial.logo_url);
+                    return (
+                      <CarouselItem key={testimonial.id} className="pl-4 basis-full md:basis-1/2">
+                        <div className="p-1 h-full">
+                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                            <div className="relative aspect-video w-full bg-slate-900">
+                                <img
+                                  src={getPublicUrl(testimonial.thumbnail_url) || 'https://placehold.co/1600x900.png'}
+                                  alt={`Thumbnail for ${testimonial.business} testimonial`}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                  data-ai-hint="video testimonial"
+                                />
+                                <div 
+                                  className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
+                                  onClick={() => handleVideoClick(testimonial)}
+                                >
+                                  <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
+                                </div>
                             </div>
-                          </>
-                      </div>
-                      <div className="p-6 flex flex-col flex-grow relative">
-                        <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
-                        <div className="flex items-center mb-4 relative">
-                            <Avatar className="h-12 w-12 border-2 border-primary/10">
-                                {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
-                                <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="ml-4">
-                                <p className="font-bold text-foreground">{testimonial.author}</p>
-                                <p className="text-sm text-muted-foreground">{testimonial.business}</p>
+                            <div className="p-6 flex flex-col flex-grow relative">
+                              <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
+                              <div className="flex items-center mb-4 relative">
+                                  <Avatar className="h-12 w-12 border-2 border-primary/10">
+                                      {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${testimonial.business} Logo`} className="object-contain" />}
+                                      <AvatarFallback>{testimonial.business[0]}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="ml-4">
+                                      <p className="font-bold text-foreground">{testimonial.author}</p>
+                                      <p className="text-sm text-muted-foreground">{testimonial.business}</p>
+                                  </div>
+                              </div>
+                              <blockquote className="flex-grow relative">
+                                  <p className="text-foreground/80 text-sm italic">"{testimonial.quote}"</p>
+                              </blockquote>
+                              <footer className="mt-4 text-xs text-primary font-medium relative text-right">
+                                  {testimonial.city}, {testimonial.state}
+                              </footer>
                             </div>
+                          </div>
                         </div>
-                        <blockquote className="flex-grow relative">
-                            <p className="text-foreground/80 text-sm italic">"{testimonial.quote}"</p>
-                        </blockquote>
-                        <footer className="mt-4 text-xs text-primary font-medium relative text-right">
-                            {testimonial.city}, {testimonial.state}
-                        </footer>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+              </Carousel>
+              {videoTestimonials.length > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                  {Array.from({ length: videoTestimonials.length }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => videoApi?.scrollTo(i)}
+                      className={`h-2 w-2 rounded-full transition-colors ${i === (currentVideo % videoTestimonials.length) ? 'bg-primary' : 'bg-primary/20'}`}
+                      aria-label={`Go to video slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -230,7 +251,7 @@ export const Testimonials = () => {
                 {videoInModal && videoInModal.video_url && (
                 <div className="aspect-video">
                     <video
-                        src={videoInModal.video_url}
+                        src={getPublicUrl(videoInModal.video_url)}
                         controls
                         autoPlay
                         className="h-full w-full object-contain rounded-lg"
