@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, AlertTriangle, Quote, PlayCircle } from 'lucide-react';
@@ -41,14 +40,6 @@ export const Testimonials = () => {
 
   const autoplayPlugin = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
-  const videoTestimonials = testimonials?.filter(t => 
-    t && t.id && t.video_url && t.quote && t.author && t.business
-  ) ?? [];
-
-  const textTestimonials = testimonials?.filter(t => 
-    t && t.id && !t.video_url && t.quote && t.author && t.business
-  ) ?? [];
-
   React.useEffect(() => {
     if (!textApi) return;
     const onSelect = (api: CarouselApi) => {
@@ -86,8 +77,18 @@ export const Testimonials = () => {
       )
     }
 
-    if (!testimonials || (videoTestimonials.length === 0 && textTestimonials.length === 0)) {
+    if (!testimonials || testimonials.length === 0) {
        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
+    }
+    
+    // Filter out testimonials that are incomplete
+    const validTestimonials = testimonials.filter(t => t && t.id && t.quote && t.author && t.business);
+    
+    const videoTestimonials = validTestimonials.filter(t => !!t.video_url);
+    const textTestimonials = validTestimonials.filter(t => !t.video_url);
+
+    if (videoTestimonials.length === 0 && textTestimonials.length === 0) {
+        return <p className="text-center text-muted-foreground">Nenhum depoimento para exibir no momento.</p>;
     }
 
     return (
@@ -166,7 +167,7 @@ export const Testimonials = () => {
                         return (
                             <CarouselItem key={id} className="pl-4 basis-full md:basis-1/2 lg:basis-1/3">
                               <div className="p-1 h-full">
-                                <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
+                                <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                     <div className="flex items-center mb-4 relative">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
