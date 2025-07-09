@@ -42,8 +42,8 @@ export const DeliveryOptions = () => {
                 key={index}
                 className="bg-white rounded-xl shadow-md p-4 md:p-6"
               >
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-primary/10 rounded-full mr-4">
+                <div className="flex items-start sm:items-center mb-4 flex-col sm:flex-row">
+                  <div className="p-2 bg-primary/10 rounded-full mr-0 sm:mr-4 mb-2 sm:mb-0 flex-shrink-0">
                     {option.icon}
                   </div>
                   
@@ -52,7 +52,7 @@ export const DeliveryOptions = () => {
                   </h3>
                 </div>
                 
-                <p className="text-muted-foreground text-sm md:text-base pl-0 md:pl-16">
+                <p className="text-muted-foreground text-sm md:text-base pl-0 sm:pl-16">
                   {option.description}
                 </p>
               </div>

@@ -31,18 +31,18 @@ export const Pricing = () => {
           Preços Transparentes
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {pricingOptions.map((option, index) => (
             <div 
               key={index}
-              className="rounded-xl overflow-hidden shadow-lg"
+              className="rounded-xl overflow-hidden shadow-lg flex flex-col"
             >
               <div className={`bg-gradient-to-br from-primary to-accent-cta py-6 px-8 text-white`}>
                 <h3 className="text-xl font-bold">{option.title}</h3>
                 <p className="text-3xl font-bold">{option.price}</p>
               </div>
               
-              <div className="bg-white p-6">
+              <div className="bg-white p-6 flex-grow">
                 <ul className="space-y-6">
                   {option.benefits.map((benefit, idx) => {
                     const [title, description] = benefit.split('\n');

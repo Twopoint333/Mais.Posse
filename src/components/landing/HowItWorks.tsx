@@ -27,7 +27,7 @@ export const HowItWorks = () => {
           Somos muito mais do que um aplicativo de delivery
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <HoverCard key={index}>
               <HoverCardTrigger asChild>

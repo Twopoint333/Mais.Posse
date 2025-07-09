@@ -98,7 +98,7 @@ export const Benefits = () => {
           >
             <CarouselContent className="-ml-4">
               {features.map((feature, index) => (
-                <CarouselItem key={index} className="pl-4 basis-11/12">
+                <CarouselItem key={index} className="pl-4 basis-[90%]">
                   <div className="h-full p-1">
                     <div className="flex flex-col h-full bg-white rounded-xl shadow-md p-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3 flex-shrink-0">

@@ -14,7 +14,7 @@ export const Hero = () => {
   return (
     <section 
       id="hero" 
-      className="scroll-m-20 relative min-h-[80vh] flex items-center justify-center px-4 py-20 md:py-24 bg-primary"
+      className="scroll-m-20 relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center px-4 py-20 md:py-24 bg-primary"
       data-ai-hint="delivery food"
     >
       <img
@@ -33,11 +33,11 @@ export const Hero = () => {
           O Mais Delivery já transformou negócios em mais de 300 cidades — o próximo pode ser o seu.
         </p>
         
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12 transform translate-y-0 opacity-100 transition-all duration-700 delay-700">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 transform translate-y-0 opacity-100 transition-all duration-700 delay-700">
           <Button 
             asChild 
             size="lg" 
-            className="w-full md:w-auto bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground border-2 border-white shadow-lg"
+            className="w-full sm:w-auto bg-accent-cta hover:bg-accent-cta/90 text-primary-foreground border-2 border-white shadow-lg"
           >
             <a href="#cta">Quero ser parceiro</a>
           </Button>
@@ -46,7 +46,7 @@ export const Hero = () => {
             asChild 
             variant="outline" 
             size="lg" 
-            className="w-full md:w-auto bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white/20"
+            className="w-full sm:w-auto bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white/20"
           >
             <a href="https://www.youtube.com/watch?v=DDDqWTgDNsI" target="_blank" rel="noopener noreferrer">
               <Play className="mr-2 text-accent-cta" /> Assista o vídeo
@@ -54,7 +54,7 @@ export const Hero = () => {
           </Button>
         </div>
         
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <ul className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
           {[
             '+ 300 cidades em todo o Brasil', 
             '+ Clientes potenciais', 
