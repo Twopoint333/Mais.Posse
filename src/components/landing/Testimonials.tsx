@@ -92,63 +92,58 @@ export const Testimonials = () => {
     return (
        <>
         {videoTestimonials.length > 0 && (
-          <div className="mb-16">
-            <h3 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 text-primary">
+          <div className="mb-12">
+            <h3 className="text-xl md:text-2xl font-bold text-center mb-8 text-primary">
               Histórias de sucesso em vídeo
             </h3>
-            <Carousel
-              plugins={[autoplayPlugin.current]}
-              opts={{ align: "start", loop: videoTestimonials.length > 1 }}
-              className="w-full"
-            >
-              <CarouselContent>
-                {videoTestimonials.map((testimonial) => {
-                  const { id, business, author, city, state, thumbnail_url, logo_url } = testimonial;
-                  const logoPublicUrl = getPublicUrl(logo_url);
-                  const thumbnailPublicUrl = getPublicUrl(thumbnail_url);
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {videoTestimonials.map((testimonial) => {
+                const { id, business, author, city, state, thumbnail_url, logo_url, quote } = testimonial;
+                const logoPublicUrl = getPublicUrl(logo_url);
+                const thumbnailPublicUrl = getPublicUrl(thumbnail_url);
 
-                  return (
-                    <CarouselItem key={id} className="basis-full md:basis-1/2">
-                      <div className="p-1 h-full">
-                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                          <div className="relative aspect-video w-full bg-slate-900">
-                              <img
-                                src={thumbnailPublicUrl || 'https://placehold.co/1600x900.png'}
-                                alt={`Thumbnail para ${business ?? 'parceiro'}`}
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                                data-ai-hint="video testimonial"
-                              />
-                              <div
-                                className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
-                                onClick={() => handleVideoClick(testimonial)}
-                              >
-                                <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
-                              </div>
+                return (
+                  <div key={id} className="p-1 h-full">
+                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                      <div className="relative aspect-video w-full bg-slate-900">
+                          <img
+                            src={thumbnailPublicUrl || 'https://placehold.co/1600x900.png'}
+                            alt={`Thumbnail para ${business ?? 'parceiro'}`}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            data-ai-hint="video testimonial"
+                          />
+                          <div
+                            className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
+                            onClick={() => handleVideoClick(testimonial)}
+                          >
+                            <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
                           </div>
-                          <div className="p-6 flex flex-col flex-grow relative">
-                            <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
-                            <div className="flex items-center mb-4 relative">
-                                <Avatar className="h-12 w-12 border-2 border-primary/10">
-                                    {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business ?? ''} Logo`} className="object-contain" />}
-                                    <AvatarFallback>{(business?.charAt(0) ?? 'P').toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                                <div className="ml-4">
-                                    <p className="font-bold text-foreground">{author ?? 'Parceiro'}</p>
-                                    <p className="text-sm text-muted-foreground">{business ?? 'Mais Delivery'}</p>
-                                </div>
-                            </div>
-                            <footer className="mt-4 text-xs text-primary font-medium relative text-right">
-                                {city}{state ? `, ${state}` : ''}
-                            </footer>
-                          </div>
-                        </div>
                       </div>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
+                      <div className="p-6 flex flex-col flex-grow relative">
+                        <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
+                        <div className="flex items-center mb-4 relative">
+                            <Avatar className="h-12 w-12 border-2 border-primary/10">
+                                {logoPublicUrl && <AvatarImage src={logoPublicUrl} alt={`${business ?? ''} Logo`} className="object-contain" />}
+                                <AvatarFallback>{(business?.charAt(0) ?? 'P').toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="ml-4">
+                                <p className="font-bold text-foreground">{author ?? 'Parceiro'}</p>
+                                <p className="text-sm text-muted-foreground">{business ?? 'Mais Delivery'}</p>
+                            </div>
+                        </div>
+                        <blockquote className="flex-grow relative my-4">
+                          <p className="text-foreground/80 text-sm italic">"{quote ?? 'Depoimento incrível!'}"</p>
+                        </blockquote>
+                        <footer className="mt-auto text-xs text-primary font-medium relative text-right">
+                            {city}{state ? `, ${state}` : ''}
+                        </footer>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -174,7 +169,7 @@ export const Testimonials = () => {
                         const logoPublicUrl = getPublicUrl(logo_url);
                         return (
                             <CarouselItem key={id} className="pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                              <div className="p-1 h-full">
+                              <div className="h-full">
                                 <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:-translate-y-1 relative shadow-lg hover:shadow-xl">
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                     <div className="flex items-center mb-4 relative">
