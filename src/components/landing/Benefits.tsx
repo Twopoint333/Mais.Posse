@@ -92,14 +92,14 @@ export const Benefits = () => {
         <div className="md:hidden">
           <Carousel
             setApi={setApi}
-            opts={{ align: "center", loop: true }}
+            opts={{ align: "start", loop: true }}
             plugins={[autoplayPlugin.current]}
             className="w-full"
           >
             <CarouselContent className="-ml-4">
               {features.map((feature, index) => (
-                <CarouselItem key={index} className="pl-4 basis-[90%]">
-                  <div className="h-full p-1">
+                <CarouselItem key={index} className="pl-4 basis-full">
+                  <div className="h-full px-4">
                     <div className="flex flex-col h-full bg-white rounded-xl shadow-md p-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3 flex-shrink-0">
                         <Check className="w-5 h-5 text-accent-cta" />
