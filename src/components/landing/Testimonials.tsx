@@ -12,7 +12,6 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { useInView } from '@/hooks/useInView';
 import {
   Dialog,
   DialogContent,
@@ -40,35 +39,15 @@ export const Testimonials = () => {
   const [currentText, setCurrentText] = React.useState(0);
   const [videoInModal, setVideoInModal] = React.useState<Testimonial | null>(null);
 
-  const autoplayPluginText = React.useRef(Autoplay({ delay: 6000, stopOnInteraction: true, stopOnMouseEnter: true }));
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
-  const { ref: inViewRef, inView } = useInView({ threshold: 0.1, once: false });
+  const videoTestimonials = testimonials?.filter(t => 
+    t && t.id && t.video_url && t.quote && t.author && t.business
+  ) ?? [];
 
-  // Filter and validate testimonials robustly.
-  const videoTestimonials = React.useMemo(() =>
-    testimonials?.filter((t): t is Testimonial =>
-      !!(t && t.id && t.video_url && t.quote && t.author && t.business)
-    ) ?? [],
-  [testimonials]);
-
-  const textTestimonials = React.useMemo(() =>
-    testimonials?.filter((t): t is Testimonial =>
-      !!(t && t.id && !t.video_url && t.quote && t.author && t.business)
-    ) ?? [],
-  [testimonials]);
-
-  // Safer effect to control autoplay
-  React.useEffect(() => {
-    const autoplay = autoplayPluginText.current;
-    if (!autoplay || !textApi) return;
-
-    if (inView && !videoInModal) {
-      autoplay.play();
-    } else {
-      autoplay.stop();
-    }
-  }, [inView, videoInModal, textApi]);
-
+  const textTestimonials = testimonials?.filter(t => 
+    t && t.id && !t.video_url && t.quote && t.author && t.business
+  ) ?? [];
 
   React.useEffect(() => {
     if (!textApi) return;
@@ -76,13 +55,8 @@ export const Testimonials = () => {
       setCurrentText(api.selectedScrollSnap());
     };
     textApi.on("select", onSelect);
-    textApi.on("reInit", onSelect);
-
-    onSelect(textApi);
-
     return () => {
       textApi.off("select", onSelect);
-      textApi.off("reInit", onSelect);
     };
   }, [textApi]);
 
@@ -92,7 +66,6 @@ export const Testimonials = () => {
     }
   };
 
-  // The main render function
   const renderContent = () => {
     if (isLoadingTestimonials) {
       return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -182,7 +155,7 @@ export const Testimonials = () => {
             </h2>
             <Carousel
                 setApi={setTextApi}
-                plugins={[autoplayPluginText.current]}
+                plugins={[autoplayPlugin.current]}
                 opts={{ align: "start", loop: textTestimonials.length > 3 }}
                 className="w-full"
             >
@@ -255,7 +228,7 @@ export const Testimonials = () => {
   }
 
   return (
-    <section ref={inViewRef} id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
+    <section id="depoimentos" className="scroll-m-20 py-8 md:py-10 px-4 bg-gray-50">
       <div className="container mx-auto">
         {renderContent()}
       </div>
