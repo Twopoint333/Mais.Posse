@@ -34,24 +34,23 @@ const getPublicUrl = (pathOrUrl: string | null | undefined): string => {
 
 export const Testimonials = () => {
   const { testimonials, isLoadingTestimonials, isErrorTestimonials } = useAdmin();
-  const [textApi, setTextApi] = React.useState<CarouselApi | undefined>();
-  const [currentText, setCurrentText] = React.useState(0);
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [current, setCurrent] = React.useState(0)
   const [videoInModal, setVideoInModal] = React.useState<Testimonial | null>(null);
 
-  const autoplayPluginText = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
-  const autoplayPluginVideo = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
 
   React.useEffect(() => {
-    if (!textApi) return;
-    const onSelect = (api: CarouselApi) => {
-      setCurrentText(api.selectedScrollSnap());
-    };
-    textApi.on("select", onSelect);
-    return () => {
-      textApi.off("select", onSelect);
-    };
-  }, [textApi]);
+    if (!api) {
+      return
+    }
+    setCurrent(api.selectedScrollSnap())
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap())
+    })
+  }, [api])
+
 
   const handleVideoClick = (testimonial: Testimonial) => {
     if (testimonial.video_url) {
@@ -95,10 +94,10 @@ export const Testimonials = () => {
         {videoTestimonials.length > 0 && (
           <div className="mb-16">
             <h3 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 text-primary">
-              Veja também em vídeo
+              Histórias de sucesso em vídeo
             </h3>
             <Carousel
-              plugins={[autoplayPluginVideo.current]}
+              plugins={[autoplayPlugin.current]}
               opts={{ align: "start", loop: videoTestimonials.length > 1 }}
               className="w-full"
             >
@@ -155,12 +154,17 @@ export const Testimonials = () => {
 
         {textTestimonials.length > 0 && (
           <div className="relative">
+             {videoTestimonials.length > 0 && (
+              <p className="text-center text-muted-foreground text-base md:text-lg mb-4 max-w-2xl mx-auto">
+                E tem mais! Veja o que outros parceiros têm a dizer:
+              </p>
+            )}
             <h2 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 text-primary">
-              O que dizem nossos parceiros
+              Depoimentos dos nossos parceiros
             </h2>
             <Carousel
-                setApi={setTextApi}
-                plugins={[autoplayPluginText.current]}
+                setApi={setApi}
+                plugins={[autoplayPlugin.current]}
                 opts={{ align: "start", loop: textTestimonials.length > 2 }}
                 className="w-full"
             >
@@ -171,7 +175,7 @@ export const Testimonials = () => {
                         return (
                             <CarouselItem key={id} className="pl-4 basis-full md:basis-1/2 lg:basis-1/3">
                               <div className="p-1 h-full">
-                                <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
+                                <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:-translate-y-1 relative shadow-lg hover:shadow-xl">
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                     <div className="flex items-center mb-4 relative">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
@@ -196,13 +200,13 @@ export const Testimonials = () => {
                     })}
                 </CarouselContent>
             </Carousel>
-            {textTestimonials.length > 1 && textApi && (
+            {textTestimonials.length > 1 && api && (
                 <div className="flex justify-center gap-2 mt-4">
-                    {Array.from({ length: textApi.scrollSnapList().length }).map((_, i) => (
+                    {Array.from({ length: api.scrollSnapList().length }).map((_, i) => (
                     <button
                         key={i}
-                        onClick={() => textApi?.scrollTo(i)}
-                        className={`h-2 w-2 rounded-full transition-colors ${i === currentText ? 'bg-primary' : 'bg-primary/20'}`}
+                        onClick={() => api?.scrollTo(i)}
+                        className={`h-2 w-2 rounded-full transition-colors ${i === current ? 'bg-primary' : 'bg-primary/20'}`}
                         aria-label={`Go to slide ${i + 1}`}
                     />
                     ))}
