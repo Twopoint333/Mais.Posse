@@ -96,7 +96,7 @@ export const MarketingCampaigns = () => {
           setApi={setApi}
           plugins={[autoplayPlugin.current]}
           opts={{
-            align: "start",
+            align: "center",
             loop: true,
           }}
           className="w-full"
