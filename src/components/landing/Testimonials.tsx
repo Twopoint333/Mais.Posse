@@ -166,7 +166,7 @@ export const Testimonials = () => {
                         return (
                             <CarouselItem key={id} className="pl-4 basis-full md:basis-1/2 lg:basis-1/3">
                               <div className="p-1 h-full">
-                                <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
+                                <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
                                     <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                     <div className="flex items-center mb-4 relative">
                                         <Avatar className="h-12 w-12 border-2 border-primary/10">
