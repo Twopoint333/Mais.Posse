@@ -66,6 +66,6 @@ export const testimonials = [
     state: "BA",
     logo_url: "/assets/logos/jp-lanches.png",
     video_url: null,
-thumbnail_url: null,
+    thumbnail_url: null,
   },
 ];
