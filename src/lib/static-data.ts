@@ -1,12 +1,9 @@
 
 export const marketingCampaigns = [
-  { id: '1', image_url: '/assets/campaigns/campaign-1.jpeg' },
-  { id: '2', image_url: '/assets/campaigns/campaign-2.jpeg' },
-  { id: '3', image_url: '/assets/campaigns/campaign-3.jpeg' },
-  { id: '4', image_url: '/assets/campaigns/campaign-4.jpeg' },
-  { id: '5', image_url: '/assets/campaigns/campaign-5.jpeg' },
-  { id: '6', image_url: '/assets/campaigns/campaign-6.jpeg' },
-  { id: '7', image_url: '/assets/campaigns/campaign-7.jpeg' },
+  { id: '1', image_url: '/assets/Cachorro Quente.png' },
+  { id: '2', image_url: '/assets/CUPOM DE DESCONTO.png' },
+  { id: '3', image_url: '/assets/Pizza Grande.png' },
+  { id: '4', image_url: '/assets/Promo Pastel Combo.png' },
 ];
 
 export const teamMembers = [
