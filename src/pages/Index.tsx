@@ -37,16 +37,18 @@ const Index = () => {
   return (
     <div className="relative bg-white overflow-x-hidden">
       <Header isScrolled={isScrolled} visible={true} />
-      <Hero />
-      <Benefits />
-      <HowItWorks />
-      <TeamSection />
-      <MarketingCampaigns />
-      <Testimonials />
-      <DeliveryOptions />
-      <BusinessTypes />
-      <Advantages />
-      <CallToAction />
+      <main>
+        <Hero />
+        <Benefits />
+        <HowItWorks />
+        <TeamSection />
+        <MarketingCampaigns />
+        <Testimonials />
+        <DeliveryOptions />
+        <BusinessTypes />
+        <Advantages />
+        <CallToAction />
+      </main>
       <Footer />
     </div>
   );

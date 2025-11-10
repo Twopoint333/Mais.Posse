@@ -1,9 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Loader2, AlertTriangle } from 'lucide-react';
-import { useAdmin } from '@/context/AdminContext';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { supabase } from '@/integrations/supabase/client';
+import { teamMembers } from '@/lib/static-data';
 import {
   Carousel,
   CarouselContent,
@@ -15,7 +12,6 @@ import { useInView } from '@/hooks/useInView';
 
 
 export const TeamSection = () => {
-  const { teamMembers, isLoadingTeam, isErrorTeam, errorTeam } = useAdmin();
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
@@ -54,29 +50,6 @@ export const TeamSection = () => {
 
 
   const renderContent = () => {
-    if (isLoadingTeam) {
-      return (
-        <div className="flex justify-center items-center h-64 md:h-80">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      );
-    }
-  
-    if (isErrorTeam) {
-      return (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Erro ao Carregar Equipe</AlertTitle>
-          <AlertDescription>
-             Não foi possível buscar os dados. Verifique as permissões no Supabase.
-            <pre className="mt-2 whitespace-pre-wrap text-xs bg-black/10 p-2 rounded-md">
-              {errorTeam?.message || JSON.stringify(errorTeam, null, 2)}
-            </pre>
-          </AlertDescription>
-        </Alert>
-      )
-    }
-    
     if (!teamMembers || teamMembers.length === 0) {
       return (
         <div className="flex items-center justify-center bg-muted rounded-lg h-64 md:h-80">
@@ -85,7 +58,6 @@ export const TeamSection = () => {
       );
     }
 
-    // To ensure smooth looping, we duplicate slides if there are too few.
     let displayMembers = [...teamMembers];
     while (displayMembers.length < 4 && teamMembers.length > 0) {
         displayMembers.push(...teamMembers.map(m => ({...m, id: `${m.id}-${displayMembers.length}`})));
@@ -105,25 +77,16 @@ export const TeamSection = () => {
         >
           <CarouselContent>
             {displayMembers.map((member, index) => {
-              let publicUrl = '';
-              if (typeof member.image_url === 'string' && member.image_url.trim() !== '') {
-                const imagePath = member.image_url.replace(/^public\//, '');
-                const { data } = supabase.storage.from('site_assets').getPublicUrl(imagePath);
-                publicUrl = data?.publicUrl ?? '';
-              }
-              
               return (
-                publicUrl && (
-                  <CarouselItem key={`${member.id}-${index}`}>
-                    <div className="overflow-hidden rounded-lg shadow-md">
-                      <img
-                          src={publicUrl}
-                          alt={`Equipe Mais Delivery ${index + 1}`}
-                          className="h-64 sm:h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
-                      />
-                    </div>
-                  </CarouselItem>
-                )
+                <CarouselItem key={`${member.id}-${index}`}>
+                  <div className="overflow-hidden rounded-lg shadow-md">
+                    <img
+                        src={member.image_url}
+                        alt={`Equipe Mais Delivery ${index + 1}`}
+                        className="h-64 sm:h-72 md:h-80 w-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
+                </CarouselItem>
               );
             })}
           </CarouselContent>
