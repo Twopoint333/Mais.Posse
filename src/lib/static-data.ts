@@ -31,7 +31,7 @@ export const testimonials = [
     city: "Posse",
     state: "GO",
     logo_url: "/assets/logos/dany-marmitex.png",
-    instagram_url: "https://www.instagram.com/reel/C88jLgKu7zM/",
+    instagram_url: "https://www.instagram.com/reel/DK-TV6bNqBb",
   },
   {
     id: "text1",
