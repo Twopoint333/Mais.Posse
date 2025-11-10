@@ -7,10 +7,9 @@ export const marketingCampaigns = [
 ];
 
 export const teamMembers = [
-  { id: '1', image_url: '/assets/team/team-1.jpeg' },
-  { id: '2', image_url: '/assets/team/team-2.jpeg' },
-  { id: '3', image_url: '/assets/team/team-3.jpeg' },
-  { id: '4', image_url: '/assets/team/team-4.jpeg' },
+  { id: '1', image_url: '/assets/equipe 1.jpeg' },
+  { id: '2', image_url: '/assets/equipe 2.jpeg' },
+  { id: '3', image_url: '/assets/equipe 3.jpeg' },
 ];
 
 export const testimonials = [
