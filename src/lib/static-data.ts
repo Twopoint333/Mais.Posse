@@ -21,7 +21,7 @@ export const testimonials = [
     city: "Posse",
     state: "GO",
     logo_url: "/assets/logos/confeitaria-gourmet.png",
-    instagram_url: "https://www.instagram.com/reel/C8_Xy8ouZRj/",
+    instagram_url: "https://www.instagram.com/reel/DJ9a8D9yqoD",
   },
   {
     id: "vid2",
