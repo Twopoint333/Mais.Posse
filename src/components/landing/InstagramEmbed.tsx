@@ -60,7 +60,6 @@ export const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
       {isLoading && <Skeleton className="h-full w-full" />}
       <blockquote
         className="instagram-media"
-        data-instgrm-captioned
         data-instgrm-permalink={url}
         data-instgrm-version="14"
         style={{
