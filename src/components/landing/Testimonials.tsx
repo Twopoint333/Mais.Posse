@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Quote, PlayCircle } from 'lucide-react';
+import { Quote } from 'lucide-react';
 import { testimonials as allTestimonials } from '@/lib/static-data';
 import {
   Carousel,
@@ -10,10 +10,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { InstagramEmbed } from './InstagramEmbed';
 
 // Simplified type for this component
 interface Testimonial {
@@ -24,14 +21,12 @@ interface Testimonial {
   city: string;
   state: string;
   logo_url?: string | null;
-  video_url?: string | null;
-  thumbnail_url?: string | null;
+  instagram_url?: string | null;
 }
 
 export const Testimonials = () => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
-  const [videoInModal, setVideoInModal] = React.useState<Testimonial | null>(null);
 
   const autoplayPlugin = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
@@ -42,11 +37,11 @@ export const Testimonials = () => {
   );
 
   const videoTestimonials = React.useMemo(() => 
-    validTestimonials.filter(t => !!t.video_url),
+    validTestimonials.filter(t => !!t.instagram_url),
     [validTestimonials]
   );
   const textTestimonials = React.useMemo(() => 
-    validTestimonials.filter(t => !t.video_url),
+    validTestimonials.filter(t => !t.instagram_url),
     [validTestimonials]
   );
 
@@ -62,12 +57,6 @@ export const Testimonials = () => {
     };
   }, [api]);
 
-  const handleVideoClick = (testimonial: Testimonial) => {
-    if (testimonial.video_url) {
-      setVideoInModal(testimonial);
-    }
-  };
-
   if (validTestimonials.length === 0) {
     return null; // Don't render the section if there are no valid testimonials
   }
@@ -82,22 +71,11 @@ export const Testimonials = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {videoTestimonials.map((testimonial) => (
-                <div key={testimonial.id} className="p-1 h-full">
+                <div key={testimonial.id} className="h-full">
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                    <div className="relative aspect-video w-full bg-slate-900">
-                        <img
-                          src={testimonial.thumbnail_url || 'https://placehold.co/1600x900.png'}
-                          alt={`Thumbnail para ${testimonial.business ?? 'parceiro'}`}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
-                        <div
-                          className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:opacity-80"
-                          onClick={() => handleVideoClick(testimonial)}
-                        >
-                          <PlayCircle className="h-16 w-16 text-white/90 transition-transform hover:scale-110" />
-                        </div>
-                    </div>
+                    {testimonial.instagram_url && (
+                       <InstagramEmbed url={testimonial.instagram_url} />
+                    )}
                     <div className="p-6 flex flex-col flex-grow relative">
                       <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                       <div className="flex items-center mb-4 relative">
@@ -144,7 +122,7 @@ export const Testimonials = () => {
                     {textTestimonials.map((testimonial) => (
                         <CarouselItem key={testimonial.id} className="pl-4 basis-full md:basis-1/2 lg:basis-1/3">
                           <div className="h-full p-1">
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:-translate-y-1 relative hover:shadow-xl">
+                            <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full p-6 transition-all duration-300 hover:-translate-y-1 relative shadow-lg hover:shadow-xl">
                                 <Quote className="absolute top-3 right-3 w-20 h-20 text-primary/5" strokeWidth={1.5} />
                                 <div className="flex items-center mb-4 relative">
                                     <Avatar className="h-12 w-12 border-2 border-primary/10">
@@ -182,24 +160,6 @@ export const Testimonials = () => {
             )}
           </div>
         )}
-
-        <Dialog open={!!videoInModal} onOpenChange={(isOpen) => !isOpen && setVideoInModal(null)}>
-            <DialogContent className="p-0 border-0 max-w-4xl w-full bg-transparent shadow-none">
-                {videoInModal?.video_url && (
-                  <div className="aspect-video">
-                      <video
-                          src={videoInModal.video_url}
-                          controls
-                          autoPlay
-                          className="h-full w-full object-contain rounded-lg"
-                          onEnded={() => setVideoInModal(null)}
-                      >
-                      Seu navegador não suporta a tag de vídeo.
-                      </video>
-                  </div>
-                )}
-            </DialogContent>
-        </Dialog>
       </div>
     </section>
   );

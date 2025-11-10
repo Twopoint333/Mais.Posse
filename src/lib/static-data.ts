@@ -21,8 +21,7 @@ export const testimonials = [
     city: "Posse",
     state: "GO",
     logo_url: "/assets/logos/confeitaria-gourmet.png",
-    video_url: "/assets/videos/video-1.mp4",
-    thumbnail_url: "/assets/videos/thumb-1.jpeg",
+    instagram_url: "https://www.instagram.com/reel/C8_Xy8ouZRj/",
   },
   {
     id: "vid2",
@@ -32,8 +31,7 @@ export const testimonials = [
     city: "Posse",
     state: "GO",
     logo_url: "/assets/logos/dany-marmitex.png",
-    video_url: "/assets/videos/video-2.mp4",
-    thumbnail_url: "/assets/videos/thumb-2.jpeg",
+    instagram_url: "https://www.instagram.com/reel/C88jLgKu7zM/",
   },
   {
     id: "text1",
@@ -43,8 +41,7 @@ export const testimonials = [
     city: "Ibotirama",
     state: "BA",
     logo_url: "/assets/logos/jc-imports.png",
-    video_url: null,
-    thumbnail_url: null,
+    instagram_url: null,
   },
   {
     id: "text2",
@@ -54,8 +51,7 @@ export const testimonials = [
     city: "Barra",
     state: "BA",
     logo_url: "/assets/logos/lanchonete-pinguim.png",
-    video_url: null,
-    thumbnail_url: null,
+    instagram_url: null,
   },
   {
     id: "text3",
@@ -65,7 +61,6 @@ export const testimonials = [
     city: "Ibotirama",
     state: "BA",
     logo_url: "/assets/logos/jp-lanches.png",
-    video_url: null,
-    thumbnail_url: null,
+    instagram_url: null,
   },
 ];
